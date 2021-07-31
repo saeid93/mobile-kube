@@ -13,8 +13,9 @@ def config_reader(mode, config_folder, type_of):
         file = "config_run.json"
     else:
         ValueError("unknown config type")
-    config_file_path = os.path.join(CONFIGS_PATH, mode, config_folder,
-                                    file)
+    config_file_path = os.path.join(
+        CONFIGS_PATH, mode, config_folder,
+        file)
 
     with open(config_file_path) as cf:
         config = json.loads(cf.read())

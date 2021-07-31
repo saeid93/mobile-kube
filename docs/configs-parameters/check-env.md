@@ -20,7 +20,7 @@
         "from_dataset": [bool],
         "reward_mode": ["cloud", "edge", "both"],
         "action_method": ["absolute", "probabilistic"],
-        "step_method": ["all" | "edge" | "aux" | "greedy"],
+        "step_method": ["all" | "edge" | "aux" | "binpacking"],
         "normalise_latency": [bool],
         "seed": [int] // seed for generating reproducible results
     }

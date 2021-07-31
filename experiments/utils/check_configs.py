@@ -177,7 +177,7 @@ def env_config_base_check(config: Dict[str, Any]):
         f"Unkown action_method option: <{config['action_method']}>"
 
     # check the mitigation methods
-    assert config['step_method'] in ['none', 'all', 'aux', 'greedy', 'edge'],\
+    assert config['step_method'] in ['none', 'all', 'aux', 'binpacking', 'edge'],\
         f"Unkown step_method option: <{config['step_method']}>"
 
     # check workload arguments

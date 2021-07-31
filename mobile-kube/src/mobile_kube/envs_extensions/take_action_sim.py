@@ -4,9 +4,9 @@ from mobile_kube.util import (
     ACTION_MIN,
     ACTION_MAX
 )
-from typing import Union, Callable
+from typing import Tuple, Callable
 
-def get_action_method_sim(action_method: str) -> Union[Callable, Callable]:
+def get_action_method_sim(action_method: str) -> Tuple[Callable, Callable]:
     action_methods = {
         'absolute': (_take_action_absolute, _validate_action_absolute),
         'probabilistic': (_take_action_probabilistic,

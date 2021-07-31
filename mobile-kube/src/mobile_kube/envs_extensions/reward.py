@@ -1,5 +1,6 @@
 import numpy as np
 from copy import deepcopy
+from typing import Tuple, Dict, Any
 
 def get_reward_method(reward_method):
     reward_methods = {
@@ -10,9 +11,9 @@ def get_reward_method(reward_method):
     return reward_methods[reward_method]
 
 def _reward_cloud(self, *, num_moves: int,
-                        greedy_mitigation_needed: bool = False,
-                        auxiliary_node_mitigation_needed: bool = False,
-                        prev_num_overloaded: int = 0) -> float:
+                  greedy_mitigation_needed: bool = False,
+                  auxiliary_node_mitigation_needed: bool = False,
+                  prev_num_overloaded: int = 0) -> Tuple[float, Dict[str, Any]]:
     """absolute reward function based-on the absolute number
     of consolidated servers
     steps:
@@ -50,19 +51,20 @@ def _reward_cloud(self, *, num_moves: int,
 
 
 def _reward_edge(self, *, num_moves: int = None,
-                 users_distances: np.array = None) -> float:
+                 users_distances: np.array = None) -> Tuple[float, Dict[str, Any]]:
     reward_total, rewards = _reward_latency(self, users_distances)
     return reward_total, rewards
 
 
-def _reward_both_edge(self, *, num_moves: int = None,
-                      greedy_mitigation_needed: int = None,
-                      auxiliary_node_mitigation_needed: int = None,
-                      prev_num_overloaded: int = None,
-                      users_distances: np.array = None) -> float:
+def _reward_both_edge(self, *, num_moves: int,
+                      greedy_mitigation_needed: bool,
+                      auxiliary_node_mitigation_needed: bool,
+                      prev_num_overloaded: int,
+                      users_distances: np.array = None) -> Tuple[float, Dict[str, Any]]:
     # TODO add weights - maybe a different way of multi-objective
     reward_total_edge, rewards_edge = _reward_latency(self, users_distances)
-    reward_total_cloud, rewards_cloud = _reward_cloud(self,
+    reward_total_cloud, rewards_cloud = _reward_cloud(
+        self,
         num_moves=num_moves,
         greedy_mitigation_needed=greedy_mitigation_needed,
         auxiliary_node_mitigation_needed=auxiliary_node_mitigation_needed,
@@ -73,7 +75,7 @@ def _reward_both_edge(self, *, num_moves: int = None,
     return reward_total, rewards
 
 
-def _reward_latency(self, users_distances: np.array) -> float:
+def _reward_latency(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
     """
     calcuate the edge reward
     """

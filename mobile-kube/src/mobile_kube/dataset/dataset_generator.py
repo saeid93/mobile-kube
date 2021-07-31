@@ -179,7 +179,7 @@ class DatasetGenerator:
     def _make_nodes_services(self):
 
         """generate the intitial state for nodes_services with a
-            bestfit greedy algorithm:
+            bestfit binpacking algorithm:
                 1. shuffle the nodes list
                 2. pop a node from the nodes lists
                 3. find the nodes with least remained resources

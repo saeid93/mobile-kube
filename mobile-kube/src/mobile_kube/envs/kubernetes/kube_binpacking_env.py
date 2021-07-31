@@ -1,34 +1,33 @@
-"""base class for non learning environments
 """
-import numpy as np
+base class for non learning environments
+"""
 from copy import deepcopy
 from typing import (
     Dict,
     Any
 )
-
 from gym.spaces import (
     Box,
     MultiDiscrete
 )
+import numpy as np
 
 from mobile_kube.util import (
     override,
-    check_config_greedy
+    check_config_binpacking
 )
+from .kube_base_env import KubeBaseEnv
 
-from .sim_base_env import SimBaseEnv
-
-class SimGreedyEnv(SimBaseEnv):
+class KubeBinpackingEnv(KubeBaseEnv):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        check_config_greedy(config)
+        check_config_binpacking(config)
         # reset the environment to the initial state
         self.observation_space, self.action_space =\
             self._setup_space(config['action_method'])
-        _ = self.reset()
+        # _ = self.reset()
 
-    @override(SimBaseEnv)
+    @override(KubeBaseEnv)
     def _setup_space(self, action_space_type: str):
         """
         States:

@@ -74,10 +74,10 @@ class KubeBaseEnv(gym.Env):
     Variables:
             self.mitigation_needed: indicator of whether the mitigation of
                                     overloading was successful
-            self.mitigation_tries: indicator of how many greedy mitigations
+            self.mitigation_tries: indicator of how many binpacking mitigations
                                 should be tried
             self.auxiliary_node_needed: indicator of whether the
-                                        _greedy_mitigator was successful or
+                                        _binpacking_mitigator was successful or
                                         not and if we need to use the
                                         auxiliary node
     """
@@ -136,7 +136,7 @@ class KubeBaseEnv(gym.Env):
         self.penalty_consolidated: float = config['penalty_consolidated']
         self.penalty_latency: float = config['penalty_latency']
 
-        # greedy mitigator variables
+        # binpacking mitigator variables
         # !!! not all of them are used in all envs
         self.mitigation_tries: int = config['mitigation_tries']
         self.mitigation_needed: bool = False

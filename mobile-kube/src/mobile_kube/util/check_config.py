@@ -93,14 +93,6 @@ def check_config(config: Dict[str, Any]):
         assert config['workload_stop'] >= 0, \
             "workload_stop is smaller than 0"
 
-def check_config_cloud(config: Dict[str, Any]):
-    """check if it is a legal combination for the cloud envs
-    """
-    assert config['reward_mode'] == 'cloud',\
-        f"reward mode <{config['reward_mode']}> is not compatible with cloud env"
-    assert config['step_method'] in ['none', 'all', 'aux'],\
-        f"step method <{config['step_method']}> is not compatible with cloud env"
-
 def check_config_edge(config: Dict[str, Any]):
     """check if it is a legal combination for the edge envs
     """
@@ -109,7 +101,7 @@ def check_config_edge(config: Dict[str, Any]):
     assert config['step_method'] == 'edge',\
         f"step method <{config['step_method']}> is not compatible with edge env"
 
-def check_config_greedy(config: Dict[str, Any]):
+def check_config_binpacking(config: Dict[str, Any]):
     """check if it is a legal combination for the greedy envs
     """
     assert config['reward_mode'] in ['cloud'],\

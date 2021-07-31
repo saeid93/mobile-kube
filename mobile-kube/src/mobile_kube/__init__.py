@@ -1,8 +1,8 @@
 from gym.envs.registration import register
 
 register(
-    id='SimGreedyEnv-v0',
-    entry_point='mobile_kube.envs:SimGreedyEnv',
+    id='SimBinpackingEnv-v0',
+    entry_point='mobile_kube.envs:SimBinpackingEnv',
 )
 register(
     id='SimEdgeEnv-v0',
@@ -13,6 +13,6 @@ register(
     entry_point='mobile_kube.envs:KubeEdgeEnv',
 )
 register(
-    id='KubeGreedyEnv-v0',
-    entry_point='mobile_kube.envs:KubeGreedyEnv',
+    id='KubeBinpackingEnv-v0',
+    entry_point='mobile_kube.envs:KubeBinpackingEnv',
 )

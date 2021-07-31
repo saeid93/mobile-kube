@@ -156,7 +156,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--config-folder', type=str, default='')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-cloud', 'sim-edge', 'sim-greedy']),
+              type=click.Choice(['sim-cloud', 'sim-edge', 'sim-binpacking']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=4)
 @click.option('--workload-id', required=True, type=int, default=0)

@@ -1,9 +1,8 @@
 from .simulation import (
     SimEdgeEnv,
-    SimGreedyEnv
+    SimBinpackingEnv
 )
 from .kubernetes import (
     KubeEdgeEnv,
-    KubeGreedyEnv
+    KubeBinpackingEnv
 )
-

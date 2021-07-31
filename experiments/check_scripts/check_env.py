@@ -21,44 +21,43 @@ from experiments.utils import (
 )
 
 
-class CheckScripts:
 
-    def __init__(self, *, config: Dict[str, Any], type_env: str,
-                 dataset_id: int, workload_id: int, network_id: int,
-                 trace_id: int):
 
-        env_config_base = config["env_config_base"]
-        if type_env == 'sim-edge' or type_env == 'kube-edge':
-            env_config = add_path_to_config_edge(
-                config=env_config_base,
-                dataset_id=dataset_id,
-                workload_id=workload_id,
-                network_id=network_id,
-                trace_id=trace_id
-            )
-        else:
-            env_config = add_path_to_config_cloud(
-                config=env_config_base,
-                dataset_id=dataset_id,
-                workload_id=workload_id
-            )
-        type_env = ENVSMAP[type_env]
-        # make the approperiate env based on the type
-        self.env = gym.make(type_env, config=env_config)
+def check_env(*, config: Dict[str, Any], type_env: str,
+              dataset_id: int, workload_id: int,
+              network_id: int, trace_id: int):
 
-    def check_env(self):
-        i = 1
-        _ = self.env.reset()
-        while i < 10000:
-            action = self.env.action_space.sample()
-            print(f"action:\n <{action}>")
-            time.sleep(1)
-            _, reward, done, info = self.env.step(action)
-            self.env.render()
-            print(f"\niteration <{i}>:")           
-            print(f"reward:\n <{reward}>")
-            print(f"info:\n {info}")
-            i += 1
+    env_config_base = config["env_config_base"]
+    if type_env == 'sim-edge' or type_env == 'kube-edge':
+        env_config = add_path_to_config_edge(
+            config=env_config_base,
+            dataset_id=dataset_id,
+            workload_id=workload_id,
+            network_id=network_id,
+            trace_id=trace_id
+        )
+    else:
+        env_config = add_path_to_config_cloud(
+            config=env_config_base,
+            dataset_id=dataset_id,
+            workload_id=workload_id
+        )
+    type_env = ENVSMAP[type_env]
+    # make the approperiate env based on the type
+    env = gym.make(type_env, config=env_config)
+
+    i = 1
+    _ = env.reset()
+    while i < 10000:
+        action = env.action_space.sample()
+        print(f"action:\n <{action}>")
+        time.sleep(1)
+        _, reward, done, info = env.step(action)
+        env.render()
+        print(f"\niteration <{i}>:")           
+        print(f"reward:\n <{reward}>")
+        print(f"info:\n {info}")
+        i += 1
 
 
 @click.command()
@@ -66,8 +65,8 @@ class CheckScripts:
               default='experimental')
 @click.option('--config_folder', type=str, default='')
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge', 'sim-greedy',
-                                 'kube-edge', 'kube-greedy']),
+              type=click.Choice(['sim-edge', 'sim-binpacking',
+                                 'kube-edge', 'kube-binpacking']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=4)
 @click.option('--workload-id', required=True, type=int, default=0)
@@ -82,11 +81,12 @@ def main(mode: str, config_folder: str , type_env: str, dataset_id: int,
     """
     config, _ = config_reader(mode, config_folder, 'check')
     config_check_env_check(config)
-    ins = CheckScripts(config=config,
-                       type_env=type_env,
-                       dataset_id=dataset_id, workload_id=workload_id,
-                       network_id=network_id, trace_id=trace_id)
-    ins.check_env()
+    check_env(config=config,
+              type_env=type_env,
+              dataset_id=dataset_id,
+              workload_id=workload_id,
+              network_id=network_id,
+              trace_id=trace_id)
 
 
 if __name__ == "__main__":
