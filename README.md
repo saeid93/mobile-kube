@@ -70,65 +70,65 @@ You can find the toturial for creating the cluster on google cloud and locally i
 1. [data](/data)
 2. [docs](/docs)
 3. [experiments](/experiments)
-4. [gym_cloudsim](/gym_cloudsim)
+4. [mobile-kube](/mobile-kube)
 5. [mobility dataset preprossing](/mobility-dataset-preprossing)
 
 The code is separated into three modules
    1. [data/](/data): This is the folder containing all the configs and results of the project. Could be anywhere in the project.
    2. [mobility-dataset-preprossing/](/mobility-dataset-preprossing): These scripts are used for preprocessing the [Cabspotting](https://privamov.github.io/accio/docs/datasets.html) and [California towers stations](antennasearch.com) dataset used in dataset-driven datasets.
-   3. [gym_cloudsim/](/gym_cloudsim): the core simulation library with [Open-AI gym](https://gym.openai.com/) interface
+   3. [mobile-kube/](/mobile-kube): the core simulation library with [Open-AI gym](https://gym.openai.com/) interface
    4. [/experiments](/experiments): experiments of the paper and the reinforcement learning side of codes.
 
-## 4.1. [gym_cloudsim](/gym_cloudsim)
+## 4.1. [mobile-kube](/mobile-kube)
 ### Structure
-* [src/](./gym_cloudsim/src): The folder containing the gym_cloudsim simulators. This should be installed for using.
-  * [gym_cloudsim/](./gym_cloudsim/src/gym_cloudsim)
-    * [dataset/](./gym_cloudsim/src/gym_cloudsim/dataset)
-      * [__init__.py](./gym_cloudsim/src/gym_cloudsim/dataset/__init__.py)
-      * [dataset_generator.py](./gym_cloudsim/src/gym_cloudsim/dataset/dataset_generator.py): Generate the datasets, nodes and services.
-      * [network_generator.py](./gym_cloudsim/src/gym_cloudsim/dataset/network_generator.py): Generate the edge network with stations.
-      * [trace_generator.py](./gym_cloudsim/src/gym_cloudsim/dataset/trace_generator.py): Generate the user movement traces.
-      * [workload_generator.py](./gym_cloudsim/src/gym_cloudsim/dataset/workload_generator.py): Generates resource usages of the services.
-    * [envs/](./gym_cloudsim/src/gym_cloudsim/envs)
-      * [__init__.py](./gym_cloudsim/src/gym_cloudsim/envs/__init__.py)
-      * [base_env.py](./gym_cloudsim/src/gym_cloudsim/envs/base_env.py): Basic functionalities of environments are implemented here. All other enviornments are inherited from the base_env.
-      * [cloud_env.py](./gym_cloudsim/src/gym_cloudsim/envs/cloud_env.py): Base cloud environments for generating different versions of the loud environment.
-      * [edge_env.py](./gym_cloudsim/src/gym_cloudsim/envs/edge_env.py): Base edge environments for generating different versions of the loud environment.
-      * [greedy_env.py](./gym_cloudsim/src/gym_cloudsim/envs/greedy_env.py): Base greedy environments for generating different versions of the cloud environment.
-    * [envs_extensions/](./gym_cloudsim/src/gym_cloudsim/envs_extensions): Functionalities to be added to the environments.
-      * [__init__.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/__init__.py)
-      * [mitigators.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/mitigators.py)
-      * [render.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/render.py)
-      * [reward.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/reward.py)
-      * [step.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/step.py)
-      * [take_action.py](./gym_cloudsim/src/gym_cloudsim/envs_extensions/take_action.py)
-      * [__init__.py](./gym_cloudsim/src/gym_cloudsim/network/__init__.py)
-      * [network_base.py](./gym_cloudsim/src/gym_cloudsim/network/network_base.py)
-      * [network_builder_dataset.py](./gym_cloudsim/src/gym_cloudsim/network/network_builder_dataset.py)
-      * [network_builder_random.py](./gym_cloudsim/src/gym_cloudsim/network/network_builder_random.py)
-      * [network_simulator.py](./gym_cloudsim/src/gym_cloudsim/network/network_simulator.py)
-    * [util/](./gym_cloudsim/src/gym_cloudsim/util)
-      * [kubernetes_utils/](./gym_cloudsim/src/gym_cloudsim/util/kubernetes_utils)
-        * [__init__.py](./gym_cloudsim/src/kubernetes_utils/__init__.py)
-        * [aux.py](./gym_cloudsim/src/kubernetes_utils/aux.py)
-        * [cluster.py](./gym_cloudsim/src/kubernetes_utils/cluster.py)
-        * [utils.py](./gym_cloudsim/src/kubernetes_utils/utils.py)
-      * [__init__.py](./gym_cloudsim/src/gym_cloudsim/util/__init__.py)
-      * [annotations.py](./gym_cloudsim/src/gym_cloudsim/util/annotations.py)
-      * [check_config.py](./gym_cloudsim/src/gym_cloudsim/util/check_config.py)
-      * [constants.py](./gym_cloudsim/src/gym_cloudsim/util/constants.py)
-      * [data_loader.py](./gym_cloudsim/src/gym_cloudsim/util/data_loader.py)
-      * [logger.py](./gym_cloudsim/src/gym_cloudsim/util/logger.py)
-      * [parser.py](./gym_cloudsim/src/gym_cloudsim/util/parser.py)
-      * [plot.py](./gym_cloudsim/src/gym_cloudsim/util/plot.py)
-      * [plot_workload.py](./gym_cloudsim/src/gym_cloudsim/util/plot_workload.py)
-      * [preprocessors.py](./gym_cloudsim/src/gym_cloudsim/util/preprocessors.py)
-    * [__init__.py](./gym_cloudsim/src/gym_cloudsim/__init__.py)
-* [setup.py](./gym_cloudsim/setup.py)
-* [unit_tests.py](./gym_cloudsim/unit_tests.py)
+* [src/](./mobile-kube/src): The folder containing the mobile-kube simulators. This should be installed for using.
+  * [mobile-kube/](./mobile-kube/src/mobile_kube)
+    * [dataset/](./mobile-kube/src/mobile_kube/dataset)
+      * [__init__.py](./mobile-kube/src/mobile_kube/dataset/__init__.py)
+      * [dataset_generator.py](./mobile-kube/src/mobile_kube/dataset/dataset_generator.py): Generate the datasets, nodes and services.
+      * [network_generator.py](./mobile-kube/src/mobile_kube/dataset/network_generator.py): Generate the edge network with stations.
+      * [trace_generator.py](./mobile-kube/src/mobile_kube/dataset/trace_generator.py): Generate the user movement traces.
+      * [workload_generator.py](./mobile-kube/src/mobile_kube/dataset/workload_generator.py): Generates resource usages of the services.
+    * [envs/](./mobile-kube/src/mobile_kube/envs)
+      * [__init__.py](./mobile-kube/src/mobile_kube/envs/__init__.py)
+      * [base_env.py](./mobile-kube/src/mobile_kube/envs/base_env.py): Basic functionalities of environments are implemented here. All other enviornments are inherited from the base_env.
+      * [cloud_env.py](./mobile-kube/src/mobile_kube/envs/cloud_env.py): Base cloud environments for generating different versions of the loud environment.
+      * [edge_env.py](./mobile-kube/src/mobile_kube/envs/edge_env.py): Base edge environments for generating different versions of the loud environment.
+      * [greedy_env.py](./mobile-kube/src/mobile_kube/envs/greedy_env.py): Base greedy environments for generating different versions of the cloud environment.
+    * [envs_extensions/](./mobile-kube/src/mobile_kube/envs_extensions): Functionalities to be added to the environments.
+      * [__init__.py](./mobile-kube/src/mobile_kube/envs_extensions/__init__.py)
+      * [mitigators.py](./mobile-kube/src/mobile_kube/envs_extensions/mitigators.py)
+      * [render.py](./mobile-kube/src/mobile_kube/envs_extensions/render.py)
+      * [reward.py](./mobile-kube/src/mobile_kube/envs_extensions/reward.py)
+      * [step.py](./mobile-kube/src/mobile_kube/envs_extensions/step.py)
+      * [take_action.py](./mobile-kube/src/mobile_kube/envs_extensions/take_action.py)
+      * [__init__.py](./mobile-kube/src/mobile_kube/network/__init__.py)
+      * [network_base.py](./mobile-kube/src/mobile_kube/network/network_base.py)
+      * [network_builder_dataset.py](./mobile-kube/src/mobile_kube/network/network_builder_dataset.py)
+      * [network_builder_random.py](./mobile-kube/src/mobile_kube/network/network_builder_random.py)
+      * [network_simulator.py](./mobile-kube/src/mobile_kube/network/network_simulator.py)
+    * [util/](./mobile-kube/src/mobile_kube/util)
+      * [kubernetes_utils/](./mobile-kube/src/mobile_kube/util/kubernetes_utils)
+        * [__init__.py](./mobile-kube/src/kubernetes_utils/__init__.py)
+        * [aux.py](./mobile-kube/src/kubernetes_utils/aux.py)
+        * [cluster.py](./mobile-kube/src/kubernetes_utils/cluster.py)
+        * [utils.py](./mobile-kube/src/kubernetes_utils/utils.py)
+      * [__init__.py](./mobile-kube/src/mobile_kube/util/__init__.py)
+      * [annotations.py](./mobile-kube/src/mobile_kube/util/annotations.py)
+      * [check_config.py](./mobile-kube/src/mobile_kube/util/check_config.py)
+      * [constants.py](./mobile-kube/src/mobile_kube/util/constants.py)
+      * [data_loader.py](./mobile-kube/src/mobile_kube/util/data_loader.py)
+      * [logger.py](./mobile-kube/src/mobile_kube/util/logger.py)
+      * [parser.py](./mobile-kube/src/mobile_kube/util/parser.py)
+      * [plot.py](./mobile-kube/src/mobile_kube/util/plot.py)
+      * [plot_workload.py](./mobile-kube/src/mobile_kube/util/plot_workload.py)
+      * [preprocessors.py](./mobile-kube/src/mobile_kube/util/preprocessors.py)
+    * [__init__.py](./mobile-kube/src/mobile_kube/__init__.py)
+* [setup.py](./mobile-kube/setup.py)
+* [unit_tests.py](./mobile-kube/unit_tests.py)
 
 ### Usage
-Go to the [gym_cloudsim/](./CCGrid-paper/gym_cloudsim) and install the library in the editable mode with
+Go to the [mobile-kube/](./mobile-kube/mobile-kube) and install the library in the editable mode with
    ```
    pip install -e .
    ```
@@ -309,7 +309,7 @@ TODO
 
 TODO
 
-## 4.4.3. [Kubernetes interface](gym_cloudsim/src/gym_cloudsim/util/kubernetes_utils)
+## 4.4.3. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
 
 The Kubernetes interface is designed based-on the Kubernetes [api version 1](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/).
 

@@ -13,7 +13,7 @@ import click
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
 
-from gym_cloudsim.dataset import TraceGenerator
+from mobile_kube.dataset import TraceGenerator
 
 # get an absolute path to the directory that contains parent files
 project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))

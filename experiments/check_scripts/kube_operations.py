@@ -1,4 +1,4 @@
-from gym_cloudsim.util.kubernetes_utils import (
+from mobile_kube.util.kubernetes_utils import (
     Cluster,
     Node,
     construct_pod
