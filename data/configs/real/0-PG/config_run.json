@@ -1,0 +1,41 @@
+
+{
+    "notes": {
+        "env_model": "real experiment",
+        "description": "this is a real experiment"
+    },
+    "env_config_base": {
+        "obs_elements": ["services_resources_usage",
+                         "nodes_resources_usage",
+                         "services_resources_usage_frac",
+                         "nodes_resources_usage_frac",
+                         "services_nodes",
+                         "auxiliary_resources_usage"],
+        "penalty_illegal": -1,
+        "penalty_move": -1,
+        "penalty_variance": -1,
+        "penalty_consolidated": 1,
+        "mitigation_tries": 4,
+        "workload_stop": 1,
+        "timestep_reset": false,
+        "placement_reset": false,
+        "episode_length": 50,
+        "reward_mode": "absolute",
+        "seed": 1
+    },
+    "run_or_experiment": "PG",
+    "learn_config": {
+        "num_gpus": 0.2,
+        "num_workers": 4,
+        "lr": 0.0004,
+        "model": {
+            "fcnet_hiddens": [40, 40, 40, 40]
+        },
+        "framework": "torch",
+        "rollout_fragment_length": 200,
+        "train_batch_size": 200
+    },
+    "stop": {
+        "training_iteration": 200
+    }
+}

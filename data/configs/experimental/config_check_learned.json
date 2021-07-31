@@ -1,0 +1,29 @@
+{
+    "metadata":{
+        "type_env": 0,
+        "dataset_id": 0,
+        "workload_id": 0,
+        "workload_id_train": 5,
+        "experiment_id": 1,
+        "trial_string": "PPO_CloudSimV0_998ae_00000_0_lr=0.01_2021-01-14_17-54-51"
+    },
+    "env_config_base": {
+        "obs_elements": ["services_resources_usage",
+                         "nodes_resources_usage",
+                         "services_resources_usage_frac",
+                         "nodes_resources_usage_frac",
+                         "services_nodes",
+                         "auxiliary_resources_usage"],
+        "penalty_illegal": -1,
+        "penalty_move": -1,
+        "penalty_variance": -1,
+        "penalty_consolidated": 2,
+        "mitigation_tries": 4,
+        "workload_stop": 0.5,
+        "episode_length": 50,
+        "timestep_reset": false,
+        "placement_reset": false,
+        "reward_mode": "absolute",
+        "seed": 1
+    }
+}

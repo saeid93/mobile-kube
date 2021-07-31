@@ -1,0 +1,14 @@
+{
+    "notes": "some network",
+    "dataset_id": 1,
+    "num_users": 135,
+    "num_stations": 20,
+    "width": 1,
+    "length": 1,
+    "speed_limit": 30,
+    "from_dataset": false,
+    "users_services_distributions": "equal",
+    "dataset_metadata": 1,
+    "nodes_stations_con": 1,
+    "seed": 52
+}

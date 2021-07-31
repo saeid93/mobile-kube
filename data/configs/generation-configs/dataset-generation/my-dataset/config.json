@@ -1,0 +1,40 @@
+{
+    "notes":"This is a triple the size of dataset one",
+    "nums": {
+        "nodes":20,
+        "services":40,
+        "resources":2,
+        "services_types":5,
+        "services_types_map":[8, 8, 8, 8, 8]
+    },
+    "metrics": {
+        "ram":"mb",
+        "cpu":"core"
+    },
+    "nodes_cap_rng": {
+        "ram": {
+            "min": 5120,
+            "max": 5120,
+            "step": 1024
+        },
+        "cpu": {
+            "min": 10,
+            "max": 10,
+            "step": 2
+        }
+    },
+    "services_cap_rng": {
+        "ram": {
+            "min": 1024,
+            "max": 1024,
+            "step": 512
+        },
+        "cpu": {
+            "min": 2,
+            "max": 2,
+            "step": 1
+        }
+    },
+    "start_workload":[[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
+    "seed": 42
+}

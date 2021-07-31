@@ -1,0 +1,8 @@
+{
+    "dataset_id": 17,
+    "network_id": 9,
+    "speed": 30,
+    "timesteps": 100,
+    "from_dataset": true,
+    "seed": 42
+}
