@@ -1,4 +1,4 @@
-{
+{   
     "env_config_base": {
         "obs_elements": ["services_resources_usage",
                          "nodes_resources_usage",
@@ -16,12 +16,19 @@
         "episode_length": 50,
         "timestep_reset": false,
         "placement_reset": false,
-        "from_dataset": true,
         "reward_mode":"edge",
         "action_method": "absolute",
         "step_method": "edge",
         "normalise_latency": false,
         "compute_greedy_num_consolidated": false,
-        "seed": 1
+        "seed": 1,
+        "kube":{
+            "admin_config": "~/.kube/config",
+            "service_image": "sdghafouri/service",
+            "namespace": "consolidation",
+            "clean_after_exit": true,
+            "utilization_image": "sdghafouri/utilization-server",
+            "using_auxiliary_server": false
+        }
     }
 }

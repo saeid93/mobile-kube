@@ -1,0 +1,95 @@
+{
+    "notes": "small dataset to fix the namings",
+    "nums": {
+        "nodes": 4,
+        "services": 3,
+        "resources": 2,
+        "services_types": 2,
+        "services_types_map": [
+            1,
+            2
+        ]
+    },
+    "metrics": {
+        "ram": "mb",
+        "cpu": "core"
+    },
+    "cutoff": {
+        "ram": 0.7,
+        "cpu": 0.7
+    },
+    "nodes_cap_rng": {
+        "ram": {
+            "min": 13940,
+            "max": 13940,
+            "step": 1024
+        },
+        "cpu": {
+            "min": 1.93,
+            "max": 1.93,
+            "step": 2
+        }
+    },
+    "services_cap_rng": {
+        "ram": {
+            "min": 1024,
+            "max": 1024,
+            "step": 512
+        },
+        "cpu": {
+            "min": 0.1,
+            "max": 0.1,
+            "step": 1
+        }
+    },
+    "start_workload": [
+        [
+            0.5,
+            0.5
+        ],
+        [
+            0.5,
+            0.5
+        ]
+    ],
+    "seed": 42,
+    "capacities": {
+        "nodes_resources": [
+            [
+                9758.0,
+                1.351
+            ],
+            [
+                9758.0,
+                1.351
+            ],
+            [
+                9758.0,
+                1.351
+            ],
+            [
+                9758.0,
+                1.351
+            ]
+        ],
+        "services_resources": [
+            [
+                1024.0,
+                0.1
+            ],
+            [
+                1024.0,
+                0.1
+            ],
+            [
+                1024.0,
+                0.1
+            ]
+        ]
+    },
+    "services_nodes": [
+        0,
+        0,
+        0
+    ]
+}

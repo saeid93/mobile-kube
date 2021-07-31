@@ -231,6 +231,11 @@ atlassian-ide-plugin.xml
 .vscode/*
 *.code-workspace
 
-# ignore the constants in each server
+# myignores
 constants.py
 .VSCodeCounter
+data/configs/real/*
+data/dataset_metadata/*
+
+results
+results-experimental

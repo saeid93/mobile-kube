@@ -48,34 +48,16 @@ class CheckScripts:
 
     def check_env(self):
         i = 1
-        action = "no action yet, initial state"
-        reward = "no reward yet, initial state"
-        info = "no info yet, initial state"
         _ = self.env.reset()
         while i < 10000:
-            print(f"\niteration <{i}>:")
-            # print(f"action:\n {action_pretty_print(action, self.env)}")
-            # print(f"action:\n {action}")
-            self.env.render()           
-            print(f"reward:\n <{reward}>")
-            print(f"info:\n {info}")
-            # print(self.env.raw_observation)
-            # print(self.env.observation)
-            # print(f'timestep: <{self.env.timestep}>')
-            if type(info) != str and 'rewards' in info.keys():
-                print(info['rewards'])
             action = self.env.action_space.sample()
             print(f"action:\n <{action}>")
             time.sleep(1)
             _, reward, done, info = self.env.step(action)
-            # self.env.edge_simulator.visualize_debug().savefig(str(i)+'png')
-            # if done:
-            #     print("\n\nend of an episode")
-            #     print('==================== reseting!!! ====================')
-            #     _ = self.env.reset()
-            #     action = "no action yet, initial state"
-            #     reward = "no reward yet, initial state"
-            #     info = "no info yet, initial state"
+            self.env.render()
+            print(f"\niteration <{i}>:")           
+            print(f"reward:\n <{reward}>")
+            print(f"info:\n {info}")
             i += 1
 
 
@@ -84,14 +66,14 @@ class CheckScripts:
               default='experimental')
 @click.option('--config_folder', type=str, default='')
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-cloud', 'sim-edge', 'sim-greedy',
-                                 'kube-cloud', 'kube-edge', 'kube-greedy']),
+              type=click.Choice(['sim-edge', 'sim-greedy',
+                                 'kube-edge', 'kube-greedy']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=4)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
-def main(mode: str, config_folder: str , type_env: int, dataset_id: int,
+def main(mode: str, config_folder: str , type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):
     """
     run it outside with
@@ -100,7 +82,8 @@ def main(mode: str, config_folder: str , type_env: int, dataset_id: int,
     """
     config, _ = config_reader(mode, config_folder, 'check')
     config_check_env_check(config)
-    ins = CheckScripts(config=config, type_env=type_env,
+    ins = CheckScripts(config=config,
+                       type_env=type_env,
                        dataset_id=dataset_id, workload_id=workload_id,
                        network_id=network_id, trace_id=trace_id)
     ins.check_env()
