@@ -13,15 +13,13 @@ from gym.spaces import (
 import numpy as np
 
 from mobile_kube.util import (
-    override,
-    check_config_binpacking
+    override
 )
 from .kube_base_env import KubeBaseEnv
 
 class KubeBinpackingEnv(KubeBaseEnv):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        check_config_binpacking(config)
         # reset the environment to the initial state
         self.observation_space, self.action_space =\
             self._setup_space(config['action_method'])

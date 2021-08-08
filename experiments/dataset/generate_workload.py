@@ -92,7 +92,9 @@ def generate_workload(notes: str, dataset_id: int,
 
 
 @click.command()
-@click.option('--workload-config', type=str, default='my-workload')
+@click.option('--workload-config',
+              type=click.Choice(['constant', 'lowhigh', 'sinusoidal', 'step']),
+              default='step')
 def main(workload_config: str):
     print('generating workload from the following config:')
     pp.pprint(workload_config)
@@ -101,8 +103,7 @@ def main(workload_config: str):
         CONFIGS_PATH,
         'generation-configs',
         'workload-generation',
-        workload_config,
-        'config.json')
+        f'{workload_config}.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     config_workload_generation_check(config=config)

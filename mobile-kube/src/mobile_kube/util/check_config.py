@@ -78,14 +78,6 @@ def check_config(config: Dict[str, Any]):
     assert config['reward_mode'] in ['cloud', 'edge', 'both'],\
         f"Unkown reward option: <{config['reward_mode']}>"
 
-    # check the action methods
-    assert config['action_method'] in ['probabilistic', 'absolute'],\
-        f"Unkown action_method option: <{config['action_method']}>"
-
-    # check the mitigation methods
-    assert config['step_method'] in ['none', 'all', 'aux', 'greedy', 'edge'],\
-        f"Unkown step_method option: <{config['step_method']}>"
-
     # check workload arguments
     if "workload_stop" in config:
         assert config['workload_stop'] <= 1, \
@@ -98,13 +90,4 @@ def check_config_edge(config: Dict[str, Any]):
     """
     assert config['reward_mode'] in ['edge', 'both'],\
         f"reward_mode <{config['reward_mode']}> is not compatible with edge env"
-    assert config['step_method'] == 'edge',\
-        f"step method <{config['step_method']}> is not compatible with edge env"
 
-def check_config_binpacking(config: Dict[str, Any]):
-    """check if it is a legal combination for the greedy envs
-    """
-    assert config['reward_mode'] in ['cloud'],\
-        f"reward_mode <{config['reward_mode']}> is not compatible with greedy env"
-    assert config['step_method'] == 'greedy',\
-        f"step method <{config['step_method']}> is not compatible with greedy env"

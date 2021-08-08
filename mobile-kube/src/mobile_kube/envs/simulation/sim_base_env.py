@@ -9,6 +9,10 @@ from typing import (
     Any
 )
 
+from colorama import (
+    Fore,
+    Style
+)
 import gym
 from gym.utils import seeding
 import types
@@ -23,9 +27,6 @@ from mobile_kube.util import (
     ACTION_MAX
 )
 from mobile_kube.envs_extensions import (
-    get_render_method,
-    get_action_method_sim,
-    get_step_method,
     get_reward_method
 )
 
@@ -58,16 +59,6 @@ class SimBaseEnv(gym.Env):
             the main indicator of the state (obseravation) if services_nodes
             the rest of the observation dictionary is updated with decorators
             automatically
-
-    Variables:
-            self.mitigation_needed: indicator of whether the mitigation of
-                                    overloading was successful
-            self.mitigation_tries: indicator of how many greedy mitigations
-                                should be tried
-            self.auxiliary_node_needed: indicator of whether the
-                                        _greedy_mitigator was successful or
-                                        not and if we need to use the
-                                        auxiliary node
     """
 
     # ------------------ common functions ------------------
@@ -124,17 +115,6 @@ class SimBaseEnv(gym.Env):
         self.penalty_consolidated: float = config['penalty_consolidated']
         self.penalty_latency: float = config['penalty_latency']
 
-        # greedy mitigator variables
-        # !!! not all of them are used in all envs
-        self.mitigation_tries: int = config['mitigation_tries']
-        self.mitigation_needed: bool = False
-        self.auxiliary_node_needed: bool = False
-
-        # render flags
-        # !!! not all of them are used in all envs
-        self.greedy_mitigation_needed_for_render: bool = False
-        self.auxiliary_node_mitigation_needed_for_render: bool = False
-
         # episode length
         self.episode_length: int = config['episode_length']
 
@@ -152,19 +132,6 @@ class SimBaseEnv(gym.Env):
         # step or not TODO 
         self.compute_greedy_num_consolidated = config[
             'compute_greedy_num_consolidated']
-
-        # set the take_action method
-        _take_action, _validate_action = get_action_method_sim(config['action_method'])
-        self._take_action = types.MethodType(_take_action, self)
-        self._validate_action = types.MethodType(_validate_action, self)
-
-        # set the step method
-        step = get_step_method(config['step_method'])
-        self.step = types.MethodType(step, self)
-
-        # set the render method
-        render = get_render_method(config['step_method'])
-        self.render = types.MethodType(render, self)
 
         # set the reward method
         _reward = get_reward_method(config['reward_mode'])
@@ -191,15 +158,45 @@ class SimBaseEnv(gym.Env):
             self.services_nodes = deepcopy(self.initial_services_nodes)
         return self.observation
 
-    def preprocessor(self, obs):
+    def render(self) -> None:
         """
-        environment preprocessor
-        depeiding on the observation (state) definition
         """
-        prep = Preprocessor(self.nodes_resources_cap,
-                            self.services_resources_cap)        
-        obs = prep.transform(obs)
-        return obs
+        print("--------state--------")
+        print("services_types_usage:")
+        if not self.num_overloaded:
+            print("nodes_resources_usage_frac:")
+            print(self.nodes_resources_usage_frac)
+            print("services_nodes:")
+            print(self.services_nodes)
+            # plot_resource_allocation(self.services_nodes,
+            #                          self.nodes_resources_cap,
+            #                          self.services_resources_cap,
+            #                          self.services_resources_usage,
+            #                          plot_length=80)
+        else:
+            print(Fore.RED, "agent's action lead to an overloaded state!")
+            # before using auxiliary
+            print("nodes_resources_usage_frac:")
+            print(self.nodes_resources_usage_frac)
+            print("services_nodes:")
+            print(self.services_nodes)
+            # plot_resource_allocation(self.services_nodes,
+            #                          self.nodes_resources_cap,
+            #                          self.services_resources_cap,
+            #                          self.services_resources_usage,
+            #                          plot_length=80)
+            # after using auxiliary
+            print(Style.RESET_ALL)
+
+        def preprocessor(self, obs):
+            """
+            environment preprocessor
+            depeiding on the observation (state) definition
+            """
+            prep = Preprocessor(self.nodes_resources_cap,
+                                self.services_resources_cap)        
+            obs = prep.transform(obs)
+            return obs
 
     # ------------------ common properties ------------------
 
@@ -208,10 +205,10 @@ class SimBaseEnv(gym.Env):
     def services_resources_usage(self) -> np.ndarray:
         """return the fraction of resource usage for each node
         workload at current timestep e.g. at time step 0.
-                         ram - memory - cpu
-                        |                  |
-            services  |                  |
-                        |                  |
+                         ram cpu
+                        |       |
+            services    |       |
+                        |       |
             range:
                 row inidices: (0, num_services]
                 columns indices: (0, num_resources]
@@ -361,19 +358,6 @@ class SimBaseEnv(gym.Env):
         return len(self.services_in_auxiliary)
 
     @property
-    @rounding
-    def auxiliary_resources_usage(self) -> np.ndarray:
-        """resource usage in auxiliary node
-        """
-        services_in_auxiliary = np.where(self.services_nodes ==
-                                           self.num_nodes)[0]
-        auxiliary_resources_usage = sum(self.services_resources_usage[
-            services_in_auxiliary])
-        if type(auxiliary_resources_usage) != np.ndarray:
-            auxiliary_resources_usage = np.zeros(self.num_resources)
-        return auxiliary_resources_usage
-
-    @property
     def done(self):
         """check at every step that if we have reached the
         final state of the simulation of not
@@ -383,14 +367,15 @@ class SimBaseEnv(gym.Env):
 
     @property
     def complete_raw_observation(self) -> Dict[str, np.ndarray]:
+        """complete observation with all the available elements
+        """
         observation = {
                 "services_resources_usage": self.services_resources_usage,
                 "nodes_resources_usage": self.nodes_resources_usage,
                 "services_resources_usage_frac":
                 self.services_resources_usage_frac,
                 "nodes_resources_usage_frac": self.nodes_resources_usage_frac,
-                "services_nodes": self.services_nodes,
-                "auxiliary_resources_usage": self.auxiliary_resources_usage
+                "services_nodes": self.services_nodes
         }
         return observation
 
@@ -405,8 +390,7 @@ class SimBaseEnv(gym.Env):
                 "services_resources_usage_frac":
                 self.services_resources_usage_frac,
                 "nodes_resources_usage_frac": self.nodes_resources_usage_frac,
-                "services_nodes": self.services_nodes,
-                "auxiliary_resources_usage": self.auxiliary_resources_usage
+                "services_nodes": self.services_nodes
         }
         selected = dict(zip(self.obs_elements,
                             [observation[k] for k in self.obs_elements]))

@@ -15,20 +15,10 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 from experiments.utils.constants import DATASETS_PATH
 
 
-def add_path_to_config_cloud(
-    config: Dict[str, Any], dataset_id: int, workload_id: int
-    ) -> Dict[str, Any]:
-    dataset_path = os.path.join(DATASETS_PATH, str(dataset_id))
-    workload_path = os.path.join(dataset_path, 'workloads', str(workload_id))
-    config.update({
-        'dataset_path': os.path.join(dataset_path, 'dataset.pickle'),
-        'workload_path': os.path.join(workload_path, 'workload.pickle')})
-    return config
-
-
 def add_path_to_config_edge(
     config: Dict[str, Any], dataset_id: int, workload_id: int,
     network_id: int,trace_id: int) -> Dict[str, Any]:
+
     dataset_path = os.path.join(DATASETS_PATH, str(dataset_id))
     workload_path = os.path.join(dataset_path, 'workloads', str(workload_id))
     network_path = os.path.join(dataset_path, 'networks', str(network_id))

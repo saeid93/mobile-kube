@@ -3,6 +3,7 @@ import sys
 import shutil
 import click
 from typing import Dict, Any
+import json
 
 import ray
 from ray import tune
@@ -16,12 +17,11 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 from experiments.utils.constants import (
     RESULTS_PATH,
     RESULTS_PATH_EXPERIMENTS,
+    CONFIGS_PATH,
     ENVSMAP
 )
 from experiments.utils import (
-    add_path_to_config_cloud,
     add_path_to_config_edge,
-    config_reader,
     make_env_class,
     CloudCallback
 )
@@ -30,7 +30,7 @@ torch, nn = try_import_torch()
 
 
 def learner(*, config_file_path: str, config: Dict[str, Any],
-            mode: bool, series: int, type_env: str, dataset_id: int,
+            mode: str, series: int, type_env: str, dataset_id: int,
             workload_id: int, network_id: int, trace_id: int,
             use_callback: bool, checkpoint_freq: int,
             local_mode: bool):
@@ -57,28 +57,20 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
           <name_of_algorithm>/<trial>
     """
     # <----- extract differnt parts of the input_config ----->
-    # metadata = input_config["metadata"]
     stop = config['stop']
     learn_config = config['learn_config']
     run_or_experiment = config["run_or_experiment"]
     env_config_base = config['env_config_base']
     # type_env = ENVSMAP[type_env]
 
-
-    if type_env == 'sim-edge' or type_env == 'kube-edge':
-        env_config = add_path_to_config_edge(
-            config=env_config_base,
-            dataset_id=dataset_id,
-            workload_id=workload_id,
-            network_id=network_id,
-            trace_id=trace_id
-        )
-    else:
-        env_config = add_path_to_config_cloud(
-            config=env_config_base,
-            dataset_id=dataset_id,
-            workload_id=workload_id
-        )
+    # <----- add the additional nencessary arguments to the edge config ----->
+    env_config = add_path_to_config_edge(
+        config=env_config_base,
+        dataset_id=dataset_id,
+        workload_id=workload_id,
+        network_id=network_id,
+        trace_id=trace_id
+    )
 
     # <----- generate the ray_config ----->
     # make the learning config based on the type of the environment
@@ -144,8 +136,9 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
         if 'json' in item:
             json_file_name = item
             break
-    json_file_path = os.path.join(this_experiment_trials_folder,
-                                  json_file_name)
+    json_file_path = os.path.join(
+        this_experiment_trials_folder,
+        json_file_name)
     os.remove(json_file_path)
 
 
@@ -156,7 +149,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--config-folder', type=str, default='')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-cloud', 'sim-edge', 'sim-binpacking']),
+              type=click.Choice(['sim-edge', 'sim-binpacking']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=4)
 @click.option('--workload-id', required=True, type=int, default=0)
@@ -164,17 +157,34 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=False)
 @click.option('--checkpoint-freq', required=False, type=int, default=100)
-def main(mode, local_mode, config_folder, series, type_env, dataset_id,
-         workload_id, network_id, trace_id, use_callback, checkpoint_freq):
+def main(mode: str, local_mode: bool, config_folder: str, series: int,
+         type_env: str, dataset_id: int, workload_id: int, network_id: int,
+         trace_id: int, use_callback: bool, checkpoint_freq: int):
+    """[summary]
+
+    Args:
+        mode (str): whether to run it in experimental mode or real mode
+        local_mode (bool): run in local mode for having the 
+        config_folder (str): name of the config folder (only used in real mode)
+        use_callback (bool): whether to use callbacks or storing and visualising
+        checkpoint_freq (int): checkpoint the ml model at each (n-th) step
+        series (int): to gather a series of datasets in a folder
+        type_env (str): the type of the used environment
+        dataset_id (int): used cluster dataset
+        workload_id (int): the workload used in that dataset
+        network_id (int): edge network of some dataset
+        trace_id (int): user movement traces
     """
-    run it outside with
-    python experiments false <-- name_of_the_config_folder -->
-    e.g. for name_of_the_config_folder: PPO_1
-    """
-    config, config_file_path = config_reader(mode, config_folder, 'learn')
+    config_file_path = os.path.join(
+        CONFIGS_PATH, mode, config_folder,
+        'run.json')
+    with open(config_file_path) as cf:
+        config = json.loads(cf.read())
+
     pp = pprint.PrettyPrinter(indent=4)
     print('start experiments with the following config:\n')
     pp.pprint(config)
+
     learner(config_file_path=config_file_path,
             config=config, mode=mode, series=series,
             type_env=type_env, dataset_id=dataset_id,

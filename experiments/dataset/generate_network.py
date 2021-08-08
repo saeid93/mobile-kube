@@ -123,15 +123,14 @@ def generate_network(
 
 
 @click.command()
-@click.option('--network-config', type=str, default='my-network')
+@click.option('--network-config', type=str, default='network')
 def main(network_config: str):
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
         'network-generation',
-        network_config,
-        'config.json')
+        f'{network_config}.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     print('generating dataset from the following config:')

@@ -67,15 +67,14 @@ def generate_dataset(config):
 
 
 @click.command()
-@click.option('--dataset-config', type=str, default='my-dataset')
+@click.option('--dataset-config', type=str, default='dataset')
 def main(dataset_config: str):
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
         'dataset-generation',
-        dataset_config,
-        'config.json')
+        f'{dataset_config}.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     print('generating dataset from the following config:')

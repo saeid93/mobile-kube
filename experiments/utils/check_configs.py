@@ -172,14 +172,6 @@ def env_config_base_check(config: Dict[str, Any]):
     assert config['reward_mode'] in ['cloud', 'edge', 'both'],\
         f"Unkown reward option: <{config['reward_mode']}>"
 
-    # check the action methods
-    assert config['action_method'] in ['probabilistic', 'absolute'],\
-        f"Unkown action_method option: <{config['action_method']}>"
-
-    # check the mitigation methods
-    assert config['step_method'] in ['none', 'all', 'aux', 'binpacking', 'edge'],\
-        f"Unkown step_method option: <{config['step_method']}>"
-
     # check workload arguments
     if "workload_stop" in config:
         assert config['workload_stop'] <= 1, \

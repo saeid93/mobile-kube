@@ -23,9 +23,7 @@ from mobile_kube.util import (
     ACTION_MAX
 )
 from mobile_kube.envs_extensions import (
-    get_render_method,
     get_action_method_kube,
-    get_step_method,
     get_reward_method
 )
 from mobile_kube.util.kubernetes_utils import (

@@ -6,7 +6,6 @@ from .preprocessors import Preprocessor
 from .check_config import (
     check_config,
     check_config_edge,
-    check_config_binpacking
 )
 from .data_loader import load_object
 from .constants import (

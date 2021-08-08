@@ -4,7 +4,8 @@ import numpy as np
 from copy import deepcopy
 from typing import (
     Dict,
-    Any
+    Any,
+    Tuple
 )
 
 from gym.spaces import (
@@ -13,23 +14,41 @@ from gym.spaces import (
 )
 
 from mobile_kube.util import (
+    Preprocessor,
     override,
-    check_config_binpacking
+    check_config_edge,
+    load_object
 )
+from mobile_kube.network import NetworkSimulator
 
 from .sim_base_env import SimBaseEnv
 
 class SimBinpackingEnv(SimBaseEnv):
     def __init__(self, config: Dict[str, Any]):
+        # the network for edge simulators
+        edge_simulator_config = load_object(config['network_path'])
+        trace = load_object(config['trace_path'])
+
+        self.edge_simulator = NetworkSimulator(
+            trace=trace,
+            **edge_simulator_config
+            )
+
+        self.users_stations = self.edge_simulator.users_stations
+        self.num_users = self.edge_simulator.num_users
+        self.num_stations = self.edge_simulator.num_stations
+        self.normalise_latency = config['normalise_latency']
+        # self.normalise_factor = self.edge_simulator.get_largest_station_node_path() TODO check
+        check_config_edge(config)
         super().__init__(config)
-        check_config_binpacking(config)
-        # reset the environment to the initial state
+        # TODO change here and remove the initialiser in the envs
+        # TODO add trace here to the nuseretwork
         self.observation_space, self.action_space =\
-            self._setup_space(config['action_method'])
+            self._setup_space()
         _ = self.reset()
 
     @override(SimBaseEnv)
-    def _setup_space(self, action_space_type: str):
+    def _setup_space(self):
         """
         States:
             the whole or a subset of the following dictionary:
@@ -65,24 +84,39 @@ class SimBinpackingEnv(SimBaseEnv):
                 # add the one hot endoded services_resources
                 # number of elements
                 obs_size += (self.num_nodes+1) * self.num_services
-            elif elm == "auxiliary_resources_usage":
-                # add the auxiliary resource usage to the number of elements
-                obs_size += self.num_resources
 
+        # add the one hot endoded users_stations
+        # number of elements
+        obs_size += (self.num_users) * self.num_stations
+
+        higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
-        observation_space = Box(low=0, high=1, shape=(obs_size, ))
-        if action_space_type == 'probabilistic':
-            action_space = Box(low=self.action_min, high=self.action_max,
-                               shape=(self.num_services * self.num_nodes,))
-
-        elif action_space_type == 'absolute':
-            action_space = MultiDiscrete(np.ones(self.num_services) *
-                                         self.num_nodes)
-        else:
-            raise ValueError("unkown type of action space "
-                             f"--> {action_space_type}")
+        observation_space = Box(low=0, high=higher_bound, shape=(obs_size, ))
+        action_space = MultiDiscrete(np.ones(self.num_services) *
+                                     self.num_nodes)
 
         return observation_space, action_space
+
+    def preprocessor(self, obs):
+        """
+        environment preprocessor
+        depeiding on the observation (state) definition
+        """
+        prep = Preprocessor(self.nodes_resources_cap,
+                            self.services_resources_cap,
+                            self.num_stations)
+        obs = prep.transform(obs)
+        return obs
+
+    @property
+    def raw_observation(self) -> Dict[str, np.ndarray]:
+        """
+        returns only the raw observations requested by the user
+        in the config input through obs_elements
+        """
+        observation = super().raw_observation
+        observation.update({'users_stations': self.users_stations})
+        return observation
 
     def _next_greedy_action(self, prev_services_nodes) -> np.ndarray:
         """
@@ -131,3 +165,51 @@ class SimBinpackingEnv(SimBaseEnv):
         self.services_nodes = deepcopy(prev_services_nodes)
         num_consolidated = self._num_consolidated(action)
         return num_consolidated, action
+
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, int, bool, dict]:
+        """
+        General overivew:
+            1. try binpacking without auxiliary
+            2. if doesn't fit add auxiliary as the last server
+                and allocate with considering it (auxiliary has
+                unlimited space)
+        Binpacking:
+        generate the intitial state for nodes_services with a
+        bestfit greedy algorithm.
+            1. iterate over nodes one by one
+            2. pop a node from the nodes lists
+            3. find the nodes with least remained resources
+            4. try to allocate the services to them
+            5. if not possible pop another node
+        We use mitigation after bin-packing because
+        the action is based-on the current timestep but
+        next timestep might result in illegal resource usage
+        with the current placement
+        """
+        # save previous action for computing the
+        # final (after mitigation) num_of_moves
+        prev_services_nodes = deepcopy(self.services_nodes)
+
+        # get the next greedy actoin from the env
+        _, action = self._next_greedy_action(prev_services_nodes)
+
+        # move the timestep to the next point of time
+        # and then take the action
+        assert self.action_space.contains(action)
+        self.global_timestep += 1
+        # find the reward and compute the remainder for round-robin
+        self.timestep = self.global_timestep % self.workload.shape[1]
+        self.services_nodes = deepcopy(action)
+
+        num_moves = len(np.where(
+            self.services_nodes != prev_services_nodes)[0])
+
+        info = {'num_moves': num_moves,
+                'num_consolidated': self.num_consolidated,
+                'timestep': self.timestep}
+
+        assert self.observation_space.contains(self.observation),\
+                (f"observation:\n<{self.raw_observation}>\noutside of "
+                f"observation_space:\n <{self.observation_space}>")
+
+        return self.observation, None, self.done, info
