@@ -42,9 +42,12 @@ class DatasetGenerator:
         self.nodes_rng_cpu['min'] *= self.cutoff['cpu']
         self.nodes_rng_cpu['max'] *= self.cutoff['ram']
 
-        assert len(services_cap_rng) == self.num_resources
-        self.services_rng_ram = services_cap_rng['ram']
-        self.services_rng_cpu = services_cap_rng['cpu']
+        # assert len(services_cap_rng) == self.num_resources
+        self.services_rng_num = [service_cap_rng['num'] for _, service_cap_rng in services_cap_rng.items()]
+        self.services_rng_ram = [service_cap_rng['ram'] for _, service_cap_rng in services_cap_rng.items()]
+        self.services_rng_cpu = [service_cap_rng['cpu'] for _, service_cap_rng in services_cap_rng.items()]
+
+        assert self.num_services == sum(self.services_rng_num)
 
         self.start_workload = np.array(start_workload)
         assert self.num_services_types == self.start_workload.shape[0]
@@ -55,19 +58,19 @@ class DatasetGenerator:
         
 
         # TEMPS
-        nodes_ram_range = np.arange(start=self.nodes_rng_ram['min'],
-                                    stop=self.nodes_rng_ram['max']
-                                    + self.nodes_rng_ram['step'],
-                                    step=self.nodes_rng_ram['step'])
-        nodes_ram = np.random.choice(nodes_ram_range,
-                                        size=(self.num_nodes, 1))
+        # nodes_ram_range = np.arange(start=self.nodes_rng_ram['min'],
+        #                             stop=self.nodes_rng_ram['max']
+        #                             + self.nodes_rng_ram['step'],
+        #                             step=self.nodes_rng_ram['step'])
+        # nodes_ram = np.random.choice(nodes_ram_range,
+        #                                 size=(self.num_nodes, 1))
 
-        nodes_cpu_range = np.arange(start=self.nodes_rng_cpu['min'],
-                                    stop=self.nodes_rng_cpu['max']
-                                    + self.nodes_rng_cpu['step'],
-                                    step=self.nodes_rng_cpu['step'])
-        nodes_cpu = np.random.choice(nodes_cpu_range,
-                                        size=(self.num_nodes, 1))
+        # nodes_cpu_range = np.arange(start=self.nodes_rng_cpu['min'],
+        #                             stop=self.nodes_rng_cpu['max']
+        #                             + self.nodes_rng_cpu['step'],
+        #                             step=self.nodes_rng_cpu['step'])
+        # nodes_cpu = np.random.choice(nodes_cpu_range,
+        #                                 size=(self.num_nodes, 1))
 
 
     def make_dataset(self):
@@ -144,29 +147,56 @@ class DatasetGenerator:
             self.nodes_resources_cap = np.concatenate((nodes_ram, nodes_cpu),
                                                       axis=1)
 
+            # TODO multiple container range for containers
             # 3. generate contaienrs
-            contaienrs_ram_range = np.arange(
-                start=self.services_rng_ram['min'],
-                stop=self.services_rng_ram['max']
-                + self.services_rng_ram['step'],
-                step=self.services_rng_ram['step'])
-            services_ram = np.random.choice(contaienrs_ram_range,
-                                              size=(self.num_services, 1))
-            services_cpu_range = np.arange(
-                start=self.services_rng_cpu['min'],
-                stop=self.services_rng_cpu['max']
-                + self.services_rng_cpu['step'],
-                step=self.services_rng_cpu['step'])
-            services_cpu = np.random.choice(services_cpu_range,
-                                              size=(self.num_services, 1))
+            size_type_len = len(self.services_rng_ram)
+            for i in range(size_type_len):
+                number = self.services_rng_num[i]
+                services_ram_range = np.arange(
+                    start=self.services_rng_ram[i]['min'],
+                    stop=self.services_rng_ram[i]['max']
+                    + self.services_rng_ram[i]['step'],
+                    step=self.services_rng_ram[i]['step'])
+                # services_ram = np.random.choice(contaienrs_ram_range,
+                #                                 size=(number, 1))
+                services_cpu_range = np.arange(
+                    start=self.services_rng_cpu[i]['min'],
+                    stop=self.services_rng_cpu[i]['max']
+                    + self.services_rng_cpu[i]['step'],
+                    step=self.services_rng_cpu[i]['step'])
+                # services_cpu = np.random.choice(services_cpu_range,
+                #                                 size=(number, 1))
+                if i == 0:
+                    services_ram = np.random.choice(services_ram_range,
+                                                    size=(number, 1))
+                    services_cpu = np.random.choice(services_cpu_range,
+                                                    size=(number, 1))
+                else:
+                    services_ram = np.concatenate((
+                        services_ram,
+                        np.random.choice(
+                            services_ram_range,
+                            size=(number, 1))
+                    ))
+                    services_cpu = np.concatenate((
+                        services_cpu,
+                        np.random.choice(
+                            services_cpu_range,
+                            size=(number, 1))
+                    ))
+            self.services_resources_cap = np.concatenate((services_ram,
+                                                services_cpu),
+                                                axis=1)
+
+            # assign workload types to services
             services_types = []
             for index, value in enumerate(self.services_types_map):
                 services_types.extend(list(itertools.repeat(index, value)))
             self.services_types = np.array(services_types)
             np.random.shuffle(services_types)
-            self.services_resources_cap = np.concatenate((services_ram,
-                                                            services_cpu),
-                                                           axis=1)
+
+            # checks if the resource usage of the current placement
+            # not exceeding the nodes capacity
             if np.alltrue(sum(self.services_resources_usage) <=
                           sum(self.nodes_resources_cap)):
                 break

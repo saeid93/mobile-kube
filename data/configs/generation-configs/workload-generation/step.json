@@ -2,9 +2,9 @@
     "notes": "resoure usage",
     "dataset_id": 8,
     "timesteps": 10000,
-    "services_types": 2,
+    "services_types": 1,
     "workloads_var" : {
-        "steps_unit":[[0.01, 0.01], [0.01, 0.01]],
+        "steps_unit":[[0, 0], [0, 0]],
         "max_steps":[[1, 1], [1, 1]]
     },
     "plot_smoothing":301,
