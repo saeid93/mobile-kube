@@ -110,7 +110,7 @@ class SimEdgeEnv(SimBaseEnv):
         depeiding on the observation (state) definition
         """
         prep = Preprocessor(self.nodes_resources_cap,
-                            self.services_resources_cap,
+                            self.services_resources_request,
                             self.num_stations)
         obs = prep.transform(obs)
         return obs

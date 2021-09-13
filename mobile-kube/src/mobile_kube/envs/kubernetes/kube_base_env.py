@@ -108,14 +108,14 @@ class KubeBaseEnv(gym.Env):
         self.workload = load_object(self.workload_path)
 
         self.nodes_resources_cap: np.array = self.dataset['nodes_resources_cap']
-        self.services_resources_cap: np.array = self.dataset[
-            'services_resources_cap']
+        self.services_resources_request: np.array = self.dataset[
+            'services_resources_request']
         self.services_types: np.array = self.dataset['services_types']
 
         # find the number of nodes, services, service types and timesteps
         self.num_resources: int = self.nodes_resources_cap.shape[1]
         self.num_nodes: int = self.nodes_resources_cap.shape[0]
-        self.num_services: int = self.services_resources_cap.shape[0]
+        self.num_services: int = self.services_resources_request.shape[0]
         self.num_services_types: int = self.workload.shape[2]
         self.total_timesteps: int = self.workload.shape[1]
 
@@ -249,7 +249,7 @@ class KubeBaseEnv(gym.Env):
         depeiding on the observation (state) definition
         """
         prep = Preprocessor(self.nodes_resources_cap,
-                            self.services_resources_cap)        
+                            self.services_resources_request)        
         obs = prep.transform(obs)
         return obs
 
@@ -274,7 +274,7 @@ class KubeBaseEnv(gym.Env):
                 columns indices: (0, num_resources]
                 enteries: [0, 1] type: float
         """
-        return self.services_resources_usage / self.services_resources_cap
+        return self.services_resources_usage / self.services_resources_request
 
     @property
     @rounding
@@ -325,11 +325,11 @@ class KubeBaseEnv(gym.Env):
 
     @property
     def services_resources_remained(self) -> np.ndarray:
-        return self.services_resources_cap - self.services_resources_usage
+        return self.services_resources_request - self.services_resources_usage
 
     @property
     def nodes_resources_remained(self) -> np.ndarray:
-        return self.nodes_resources_cap - self.nodes_resources_usage
+        return self.nodes_resources_request - self.nodes_resources_usage
 
     @property
     @rounding
@@ -516,8 +516,8 @@ class KubeBaseEnv(gym.Env):
                 image=self.service_image,
                 node_name=node.name,
                 namespace=self._cluster.namespace,
-                limit_mem="{}Mi".format(self.services_resources_cap[service_id][0]),
-                limit_cpu="{}".format(self.services_resources_cap[service_id][1]),
+                limit_mem="{}Mi".format(self.services_resources_request[service_id][0]),
+                limit_cpu="{}".format(self.services_resources_request[service_id][1]),
             )
 
             svc = construct_svc(

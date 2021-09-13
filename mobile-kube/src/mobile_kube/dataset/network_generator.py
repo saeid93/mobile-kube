@@ -29,7 +29,7 @@ class NetworkGenerator:
         self.services_nodes = dataset['services_nodes']
         self.num_nodes: int = dataset['nodes_resources_cap'].shape[0]
         self.num_services: int = dataset[
-            'services_resources_cap'].shape[0]
+            'services_resources_request'].shape[0]
         self.nodes_stations_con = nodes_stations_con
         self.num_users = num_users
         self.num_stations = num_stations

@@ -89,14 +89,14 @@ class SimBaseEnv(gym.Env):
         self.workload = load_object(self.workload_path)
 
         self.nodes_resources_cap: np.array = self.dataset['nodes_resources_cap']
-        self.services_resources_cap: np.array = self.dataset[
-            'services_resources_cap']
+        self.services_resources_request: np.array = self.dataset[
+            'services_resources_request']
         self.services_types: np.array = self.dataset['services_types']
 
         # find the number of nodes, services, service types and timesteps
         self.num_resources: int = self.nodes_resources_cap.shape[1]
         self.num_nodes: int = self.nodes_resources_cap.shape[0]
-        self.num_services: int = self.services_resources_cap.shape[0]
+        self.num_services: int = self.services_resources_request.shape[0]
         self.num_services_types: int = self.workload.shape[2]
         self.total_timesteps: int = self.workload.shape[1]
 
@@ -170,7 +170,7 @@ class SimBaseEnv(gym.Env):
             print(self.services_nodes)
             # plot_resource_allocation(self.services_nodes,
             #                          self.nodes_resources_cap,
-            #                          self.services_resources_cap,
+            #                          self.services_resources_request,
             #                          self.services_resources_usage,
             #                          plot_length=80)
         else:
@@ -182,7 +182,7 @@ class SimBaseEnv(gym.Env):
             print(self.services_nodes)
             # plot_resource_allocation(self.services_nodes,
             #                          self.nodes_resources_cap,
-            #                          self.services_resources_cap,
+            #                          self.services_resources_request,
             #                          self.services_resources_usage,
             #                          plot_length=80)
             # after using auxiliary
@@ -194,7 +194,7 @@ class SimBaseEnv(gym.Env):
             depeiding on the observation (state) definition
             """
             prep = Preprocessor(self.nodes_resources_cap,
-                                self.services_resources_cap)        
+                                self.services_resources_request)        
             obs = prep.transform(obs)
             return obs
 
@@ -215,7 +215,7 @@ class SimBaseEnv(gym.Env):
                 enteries: [0, node_resource_cap] type: float
         """
         services_resources_usage = (self.services_resources_usage_frac *
-                                      self.services_resources_cap)
+                                      self.services_resources_request)
         return services_resources_usage
 
     @property
@@ -244,7 +244,7 @@ class SimBaseEnv(gym.Env):
 
     @property
     def services_resources_remained(self) -> np.ndarray:
-        return self.services_resources_cap - self.services_resources_usage
+        return self.services_resources_request - self.services_resources_usage
 
     @property
     def nodes_resources_remained(self) -> np.ndarray:

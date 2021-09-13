@@ -5,7 +5,7 @@ import random
 
 class DatasetGenerator:
     def __init__(self, nums, metrics, nodes_cap_rng,
-                 services_cap_rng, start_workload,
+                 services_request_rng, start_workload,
                  cutoff, seed):
         """dataset generator
         """
@@ -42,10 +42,10 @@ class DatasetGenerator:
         self.nodes_rng_cpu['min'] *= self.cutoff['cpu']
         self.nodes_rng_cpu['max'] *= self.cutoff['ram']
 
-        # assert len(services_cap_rng) == self.num_resources
-        self.services_rng_num = [service_cap_rng['num'] for _, service_cap_rng in services_cap_rng.items()]
-        self.services_rng_ram = [service_cap_rng['ram'] for _, service_cap_rng in services_cap_rng.items()]
-        self.services_rng_cpu = [service_cap_rng['cpu'] for _, service_cap_rng in services_cap_rng.items()]
+        # assert len(services_request_rng) == self.num_resources
+        self.services_rng_num = [service_request_rng['num'] for _, service_request_rng in services_request_rng.items()]
+        self.services_rng_ram = [service_request_rng['ram'] for _, service_request_rng in services_request_rng.items()]
+        self.services_rng_cpu = [service_request_rng['cpu'] for _, service_request_rng in services_request_rng.items()]
 
         assert self.num_services == sum(self.services_rng_num)
 
@@ -84,7 +84,7 @@ class DatasetGenerator:
                 nodes  |         |
                        |         |
 
-            services_resources_cap:
+            services_resources_request:
 
                              ram - cpu
                             |         |
@@ -114,7 +114,7 @@ class DatasetGenerator:
 
         dataset = {
             'nodes_resources_cap': self.nodes_resources_cap,
-            'services_resources_cap': self.services_resources_cap,
+            'services_resources_request': self.services_resources_request,
             'services_nodes': self.services_nodes,
             'services_types': self.services_types,
             'start_workload': self.start_workload
@@ -184,7 +184,7 @@ class DatasetGenerator:
                             services_cpu_range,
                             size=(number, 1))
                     ))
-            self.services_resources_cap = np.concatenate((services_ram,
+            self.services_resources_request = np.concatenate((services_ram,
                                                 services_cpu),
                                                 axis=1)
 
@@ -278,7 +278,7 @@ class DatasetGenerator:
             lambda service_type: self.start_workload[service_type],
             self.services_types)))
         services_resources_usage = services_workloads *\
-            self.services_resources_cap
+            self.services_resources_request
         return services_resources_usage
 
     @property
@@ -299,7 +299,7 @@ class DatasetGenerator:
 
     @property
     def services_resources_remained(self):
-        return self.services_resources_cap - self.services_resources_usage
+        return self.services_resources_request - self.services_resources_usage
 
     @property
     def nodes_resources_remained(self):
@@ -315,7 +315,7 @@ class DatasetGenerator:
 
     @property
     def services_resources_usage_frac(self):
-        return self.services_resources_usage / self.services_resources_cap
+        return self.services_resources_usage / self.services_resources_request
 
     @property
     def nodes_resources_usage_frac(self):

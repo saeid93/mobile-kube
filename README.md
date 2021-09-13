@@ -138,7 +138,7 @@ follows:
 
 ### 4.4.1. [Data Generation](experiments/dataset)
 The dataset, workloads, networks and traces are generated in the following order:
-1. **Datasets**: Nodes, services, their capacities and their initial placements. 
+1. **Datasets**: Nodes, services, their capacities, requested resources and their initial placements. 
 2. **Workloads**: The workload for each dataset that determines the resource usage at each time step. This is built on top of the datasets built on step 1. Each dataset can have several workloads.
 3. **Networks**: The edge network for each dataset that generates the network with users and stations for the simulation. This contains the network object containing the nodes and stations and intitial location of the users. The network can be built both randomly of based-on the [Cabspotting](https://privamov.github.io/accio/docs/datasets.html) and [California towers stations](antennasearch.com) dataset. This is built on top of the nodes-services datasets built on step 1. Each dataset can have several networks.
 4. **Traces**: The movement traces for each network. This is the location of each user at each timestep. This can be a random or based-on [Cabspotting](https://privamov.github.io/accio/docs/) dataset. This is built on top of the networks built in step 3.

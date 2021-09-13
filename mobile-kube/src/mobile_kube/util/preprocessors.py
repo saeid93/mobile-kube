@@ -4,10 +4,10 @@ from mobile_kube.util import rounding
 
 class Preprocessor():
     def __init__(self, nodes_resources_cap: np.ndarray,
-                 services_resources_cap: np.ndarray,
+                 services_resources_request: np.ndarray,
                  num_stations: int = 0):
         self.nodes_resources_cap = nodes_resources_cap
-        self.services_resources_cap = services_resources_cap
+        self.services_resources_request = services_resources_request
         self.num_nodes = nodes_resources_cap.shape[0]
         self.num_stations = num_stations
 
@@ -42,8 +42,8 @@ class Preprocessor():
             ram_usage_of_a_service / largest_ram_capacity_of_any_conrainer
         """
         lst = []
-        for index in range(self.services_resources_cap.shape[1]):
-            lst.append(max(self.services_resources_cap[:, index]))
+        for index in range(self.services_resources_request.shape[1]):
+            lst.append(max(self.services_resources_request[:, index]))
         return obs/lst
 
     def _nodes_usage_normalizer(self, obs: np.ndarray) -> np.ndarray:

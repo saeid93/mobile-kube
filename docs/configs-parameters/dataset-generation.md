@@ -24,7 +24,7 @@
             "step": [int]
         }
     },
-    "services_cap_rng": { // nodes capacities minimum, maximum and step
+    "services_request_rng": { // nodes capacities minimum, maximum and step
         "ram": {
             "min": [int],
             "max": [int],

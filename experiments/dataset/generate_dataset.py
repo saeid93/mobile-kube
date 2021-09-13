@@ -50,7 +50,7 @@ def generate_dataset(config):
     info['capacities']['nodes_resources'] = \
         dataset['nodes_resources_cap'].tolist()
     info['capacities']['services_resources'] = \
-        dataset['services_resources_cap'].tolist()
+        dataset['services_resources_request'].tolist()
     info['services_nodes'] = \
         dataset['services_nodes'].tolist()
 

@@ -27,7 +27,7 @@
             "step": 1
         }
     },
-    "services_cap_rng": {
+    "services_request_rng": {
         "0":
             {
             "num": 2,

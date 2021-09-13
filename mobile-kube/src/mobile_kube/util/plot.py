@@ -60,7 +60,7 @@ class Server:
 
 
 def plot_resource_allocation(service_node, node_resource_cap,
-                             service_resource_cap, service_resource_usage,
+                             service_resource_request, service_resource_usage,
                              plot_length=80):
     servers = []
     for i in range(len(node_resource_cap)):
@@ -70,35 +70,35 @@ def plot_resource_allocation(service_node, node_resource_cap,
 
         servers[i].resources['RAM'] = [
             ServiceResource(identifier=j,
-                              capacity=service_resource_cap[j][0],
+                              capacity=service_resource_request[j][0],
                               usage=service_resource_usage[j][0]
-            ) for j in range(len(service_resource_cap)) if service_node[j] == i
+            ) for j in range(len(service_resource_request)) if service_node[j] == i
         ]
 
         servers[i].resources['DISK'] = [
             ServiceResource(identifier=j,
-                              capacity=service_resource_cap[j][1],
+                              capacity=service_resource_request[j][1],
                               usage=service_resource_usage[j][1]
-            ) for j in range(len(service_resource_cap)) if service_node[j] == i
+            ) for j in range(len(service_resource_request)) if service_node[j] == i
         ]
 
         servers[i].resources['CPU'] = [
             ServiceResource(identifier=j,
-                              capacity=service_resource_cap[j][2],
+                              capacity=service_resource_request[j][2],
                               usage=service_resource_usage[j][2]
-            ) for j in range(len(service_resource_cap)) if service_node[j] == i
+            ) for j in range(len(service_resource_request)) if service_node[j] == i
         ]
         print(str(servers[i]))
 
-        for c in range(len(service_resource_cap)):
+        for c in range(len(service_resource_request)):
             if service_node[c] == i:
                 print('\tservice %d' % c)
                 print('\t\tRAM:', ServiceResource(identifier=c,
-                                                    capacity=service_resource_cap[c][0],
+                                                    capacity=service_resource_request[c][0],
                                                     usage=service_resource_usage[c][0]))
                 print('\t\tDISK:', ServiceResource(identifier=c,
-                                                     capacity=service_resource_cap[c][1],
+                                                     capacity=service_resource_request[c][1],
                                                      usage=service_resource_usage[c][1]))
                 print('\t\tCPU:', ServiceResource(identifier=c,
-                                                    capacity=service_resource_cap[c][2],
+                                                    capacity=service_resource_request[c][2],
                                                     usage=service_resource_usage[c][2]))

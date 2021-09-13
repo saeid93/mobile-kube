@@ -92,9 +92,7 @@ def generate_workload(notes: str, dataset_id: int,
 
 
 @click.command()
-@click.option('--workload-config',
-              type=click.Choice(['constant', 'lowhigh', 'sinusoidal', 'step']),
-              default='step')
+@click.option('--workload-config', type=str, default='workload')
 def main(workload_config: str):
     print('generating workload from the following config:')
     pp.pprint(workload_config)

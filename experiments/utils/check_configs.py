@@ -17,7 +17,7 @@ def config_dataset_generation_check(config: Dict[str, Any]):
     """
     # TODO add more items into it
     allowed_items = ['notes', 'nums', 'metrics', 'nodes_cap_rng',
-                     'services_cap_rng', 'cutoff', 'start_workload', 'seed']
+                     'services_request_rng', 'cutoff', 'start_workload', 'seed']
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the environment config")
@@ -115,7 +115,7 @@ def env_config_base_check(config: Dict[str, Any]):
                      'workload_stop', 'episode_length', 'timestep_reset',
                      'placement_reset', 'reward_mode',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
-                     'workload', 'nodes_cap_rng', 'services_cap_rng',
+                     'workload', 'nodes_cap_rng', 'services_request_rng',
                      'num_users', 'num_stations', 'network',
                      'normalise_latency', 'trace', 'from_dataset',
                      'edge_simulator_config', 'action_method', 'step_method',
