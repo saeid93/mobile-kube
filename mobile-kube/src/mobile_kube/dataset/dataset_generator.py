@@ -55,23 +55,6 @@ class DatasetGenerator:
 
         self.services_nodes = np.ones(self.num_services, dtype=int) * (-1)
 
-        
-
-        # TEMPS
-        # nodes_ram_range = np.arange(start=self.nodes_rng_ram['min'],
-        #                             stop=self.nodes_rng_ram['max']
-        #                             + self.nodes_rng_ram['step'],
-        #                             step=self.nodes_rng_ram['step'])
-        # nodes_ram = np.random.choice(nodes_ram_range,
-        #                                 size=(self.num_nodes, 1))
-
-        # nodes_cpu_range = np.arange(start=self.nodes_rng_cpu['min'],
-        #                             stop=self.nodes_rng_cpu['max']
-        #                             + self.nodes_rng_cpu['step'],
-        #                             step=self.nodes_rng_cpu['step'])
-        # nodes_cpu = np.random.choice(nodes_cpu_range,
-        #                                 size=(self.num_nodes, 1))
-
 
     def make_dataset(self):
         """combining state initilizer for consolidation
@@ -119,6 +102,7 @@ class DatasetGenerator:
             'services_types': self.services_types,
             'start_workload': self.start_workload
         }
+
         return dataset
 
     def _make_capacities(self):
@@ -147,7 +131,6 @@ class DatasetGenerator:
             self.nodes_resources_cap = np.concatenate((nodes_ram, nodes_cpu),
                                                       axis=1)
 
-            # TODO multiple container range for containers
             # 3. generate contaienrs
             size_type_len = len(self.services_rng_ram)
             for i in range(size_type_len):
@@ -187,6 +170,7 @@ class DatasetGenerator:
             self.services_resources_request = np.concatenate((services_ram,
                                                 services_cpu),
                                                 axis=1)
+            
 
             # assign workload types to services
             services_types = []
@@ -242,11 +226,11 @@ class DatasetGenerator:
                     # current service inside it
                     nodes_sorted = [node for _, node in
                                     sorted(zip(
-                                        self.nodes_resources_remained_frac_avg[popped_nodes],
+                                        self.nodes_resources_available_frac_avg[popped_nodes],
                                                popped_nodes))]
                     for node in nodes_sorted:
-                        if np.alltrue(self.services_resources_usage[service_id] <
-                                      self.nodes_resources_remained[node]):
+                        if np.alltrue(self.services_resources_request[service_id] <
+                                      self.nodes_resources_available[node]):
                             self.services_nodes[service_id] = node
                             break
                     else:  # no-break 
@@ -283,8 +267,8 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_usage(self):
-        """return the fraction of resource usage of
-        each node
+        """return the amount of resource usage
+        on each node
         """
         nodes_resources_usage = []
         for node in range(self.num_nodes):
@@ -298,20 +282,56 @@ class DatasetGenerator:
         return np.array(nodes_resources_usage)
 
     @property
+    def nodes_resources_request(self):
+        """return the amount of resource usage
+        on each node
+        """
+        # TODO DONE
+        nodes_resources_request = []
+        for node in range(self.num_nodes):
+            services_in_node = np.where(
+                self.services_nodes == node)[0]
+            node_resources_usage = sum(
+                self.services_resources_request[services_in_node])
+            if type(node_resources_usage) != np.ndarray:
+                node_resources_usage = np.zeros(self.num_resources)
+            nodes_resources_request.append(node_resources_usage)
+        return np.array(nodes_resources_request)
+
+    @property
     def services_resources_remained(self):
         return self.services_resources_request - self.services_resources_usage
 
     @property
     def nodes_resources_remained(self):
+        # The amount of acutally used resources
+        # on the nodes
         return self.nodes_resources_cap - self.nodes_resources_usage
+
+    @property
+    def nodes_resources_available(self):
+        # TODO DONE
+        # The amount of the available
+        # non-requested resources on the nodes
+        return self.nodes_resources_cap - self.nodes_resources_request
 
     @property
     def nodes_resources_remained_frac(self):
         return self.nodes_resources_remained / self.nodes_resources_cap
 
     @property
+    def nodes_resources_available_frac(self):
+        # TODO
+        return self.nodes_resources_available / self.nodes_resources_cap
+
+    @property
     def nodes_resources_remained_frac_avg(self):
         return np.average(self.nodes_resources_remained_frac, axis=1)
+
+    @property
+    def nodes_resources_available_frac_avg(self):
+        # TODO
+        return np.average(self.nodes_resources_available_frac, axis=1)
 
     @property
     def services_resources_usage_frac(self):
@@ -320,6 +340,12 @@ class DatasetGenerator:
     @property
     def nodes_resources_usage_frac(self):
         return self.nodes_resources_usage / self.nodes_resources_cap
+
+    @property
+    def nodes_resources_request_frac(self):
+        # TODO
+        return self.nodes_resources_request / self.nodes_resources_cap
+
 
     @property
     def services_nodes_alloc(self):
