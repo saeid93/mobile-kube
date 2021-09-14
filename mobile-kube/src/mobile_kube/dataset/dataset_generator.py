@@ -26,8 +26,6 @@ class DatasetGenerator:
         assert len(self.metrics) == self.num_resources,\
             "number of metrics is not equal to the number of resources"
 
-        # TODO the number of resources should be dynamic
-        #      rather than reading their name hardcoded
         assert len(nodes_cap_rng) == self.num_resources
         self.nodes_rng_ram = nodes_cap_rng['ram']
         self.nodes_rng_cpu = nodes_cap_rng['cpu']
@@ -339,9 +337,7 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_request_frac(self):
-        # TODO
         return self.nodes_resources_request / self.nodes_resources_cap
-
 
     @property
     def services_nodes_alloc(self):

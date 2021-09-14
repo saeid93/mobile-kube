@@ -330,6 +330,23 @@ class SimBaseEnv(gym.Env):
         return self.nodes_resources_usage / self.nodes_resources_cap
 
     @property
+    @rounding
+    def nodes_resources_request_frac(self):
+        """returns the resource requested on
+        each node
+                     ram - cpu
+                    |         |
+            nodes   |         |
+                    |         |
+
+            range:
+                row inidices: (0, num_nodes]
+                columns indices: (0, num_resources]
+                enteries: [0, 1] type: float
+        """
+        return self.nodes_resources_request / self.nodes_resources_cap
+
+    @property
     def num_consolidated(self) -> int:
         """returns the number of consolidated nodes
         """

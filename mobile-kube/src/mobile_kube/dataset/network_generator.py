@@ -12,7 +12,7 @@ class NetworkGenerator:
     def __init__(self, *, dataset: np.array,
                  num_stations: int,
                  num_users: int,
-                 width: int, length: int,
+                 width: float, length: float,
                  speed_limit: int,
                  nodes_stations_con: int,
                  from_dataset: bool,

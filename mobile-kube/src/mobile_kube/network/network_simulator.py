@@ -24,7 +24,7 @@ class NetworkSimulator(NetworkSimulatorBase):
         stations_dataset_path: str,
         network: nx.Graph, raw_network: nx.Graph,
         trace: List[Dict[int, Tuple[float, float]]],
-        seed: int):
+        seed: int, selected_nodes: list=None):
         """
             The initialiser for using the simulator in the envs
         """

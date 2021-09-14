@@ -20,12 +20,10 @@ class TraceGenerator:
         """
             dataset generator
         """
-        # TODO add check NONE
         self.seed = seed
         np.random.seed(self.seed)
         random.seed(seed)
 
-        # TODO add option for from NetworkSimulatorDataset
         if from_dataset:
             self.sim = NetworkBuilderDataset.with_network(**edge_simulator_config)
         else:

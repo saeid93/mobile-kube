@@ -22,7 +22,7 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
         num_stations: int, width: int, length: int,
         speed_limit: int, nodes_stations_con: int ,seed: int,
         stations_dataset_path: str, users_dataset_path: str,
-        nodes_selection: bool, nodes_list: list) -> None:
+        nodes_selection: str, nodes_list: list) -> None:
         """The initialiser for generating the dataset network
         """
         assert num_nodes == num_stations, \
@@ -57,7 +57,8 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
                      speed_limit: int, nodes_stations_con: int,
                      network: nx.Graph, raw_network: nx.Graph,
                      users_dataset_path: str,
-                     stations_dataset_path: str, seed: int):
+                     stations_dataset_path: str, seed: int,
+                     selected_nodes: np.array):
         """
             The initialiser for generating the trace
         """
@@ -69,7 +70,10 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
                   stations_dataset_path=stations_dataset_path,
                   users_dataset_path=users_dataset_path,
                   nodes_stations_con=nodes_stations_con,
-                  seed=seed)
+                  seed=seed,
+                  nodes_selection='node_list',
+                  nodes_list=list(selected_nodes))
+                #   TODO check this
         ins.network = network
         ins.raw_network = raw_network
         ins.users_parser = UserParser(users_dataset_path)
@@ -88,6 +92,7 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
         # read nodes and stations from the dataset
         nodes = self.nodes_parser.serialize()
         stations = self.stations_parser.serialize()
+        selected_nodes_indexes=np.array([])
         assert len(nodes) == len(stations),\
             "number of nodes and stations must be equal"
         if self.node_selection == 'random':

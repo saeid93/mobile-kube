@@ -43,7 +43,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     while i < 10000:
         action = env.action_space.sample()
         print(f"action:\n <{action}>")
-        time.sleep(1)
+        # time.sleep(1)
         _, reward, done, info = env.step(action)
         env.render()
         print(f"\niteration <{i}>:")
@@ -56,8 +56,8 @@ def check_env(*, config: Dict[str, Any], type_env: str,
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-edge-greedy']),
-              default='sim-binpacking')
-@click.option('--dataset-id', required=True, type=int, default=4)
+              default='sim-edge')
+@click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
