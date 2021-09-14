@@ -42,8 +42,8 @@ def _take_action_probabilistic(self, action: np.ndarray) -> None:
     for service in range(self.num_services):
         node_order = nodes_orders[service, :]
         for node in node_order:
-            if np.alltrue(self.services_resources_usage[service] <
-                            self.nodes_resources_remained[node]):
+            if np.alltrue(self.services_resources_request[service] <
+                            self.nodes_resources_available[node]):
                 absolute_action[service] = node
                 break
     self.services_nodes_obj = self.nodes[list(map(int, absolute_action))]

@@ -144,12 +144,12 @@ class SimBinpackingEnv(SimBaseEnv):
                 # current service inside it
                 nodes_sorted = [node for _, node in
                                 sorted(zip(
-                                    self.nodes_resources_remained_frac_avg[
+                                    self.nodes_resources_available_frac_avg[
                                         popped_nodes], popped_nodes))]
                 for node in nodes_sorted:
                     if np.alltrue(
-                        self.services_resources_usage[service_id] <
-                            self.nodes_resources_remained[node]):
+                        self.services_resources_request[service_id] <
+                            self.nodes_resources_available[node]):
                         self.services_nodes[service_id] = node
                         break
                 else:  # no-break

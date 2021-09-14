@@ -220,8 +220,8 @@ class SimBaseEnv(gym.Env):
 
     @property
     def nodes_resources_usage(self):
-        """return the fraction of resource usage of
-        each node
+        """return the amount of resource usage
+        on each node
                      ram - cpu
                     |         |
             nodes   |         |
@@ -243,12 +243,36 @@ class SimBaseEnv(gym.Env):
         return np.array(nodes_resources_usage)
 
     @property
+    def nodes_resources_request(self):
+        """return the amount of resource usage
+        on each node
+        """
+        nodes_resources_request = []
+        for node in range(self.num_nodes):
+            services_in_node = np.where(
+                self.services_nodes == node)[0]
+            node_resources_usage = sum(
+                self.services_resources_request[services_in_node])
+            if type(node_resources_usage) != np.ndarray:
+                node_resources_usage = np.zeros(self.num_resources)
+            nodes_resources_request.append(node_resources_usage)
+        return np.array(nodes_resources_request)
+
+    @property
     def services_resources_remained(self) -> np.ndarray:
         return self.services_resources_request - self.services_resources_usage
 
     @property
-    def nodes_resources_remained(self) -> np.ndarray:
+    def nodes_resources_remained(self):
+        # The amount of acutally used resources
+        # on the nodes
         return self.nodes_resources_cap - self.nodes_resources_usage
+
+    @property
+    def nodes_resources_available(self):
+        # The amount of the available
+        # non-requested resources on the nodes
+        return self.nodes_resources_cap - self.nodes_resources_request
 
     @property
     @rounding
@@ -316,7 +340,7 @@ class SimBaseEnv(gym.Env):
         """return the number of resource exceeding nodes
         """
         overloaded_nodes = np.unique(np.where(
-            self.nodes_resources_usage_frac > 1)[0])
+            self.nodes_resources_request_frac > 1)[0])
         return len(overloaded_nodes)
 
     @property
@@ -325,7 +349,7 @@ class SimBaseEnv(gym.Env):
              contianer_id   contianer_id          contianer_id
             [node_id,       node_id,    , ... ,   node_id     ]
         to:
-                       node_id                    node_id
+                node_id                    node_id
             [[service_id, service_id], ...,[service_id]]
         """
         nodes_services = []
@@ -344,12 +368,20 @@ class SimBaseEnv(gym.Env):
         return services_in_auxiliary
 
     @property
-    def nodes_resources_remained_frac(self) -> np.ndarray:
+    def nodes_resources_remained_frac(self):
         return self.nodes_resources_remained / self.nodes_resources_cap
+
+    @property
+    def nodes_resources_available_frac(self):
+        return self.nodes_resources_available / self.nodes_resources_cap
 
     @property
     def nodes_resources_remained_frac_avg(self):
         return np.average(self.nodes_resources_remained_frac, axis=1)
+
+    @property
+    def nodes_resources_available_frac_avg(self):
+        return np.average(self.nodes_resources_available_frac, axis=1)
 
     @property
     def num_in_auxiliary(self) -> int:

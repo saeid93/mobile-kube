@@ -103,7 +103,7 @@ def _reward_variance(self):
     """compute the variance reward
     """
     reward_factor = np.sum(np.var(
-        self.nodes_resources_usage_frac, axis=1))
+        self.nodes_resources_request_frac, axis=1))
     reward_variance = reward_factor * self.penalty_variance
     return reward_variance
 

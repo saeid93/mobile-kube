@@ -283,10 +283,9 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_request(self):
-        """return the amount of resource usage
+        """return the amount of resource requested
         on each node
         """
-        # TODO DONE
         nodes_resources_request = []
         for node in range(self.num_nodes):
             services_in_node = np.where(
@@ -310,7 +309,6 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_available(self):
-        # TODO DONE
         # The amount of the available
         # non-requested resources on the nodes
         return self.nodes_resources_cap - self.nodes_resources_request
@@ -321,7 +319,6 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_available_frac(self):
-        # TODO
         return self.nodes_resources_available / self.nodes_resources_cap
 
     @property
@@ -330,7 +327,6 @@ class DatasetGenerator:
 
     @property
     def nodes_resources_available_frac_avg(self):
-        # TODO
         return np.average(self.nodes_resources_available_frac, axis=1)
 
     @property
