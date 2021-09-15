@@ -147,7 +147,8 @@ def env_config_base_check(config: Dict[str, Any]):
                                    "services_resources_usage_frac",
                                    "nodes_resources_usage_frac",
                                    "services_nodes",
-                                   "auxiliary_resources_usage"]
+                                   "auxiliary_resources_usage",
+                                   "users_stations"]
 
     assert set(config['obs_elements']).issubset(
         set(all_obs_elements)),\

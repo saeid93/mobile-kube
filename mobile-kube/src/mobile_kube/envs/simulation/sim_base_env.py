@@ -64,7 +64,6 @@ class SimBaseEnv(gym.Env):
     # ------------------ common functions ------------------
 
     def __init__(self, config: Dict[str, Any]):
-        
         # action min and max
         self.action_min, self.action_max = (
             ACTION_MIN, ACTION_MAX
@@ -165,7 +164,7 @@ class SimBaseEnv(gym.Env):
         print("services_types_usage:")
         if not self.num_overloaded:
             print("nodes_resources_usage_frac:")
-            print(self.nodes_resources_usage_frac)
+            print(self.nodes_resources_request_frac)
             print("services_nodes:")
             print(self.services_nodes)
             # plot_resource_allocation(self.services_nodes,
@@ -177,7 +176,7 @@ class SimBaseEnv(gym.Env):
             print(Fore.RED, "agent's action lead to an overloaded state!")
             # before using auxiliary
             print("nodes_resources_usage_frac:")
-            print(self.nodes_resources_usage_frac)
+            print(self.nodes_resources_request_frac)
             print("services_nodes:")
             print(self.services_nodes)
             # plot_resource_allocation(self.services_nodes,

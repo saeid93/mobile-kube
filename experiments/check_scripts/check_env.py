@@ -13,7 +13,8 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
     ENVSMAP,
-    CONFIGS_PATH
+    CONFIGS_PATH,
+    DATA_PATH
 )
 from experiments.utils import (
     add_path_to_config_edge,
@@ -46,6 +47,8 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         # time.sleep(1)
         _, reward, done, info = env.step(action)
         env.render()
+        # env.edge_simulator.visualize_debug().savefig(
+        #     os.path.join(DATA_PATH, 'plots', f'{i}.png'))
         print(f"\niteration <{i}>:")
         print(f"reward:\n <{reward}>")
         print(f"info:\n {info}")
@@ -56,7 +59,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-edge-greedy']),
-              default='sim-edge')
+              default='sim-binpacking')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)

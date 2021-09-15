@@ -1,10 +1,6 @@
 {   
     "env_config_base": {
-        "obs_elements": ["services_resources_usage",
-                         "nodes_resources_usage",
-                         "services_resources_usage_frac",
-                         "nodes_resources_usage_frac",
-                         "services_nodes"],
+        "obs_elements": ["services_nodes"],
         "penalty_illegal": -1,
         "penalty_move": -1,
         "penalty_variance": -10,

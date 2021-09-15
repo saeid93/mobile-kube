@@ -133,26 +133,21 @@ class SimEdgeEnv(SimBaseEnv):
         2. do one step of user movements
         3. update the nodes
         """
-        # save previous action for computing the
-        # final num_of_moves
+        # take the action
         prev_services_nodes = deepcopy(self.services_nodes)
-        if self.timestep == 3452:
-            a = 1
-
-        # TODO add action of the users here too
         assert self.action_space.contains(action)
-        self.global_timestep += 1
-        # find the reward and compute the remainder for round-robin
-        self.timestep = self.global_timestep % self.workload.shape[1]
         self.services_nodes = deepcopy(action)
-        
+
+        # move to the next timestep
+        self.global_timestep += 1
+        self.timestep = self.global_timestep % self.workload.shape[1]
+
         # make user movements --> network parts
         self.users_stations = self.edge_simulator.sample_users_stations(
             timestep=self.timestep)
         users_distances = self.edge_simulator.users_distances
         # update network with the new placements
         self.edge_simulator.update_services_nodes(self.services_nodes)
-
 
         num_moves = len(np.where(
             self.services_nodes != prev_services_nodes)[0])
