@@ -44,6 +44,7 @@ class NetworkSimulator(NetworkSimulatorBase):
         """
             move users from the loaded trace
         """
+        timestep = timestep % len(self.trace)
         users_next_location = self.trace[timestep]
         self._change_users_loactions(users_next_location)
 

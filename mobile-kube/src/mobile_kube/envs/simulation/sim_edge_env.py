@@ -136,6 +136,8 @@ class SimEdgeEnv(SimBaseEnv):
         # save previous action for computing the
         # final num_of_moves
         prev_services_nodes = deepcopy(self.services_nodes)
+        if self.timestep == 3452:
+            a = 1
 
         # TODO add action of the users here too
         assert self.action_space.contains(action)
