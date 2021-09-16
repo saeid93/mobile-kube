@@ -65,9 +65,19 @@ class SimBinpackingEnv(SimEdgeEnv):
             self.services_nodes != prev_services_nodes)[0])
 
         reward, rewards = self._reward(
+            # greedy_mitigation_needed,
+            # auxiliary_node_mitigation_needed=self,
+            # prev_num_overloaded,
             users_distances=users_distances,
             num_moves=num_moves
             )
+
+
+# (self, *, num_moves: int,
+#                       greedy_mitigation_needed: bool,
+#                       auxiliary_node_mitigation_needed: bool,
+#                       prev_num_overloaded: int,
+#                       users_distances: np.array = None)
 
         info = {'num_moves': num_moves,
                 'num_consolidated': self.num_consolidated,

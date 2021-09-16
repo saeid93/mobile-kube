@@ -38,7 +38,7 @@ class SimEdgeEnv(SimBaseEnv):
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
         self.normalise_latency = config['normalise_latency']
-        # self.normalise_factor = self.edge_simulator.get_largest_station_node_path() TODO check
+        self.normalise_factor = self.edge_simulator.get_largest_station_node_path() # TODO check
         check_config_edge(config)
         super().__init__(config)
         # TODO change here and remove the initialiser in the envs
@@ -134,6 +134,7 @@ class SimEdgeEnv(SimBaseEnv):
         3. update the nodes
         """
         # take the action
+        # TODO option to take and not take overloaded action
         prev_services_nodes = deepcopy(self.services_nodes)
         assert self.action_space.contains(action)
         self.services_nodes = deepcopy(action)
@@ -149,19 +150,25 @@ class SimEdgeEnv(SimBaseEnv):
         # update network with the new placements
         self.edge_simulator.update_services_nodes(self.services_nodes)
 
+        # find number of overloaded
+        if self.num_overloaded > 0:
+            a = 1
+
         num_moves = len(np.where(
             self.services_nodes != prev_services_nodes)[0])
 
         reward, rewards = self._reward(
+            num_overloaded=self.num_overloaded,
             users_distances=users_distances,
             num_moves=num_moves
             )
 
-        info = {'num_moves': num_moves,
-                'num_consolidated': self.num_consolidated,
+        info = {'num_consolidated': self.num_consolidated,
+                'num_moves': num_moves,
+                'num_overloaded': self.num_overloaded,
                 'total_reward': reward,
-                'rewards': rewards,
-                'timestep': self.timestep}
+                'timestep': self.timestep,
+                'rewards': rewards}
 
         assert self.observation_space.contains(self.observation),\
                 (f"observation:\n<{self.raw_observation}>\noutside of "

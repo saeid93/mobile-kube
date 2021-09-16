@@ -23,13 +23,14 @@ def check_config(config: Dict[str, Any]):
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the environment config")
     # type checks
-    ints = ['penalty_illegal', 'penalty_illegal', 'penalty_variance',
-            'penalty_consolidated', 'penalty_latency', 'episode_length',
+    ints = ['episode_length',
             'mitigation_tries', 'seed']
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"
 
-    floats = ['workload_stop']
+    floats = ['workload_stop', 'penalty_illegal', 'penalty_illegal',
+              'penalty_variance', 'penalty_consolidated',
+              'penalty_latency', ]
     for item in floats:
         assert type(config[item])==float or type(config[item])==int,\
             f"[{item}] must be a float"

@@ -6,7 +6,8 @@ from copy import deepcopy
 from typing import (
     List,
     Dict,
-    Any
+    Any,
+    Literal
 )
 
 from colorama import (
@@ -24,7 +25,8 @@ from mobile_kube.util import (
     check_config,
     load_object,
     ACTION_MIN,
-    ACTION_MAX
+    ACTION_MAX,
+    plot_resource_allocation
 )
 from mobile_kube.envs_extensions import (
     get_reward_method
@@ -157,21 +159,21 @@ class SimBaseEnv(gym.Env):
             self.services_nodes = deepcopy(self.initial_services_nodes)
         return self.observation
 
-    def render(self) -> None:
+    def render(self, mode: Literal['human', 'ansi'] ='human') -> None:
         """
         """
         print("--------state--------")
-        print("services_types_usage:")
         if not self.num_overloaded:
-            print("nodes_resources_usage_frac:")
+            print("nodes_resources_request_frac:")
             print(self.nodes_resources_request_frac)
             print("services_nodes:")
             print(self.services_nodes)
-            # plot_resource_allocation(self.services_nodes,
-            #                          self.nodes_resources_cap,
-            #                          self.services_resources_request,
-            #                          self.services_resources_usage,
-            #                          plot_length=80)
+            if mode == 'ansi':
+                plot_resource_allocation(self.services_nodes,
+                                        self.nodes_resources_cap,
+                                        self.services_resources_request,
+                                        self.services_resources_usage,
+                                        plot_length=80)
         else:
             print(Fore.RED, "agent's action lead to an overloaded state!")
             # before using auxiliary
@@ -179,11 +181,12 @@ class SimBaseEnv(gym.Env):
             print(self.nodes_resources_request_frac)
             print("services_nodes:")
             print(self.services_nodes)
-            # plot_resource_allocation(self.services_nodes,
-            #                          self.nodes_resources_cap,
-            #                          self.services_resources_request,
-            #                          self.services_resources_usage,
-            #                          plot_length=80)
+            if mode == 'ansi':
+                plot_resource_allocation(self.services_nodes,
+                                        self.nodes_resources_cap,
+                                        self.services_resources_request,
+                                        self.services_resources_usage,
+                                        plot_length=80)
             # after using auxiliary
             print(Style.RESET_ALL)
 

@@ -6,6 +6,8 @@ import numpy as np
 from typing import Dict, Any
 import time
 import json
+from pprint import PrettyPrinter
+pp = PrettyPrinter(indent=4)
 
 # get an absolute path to the directory that contains parent files
 project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
@@ -49,9 +51,10 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         env.render()
         # env.edge_simulator.visualize_debug().savefig(
         #     os.path.join(DATA_PATH, 'plots', f'{i}.png'))
-        print(f"\niteration <{i}>:")
-        print(f"reward:\n <{reward}>")
-        print(f"info:\n {info}")
+        # print(f"\niteration <{i}>:")
+        # print(f"reward:\n <{reward}>")
+        print('info:')
+        pp.pprint(info)
         i += 1
 
 
@@ -59,7 +62,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-edge-greedy']),
-              default='sim-binpacking')
+              default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
