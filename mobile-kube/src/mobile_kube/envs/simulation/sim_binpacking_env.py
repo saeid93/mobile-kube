@@ -72,13 +72,6 @@ class SimBinpackingEnv(SimEdgeEnv):
             num_moves=num_moves
             )
 
-
-# (self, *, num_moves: int,
-#                       greedy_mitigation_needed: bool,
-#                       auxiliary_node_mitigation_needed: bool,
-#                       prev_num_overloaded: int,
-#                       users_distances: np.array = None)
-
         info = {'num_moves': num_moves,
                 'num_consolidated': self.num_consolidated,
                 'total_reward': reward,

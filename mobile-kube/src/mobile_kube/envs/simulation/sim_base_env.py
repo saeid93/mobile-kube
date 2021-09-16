@@ -129,11 +129,6 @@ class SimBaseEnv(gym.Env):
         # what type of environemnt is used
         self.reward_mode = config['reward_mode']
 
-        # whether to compute the greedy_num_consolidated at each
-        # step or not TODO 
-        self.compute_greedy_num_consolidated = config[
-            'compute_greedy_num_consolidated']
-
         # set the reward method
         _reward = get_reward_method(config['reward_mode'])
         self._reward = types.MethodType(_reward, self)
@@ -142,6 +137,9 @@ class SimBaseEnv(gym.Env):
         # add one auxiliary node with unlimited and autoscaled capacity
         # TODO make it consistent with Alireza
         self.total_num_nodes: int = self.num_nodes + 1
+
+        # whether to take the overloaded action with negative reward or not
+        self.no_action_on_overloaded = config['no_action_on_overloaded']
 
     @override(gym.Env)
     def reset(self) -> np.ndarray:

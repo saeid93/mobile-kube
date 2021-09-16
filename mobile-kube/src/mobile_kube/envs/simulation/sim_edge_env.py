@@ -13,11 +13,13 @@ from gym.spaces import (
     MultiDiscrete
 )
 
+
 from mobile_kube.util import (
     Preprocessor,
     override,
     check_config_edge,
-    load_object
+    load_object,
+    logger
 )
 from mobile_kube.network import NetworkSimulator
 
@@ -134,10 +136,17 @@ class SimEdgeEnv(SimBaseEnv):
         3. update the nodes
         """
         # take the action
-        # TODO option to take and not take overloaded action
         prev_services_nodes = deepcopy(self.services_nodes)
         assert self.action_space.contains(action)
+
+        # TODO not possible to roll back in the real world
+        # take the action in the real world only if possible
+        # simulation therefore should co-exist
         self.services_nodes = deepcopy(action)
+        if self.no_action_on_overloaded and self.num_overloaded > 0:
+            self.num_overloaded
+            print("overloaded state, reverting back ...")
+            self.services_nodes = deepcopy(prev_services_nodes)
 
         # move to the next timestep
         self.global_timestep += 1
@@ -149,10 +158,6 @@ class SimEdgeEnv(SimBaseEnv):
         users_distances = self.edge_simulator.users_distances
         # update network with the new placements
         self.edge_simulator.update_services_nodes(self.services_nodes)
-
-        # find number of overloaded
-        if self.num_overloaded > 0:
-            a = 1
 
         num_moves = len(np.where(
             self.services_nodes != prev_services_nodes)[0])

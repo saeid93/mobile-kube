@@ -45,7 +45,8 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     _ = env.reset()
     while i < 10000:
         action = env.action_space.sample()
-        print(f"action:\n <{action}>")
+        print("\n\n--------action--------")
+        print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
         env.render()

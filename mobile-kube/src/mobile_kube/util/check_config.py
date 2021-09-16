@@ -17,7 +17,8 @@ def check_config(config: Dict[str, Any]):
                      'num_users', 'num_stations', 'network', 'normalise_latency',
                      'trace', 'from_dataset', 'edge_simulator_config',
                      'action_method', 'step_method', 'kube',
-                     'dataset_path', 'workload_path', 'network_path', 'trace_path']
+                     'dataset_path', 'workload_path', 'network_path', 'trace_path',
+                     'no_action_on_overloaded']
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
@@ -36,7 +37,7 @@ def check_config(config: Dict[str, Any]):
             f"[{item}] must be a float"
 
     bools = ['timestep_reset',  'placement_reset',
-             'compute_greedy_num_consolidated', 'normalise_latency']
+              'normalise_latency']
     for item in bools:
         assert type(config[item]) == bool, f"<{item}> must be a boolean"
 
