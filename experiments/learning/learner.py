@@ -16,7 +16,6 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
     RESULTS_PATH,
-    RESULTS_PATH_EXPERIMENTS,
     CONFIGS_PATH,
     ENVSMAP
 )
@@ -30,7 +29,7 @@ torch, nn = try_import_torch()
 
 
 def learner(*, config_file_path: str, config: Dict[str, Any],
-            mode: str, series: int, type_env: str, dataset_id: int,
+            series: int, type_env: str, dataset_id: int,
             workload_id: int, network_id: int, trace_id: int,
             use_callback: bool, checkpoint_freq: int,
             local_mode: bool):
@@ -80,13 +79,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
     # <----- generate the path ----->
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
     # example:        env1/dataset/1/workloads/3
-    if mode == 'experimental':
-        result_folder = RESULTS_PATH_EXPERIMENTS
-    elif mode == 'real':
-        result_folder = RESULTS_PATH
-    else:
-        raise ValueError('unknwon expriment mode')
-    experiments_folder = os.path.join(result_folder,
+    experiments_folder = os.path.join(RESULTS_PATH,
                                       "series",     str(series),
                                       "envs",       str(type_env),
                                       "datasets",   str(dataset_id),
@@ -143,27 +136,24 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 
 @click.command()
-@click.option('--mode', type=click.Choice(['experimental', 'real']),
-              default='experimental')
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--config-folder', type=str, default='')
+@click.option('--config-folder', type=str, default='experimental')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge', 'sim-binpacking']),
+              type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy']),
               default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=4)
+@click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=False)
 @click.option('--checkpoint-freq', required=False, type=int, default=100)
-def main(mode: str, local_mode: bool, config_folder: str, series: int,
+def main(local_mode: bool, config_folder: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, use_callback: bool, checkpoint_freq: int):
     """[summary]
 
     Args:
-        mode (str): whether to run it in experimental mode or real mode
         local_mode (bool): run in local mode for having the 
         config_folder (str): name of the config folder (only used in real mode)
         use_callback (bool): whether to use callbacks or storing and visualising
@@ -176,7 +166,7 @@ def main(mode: str, local_mode: bool, config_folder: str, series: int,
         trace_id (int): user movement traces
     """
     config_file_path = os.path.join(
-        CONFIGS_PATH, mode, config_folder,
+        CONFIGS_PATH, 'train', config_folder,
         'run.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
@@ -186,7 +176,7 @@ def main(mode: str, local_mode: bool, config_folder: str, series: int,
     pp.pprint(config)
 
     learner(config_file_path=config_file_path,
-            config=config, mode=mode, series=series,
+            config=config, series=series,
             type_env=type_env, dataset_id=dataset_id,
             workload_id=workload_id, network_id=network_id,
             trace_id=trace_id, use_callback=use_callback,

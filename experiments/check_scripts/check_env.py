@@ -80,7 +80,7 @@ def main(type_env: str, dataset_id: int,
         trace_id (int): user movement traces
     """
     config_file_path = os.path.join(
-        CONFIGS_PATH, 'experimental',
+        CONFIGS_PATH, 'check',
         'check_env.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())

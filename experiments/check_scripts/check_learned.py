@@ -1,6 +1,6 @@
-# TODO fix based on check_env
 """
 scripts to check a learned agent
+based-on https://github.com/ray-project/ray/issues/9123
 """
 import json
 import os
@@ -19,7 +19,7 @@ from experiments.utils.constants import (
     CONFIGS_PATH
 )
 from experiments.utils import (
-    config_reader,
+    # config_reader,
     action_pretty_print
 )
 
@@ -60,7 +60,7 @@ class CheckLearned:
     def load_test_info(self, config_path):
         config_check_learned_path = os.path.join(
             CONFIGS_PATH,
-            'experiments',
+            'check',
             config_path)
         with open(config_check_learned_path, 'rb') as in_file:
             config_check_learned = json.load(in_file)
