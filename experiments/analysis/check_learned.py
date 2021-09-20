@@ -148,7 +148,6 @@ def main(local_mode: bool, config_folder: str, series: int,
          trace_id: int, use_callback: bool, experiment_id: int,
 	 checkpoint: int):
     """[summary]
-
     Args:
         local_mode (bool): run in local mode for having the 
         config_folder (str): name of the config folder (only used in real mode)
