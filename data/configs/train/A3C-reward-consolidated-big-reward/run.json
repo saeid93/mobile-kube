@@ -12,7 +12,6 @@
         "penalty_move": 0,
         "penalty_variance": 0,
         "penalty_consolidated": 100,
-        "mitigation_tries": 4,
         "workload_stop": 1,
         "timestep_reset": false,
         "placement_reset": false,

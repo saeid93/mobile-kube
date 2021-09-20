@@ -6,7 +6,6 @@
         "penalty_variance": 0,
         "penalty_consolidated": 0.5,
         "penalty_latency": 0.5,
-        "mitigation_tries": 4,
         "workload_stop": 1,
         "episode_length": 50,
         "timestep_reset": false,
