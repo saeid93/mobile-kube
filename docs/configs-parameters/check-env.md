@@ -12,7 +12,6 @@
         "penalty_variance": [int], // penalty for the variance reward
         "penalty_consolidatefd": [int], // penalty for the number of consolidated
         "penalty_latency": [int], // penalty for the latency
-        "mitigation_tries": [int],
         "workload_stop": [int],
         "episode_length": [int],
         "timestep_reset": [bool],

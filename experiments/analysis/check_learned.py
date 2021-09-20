@@ -1,3 +1,9 @@
+"""
+scripts to check a learned agent
+based-on:
+https://github.com/ray-project/ray/issues/9123
+https://github.com/ray-project/ray/issues/7983
+"""
 import os
 import sys
 import shutil
@@ -9,6 +15,14 @@ import ray
 from ray import tune
 from ray.rllib.utils.framework import try_import_torch
 import pprint
+import gym
+import ray.rllib.agents.ppo as ppo
+import ray.rllib.agents.a3c as a3c
+import ray.rllib.agents.pg as pg
+import ray.rllib.agents.dqn as dqn
+from pprint import PrettyPrinter
+pp = PrettyPrinter(indent=4)
+
 
 # get an absolute path to the directory that contains parent files
 project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
@@ -31,36 +45,20 @@ torch, nn = try_import_torch()
 def learner(*, config_file_path: str, config: Dict[str, Any],
             series: int, type_env: str, dataset_id: int,
             workload_id: int, network_id: int, trace_id: int,
-            use_callback: bool, checkpoint_freq: int,
+            use_callback: bool, checkpoint: int, experiment_id: int,
             local_mode: bool):
     """
-    input_config: {"env_config_base": ...,
-                    "run_or_experiment": ...,
-                    "learn_config": ...,
-                    "stop": ...}
-    - is used to build:
-    ray_config: {...
-                learning paramters
-                ...,
-                env: <environment class>,
-                env_config: <environment config read before>
-                }
-
-    - the results are saved into the concatenation of the following paths:
-        - results path:
-          data/results/
-        - environment info:
-          env/<env_id>/datasets/<dataset_id>/workloads/<workload_id>
-          /experiments/<experiment_id>
-        - rllib:
-          <name_of_algorithm>/<trial>
     """
     # extract differnt parts of the input_config
-    stop = config['stop']
     learn_config = config['learn_config']
-    run_or_experiment = config["run_or_experiment"]
+    algorithm = config["run_or_experiment"]
     env_config_base = config['env_config_base']
-    # type_env = ENVSMAP[type_env]
+
+    # add evn_config_base updates
+    env_config_base.update({
+        'episode_length': 1000,
+        'no_action_on_overloaded': True
+    })
 
     # add the additional nencessary arguments to the edge config
     env_config = add_path_to_config_edge(
@@ -70,70 +68,65 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
         network_id=network_id,
         trace_id=trace_id
     )
+    env = gym.make(ENVSMAP[type_env], config=env_config)
 
     # generate the ray_config
     # make the learning config based on the type of the environment
     ray_config = {"env": make_env_class(type_env),
                   "env_config": env_config}
+    ray_config.update(learn_config)
 
     # generate the path
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
     # example:        env1/dataset/1/workloads/3
     experiments_folder = os.path.join(RESULTS_PATH,
-                                      "series",     str(series),
-                                      "envs",       str(type_env),
-                                      "datasets",   str(dataset_id),
-                                      "workloads",  str(workload_id),
-                                      "experiments")
-    # make the base bath if it does not exists
-    if not os.path.isdir(experiments_folder):
-        os.makedirs(experiments_folder)
-    # generate new experiment folder
-    content = os.listdir(experiments_folder)
-    new_experiment = len(content)
-    this_experiment_folder = os.path.join(experiments_folder,
-                                          str(new_experiment))
-    # make the new experiment folder
-    os.mkdir(this_experiment_folder)
-
-    # copy our input json to the path a change
-    # the name to a unified name
-    shutil.copy(config_file_path, this_experiment_folder)
-    source_file = os.path.join(this_experiment_folder,
-                               os.path.split(config_file_path)[-1])
-    dest_file = os.path.join(this_experiment_folder, 'experiment_config.json')
-    os.rename(source_file, dest_file)
-
-    # update the ray_config with learn_config
-    ray_config.update(learn_config)
-
-    # if callback is specified add it here
-    if use_callback:
-        ray_config.update({'callbacks': CloudCallback})
+                                      "series",      str(series),
+                                      "envs",        str(type_env),
+                                      "datasets",    str(dataset_id),
+                                      "workloads",   str(workload_id),
+                                      "experiments", str(experiment_id),
+                                      algorithm)
+    checkpoint_path = os.path.join(
+        experiments_folder,
+        os.listdir(experiments_folder)[0],
+        f"checkpoint_{checkpoint}",
+        f"checkpoint-{checkpoint}"
+    )
 
     ray.init(local_mode=local_mode)
-    # run the ML after fixing the folders structres
-    _ = tune.run(local_dir=this_experiment_folder,
-                 run_or_experiment=run_or_experiment,
-                 config=ray_config,
-                 stop=stop,
-                 checkpoint_freq=checkpoint_freq,
-                 checkpoint_at_end=True)
 
-    # delete the unnecessary big json file
-    # TODO maybe of use in the analysis
-    this_experiment_trials_folder = os.path.join(
-        this_experiment_folder, run_or_experiment)
-    this_experiment_trials_folder_contents = os.listdir(
-        this_experiment_trials_folder)
-    for item in this_experiment_trials_folder_contents:
-        if 'json' in item:
-            json_file_name = item
-            break
-    json_file_path = os.path.join(
-        this_experiment_trials_folder,
-        json_file_name)
-    os.remove(json_file_path)
+    if algorithm == 'PPO':
+        agent = ppo.PPOTrainer(
+            config=ray_config,
+            env=make_env_class(type_env))
+    elif algorithm == 'A3C':
+        agent = a3c.A3CTrainer(
+            config=ray_config,
+            env=make_env_class(type_env))
+    elif algorithm == 'PG':
+        agent = pg.PGTrainer(
+            config=ray_config,
+            env=make_env_class(type_env))
+    elif algorithm == 'DQN':
+        agent = dqn.DQNTrainer(
+            config=ray_config,
+            env=make_env_class(type_env))
+
+    agent.restore(checkpoint_path=checkpoint_path)
+    episode_reward = 0
+    done = False
+    obs = env.reset()
+    env.render()
+    while not done:
+        action = agent.compute_action(obs)
+        print("\n\n--------action--------")
+        print(action)
+        obs, reward, done, info = env.step(action)
+        env.render()
+        print('info:')
+        pp.pprint(info)
+        episode_reward += reward
+    print(f"episode reward: {episode_reward}")
 
 
 @click.command()
@@ -141,17 +134,19 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--config-folder', type=str, default='experimental')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy']),
+              type=click.Choice(['sim-edge', 'kube-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=False)
-@click.option('--checkpoint-freq', required=False, type=int, default=100)
+@click.option('--experiment_id', required=True, type=int, default=0)
+@click.option('--checkpoint', required=False, type=int, default=100)
 def main(local_mode: bool, config_folder: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
-         trace_id: int, use_callback: bool, checkpoint_freq: int):
+         trace_id: int, use_callback: bool, experiment_id: int,
+	 checkpoint: int):
     """[summary]
 
     Args:
@@ -181,7 +176,8 @@ def main(local_mode: bool, config_folder: str, series: int,
             type_env=type_env, dataset_id=dataset_id,
             workload_id=workload_id, network_id=network_id,
             trace_id=trace_id, use_callback=use_callback,
-            checkpoint_freq=checkpoint_freq, local_mode=local_mode)
+            experiment_id=experiment_id, checkpoint=checkpoint,
+	    local_mode=local_mode)
 
 
 if __name__ == "__main__":

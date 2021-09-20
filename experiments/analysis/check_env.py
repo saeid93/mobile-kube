@@ -42,8 +42,10 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     env = gym.make(type_env, config=env_config)
 
     i = 1
+    total_timesteps = 1000
     _ = env.reset()
-    while i < 10000:
+    env.render()
+    while i < total_timesteps:
         action = env.action_space.sample()
         print("\n\n--------action--------")
         print(action)

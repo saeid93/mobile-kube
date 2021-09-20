@@ -9,8 +9,8 @@ def check_config(config: Dict[str, Any]):
     # check the for illegal items
     allowed_items = ['obs_elements', 'penalty_illegal', 'penalty_move',
                      'penalty_variance', 'penalty_latency',
-                     'penalty_consolidated', 'mitigation_tries',
-                     'workload_stop', 'episode_length', 'timestep_reset',
+                     'penalty_consolidated', 'workload_stop',
+                     'episode_length', 'timestep_reset',
                      'placement_reset', 'reward_mode',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
                      'workload', 'nodes_cap_rng', 'services_request_rng',
@@ -24,8 +24,7 @@ def check_config(config: Dict[str, Any]):
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the environment config")
     # type checks
-    ints = ['episode_length',
-            'mitigation_tries', 'seed']
+    ints = ['episode_length', 'seed']
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"
 

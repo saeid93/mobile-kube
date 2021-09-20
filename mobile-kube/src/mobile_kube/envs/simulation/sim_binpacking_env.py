@@ -39,10 +39,6 @@ class SimBinpackingEnv(SimEdgeEnv):
             3. find the nodes with least remained resources
             4. try to allocate the services to them
             5. if not possible pop another node
-        We use mitigation after bin-packing because
-        the action is based-on the current timestep but
-        next timestep might result in illegal resource usage
-        with the current placement
         """
         # find take the action
         prev_services_nodes = deepcopy(self.services_nodes)
@@ -65,9 +61,6 @@ class SimBinpackingEnv(SimEdgeEnv):
             self.services_nodes != prev_services_nodes)[0])
 
         reward, rewards = self._reward(
-            # greedy_mitigation_needed,
-            # auxiliary_node_mitigation_needed=self,
-            # prev_num_overloaded,
             users_distances=users_distances,
             num_moves=num_moves
             )

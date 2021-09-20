@@ -136,14 +136,9 @@ class KubeBaseEnv(gym.Env):
 
         # binpacking mitigator variables
         # !!! not all of them are used in all envs
-        self.mitigation_tries: int = config['mitigation_tries']
+        # self.mitigation_tries: int = config['mitigation_tries']
         self.mitigation_needed: bool = False
         self.auxiliary_node_needed: bool = False
-
-        # render flags
-        # !!! not all of them are used in all envs
-        self.greedy_mitigation_needed_for_render: bool = False
-        self.auxiliary_node_mitigation_needed_for_render: bool = False
 
         # episode length
         self.episode_length: int = config['episode_length']
