@@ -237,7 +237,7 @@ constants.py
 data/configs/real/*
 data/dataset_metadata/*
 
-experiments
+data/experiments
 results
 results-experimental
 data/datasets
