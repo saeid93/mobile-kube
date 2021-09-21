@@ -72,9 +72,7 @@ class SimBaseEnv(gym.Env):
         )
 
         # initialize seed to ensure reproducible resutls
-        self.seed: int = config['seed']
-        # np.random.seed(self.seed)
-        self.np_random = seeding.np_random(self.seed)
+        self.seed(config['seed'])
 
         check_config(config)
 
@@ -140,6 +138,10 @@ class SimBaseEnv(gym.Env):
 
         # whether to take the overloaded action with negative reward or not
         self.no_action_on_overloaded = config['no_action_on_overloaded']
+
+    def seed(self, seed):
+        np.random.seed(seed)
+        self.np_random = seeding.np_random(seed)
 
     @override(gym.Env)
     def reset(self) -> np.ndarray:

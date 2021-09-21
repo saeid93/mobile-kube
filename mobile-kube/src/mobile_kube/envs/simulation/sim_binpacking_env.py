@@ -61,21 +61,23 @@ class SimBinpackingEnv(SimEdgeEnv):
             self.services_nodes != prev_services_nodes)[0])
 
         reward, rewards = self._reward(
+            num_overloaded=self.num_overloaded,
             users_distances=users_distances,
             num_moves=num_moves
             )
 
-        info = {'num_moves': num_moves,
-                'num_consolidated': self.num_consolidated,
+        info = {'num_consolidated': self.num_consolidated,
+                'num_moves': num_moves,
+                'num_overloaded': self.num_overloaded,
                 'total_reward': reward,
-                'rewards': rewards,
-                'timestep': self.timestep}
+                'timestep': self.timestep,
+                'rewards': rewards}
 
         assert self.observation_space.contains(self.observation),\
                 (f"observation:\n<{self.raw_observation}>\noutside of "
                 f"observation_space:\n <{self.observation_space}>")
 
-        return self.observation, None, self.done, info
+        return self.observation, reward, self.done, info
 
     def _next_greedy_action(self, prev_services_nodes) -> np.ndarray:
         """

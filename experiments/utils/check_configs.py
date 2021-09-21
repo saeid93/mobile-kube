@@ -125,8 +125,7 @@ def env_config_base_check(config: Dict[str, Any]):
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the environment config")
     # type checks
-    ints = ['episode_length',
-            'mitigation_tries', 'seed']
+    ints = ['episode_length', 'seed']
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"
     floats = ['workload_stop', 'penalty_illegal', 'penalty_illegal',

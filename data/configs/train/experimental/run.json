@@ -35,7 +35,8 @@
         "rollout_fragment_length": 20,
         "train_batch_size": 40,
         "sgd_minibatch_size": 40,
-        "num_sgd_iter": 5
+        "num_sgd_iter": 5,
+        "seed": 203
     },
     "stop": {
         "training_iteration": 1000

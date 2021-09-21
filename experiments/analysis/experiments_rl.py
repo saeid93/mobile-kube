@@ -178,7 +178,7 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--config-folder', type=str, default='experimental')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge', 'kube-edge']),
+              type=click.Choice(['sim-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
