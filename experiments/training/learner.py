@@ -147,7 +147,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
-@click.option('--use-callback', required=True, type=bool, default=False)
+@click.option('--use-callback', required=True, type=bool, default=True)
 @click.option('--checkpoint-freq', required=False, type=int, default=100)
 def main(local_mode: bool, config_folder: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,

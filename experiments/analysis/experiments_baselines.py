@@ -125,6 +125,7 @@ def flatten(raw_obs, action, reward, info):
         'num_consolidated': info['num_consolidated'],
         'num_moves': info['num_moves'],
         'num_overloaded': info['num_overloaded'],
+        'users_distances': info['users_distances'],
         'reward_latency': info['rewards']['reward_latency'],
         'reward_move': info['rewards']['reward_move'],
         'reward_illegal': info['rewards']['reward_illegal'],

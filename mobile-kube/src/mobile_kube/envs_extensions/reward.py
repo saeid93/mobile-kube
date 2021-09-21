@@ -21,7 +21,8 @@ def _reward_both_edge(
             "reward_move": 0,
             "reward_illegal": 0,
             "reward_consolidation": 0,
-            "reward_variance": 0
+            "reward_variance": 0,
+            "reward_latency": 0
             }
 
     reward_total_edge, rewards_edge = _reward_latency(self, users_distances)

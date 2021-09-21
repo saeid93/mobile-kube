@@ -62,13 +62,9 @@ class CloudCallback(DefaultCallbacks):
         # rewards
         episode.user_data["rewards"] = []
         episode.hist_data["rewards"] = []
-        # greedy_consolidation
-        episode.user_data["greedy_num_consolidated"] = []
-        episode.hist_data["greedy_num_consolidated"] = []
-
-        # # TODO TEMP
-        # episode.user_data["step_reward"] = []
-        # episode.hist_data["step_reward"] = []
+        # users distances
+        episode.user_data["users_distances"] = []
+        episode.hist_data["users_distances"] = []
 
     def on_episode_step(self, *, worker: RolloutWorker,
                         base_env: BaseEnv,
@@ -85,15 +81,12 @@ class CloudCallback(DefaultCallbacks):
             # extract the number of overloaded from the info dict
             num_overloaded = episode.last_info_for()['num_overloaded']
             episode.user_data["num_overloaded"].append(num_overloaded)
-            # extract of the greedy_num_consolidated from the dict
+            # extract of the number of services moves from the dict
             num_moves = episode.last_info_for()['num_moves']
             episode.user_data["num_moves"].append(num_moves)
-            # extract of the greedy_num_consolidated from the dict
-            greedy_num_consolidated = episode.last_info_for()[
-                'greedy_num_consolidated']
-            episode.user_data["greedy_num_consolidated"].append(
-                greedy_num_consolidated)
-
+            # extract of the total sum of latencies
+            users_distances = episode.last_info_for()['users_distances']
+            episode.user_data["users_distances"].append(users_distances)
             # rewards
             rewards = episode.last_info_for()['rewards']
             episode.user_data["rewards"].append(rewards)
@@ -120,13 +113,9 @@ class CloudCallback(DefaultCallbacks):
         # extract the episode information
         num_moves_avg = np.mean(episode.user_data["num_moves"])
         num_consolidated_avg = np.mean(episode.user_data["num_consolidated"])
+        users_distances_avg = np.mean(episode.user_data["users_distances"])
         num_overloaded_avg = np.mean(episode.user_data["num_overloaded"])
         last_timestep = np.max(episode.user_data["timestep"])
-        if episode.user_data["greedy_num_consolidated"][0] is not None:
-            greedy_num_consolidated_avg = np.mean(
-                episode.user_data["greedy_num_consolidated"])
-        else:
-            greedy_num_consolidated_avg = None
         episode_total_reward = episode.total_reward
         action_logit_max = round(max(episode.last_action_for()).item(), 2)
         action_logit_min = round(min(episode.last_action_for()).item(), 2)
@@ -145,12 +134,14 @@ class CloudCallback(DefaultCallbacks):
         reward_variance_max = max([a['reward_variance']
                                    for a in episode.user_data[
                                        "rewards"]])
-
+        reward_latency_max = max([a['reward_latency']
+                                   for a in episode.user_data[
+                                       "rewards"]])
         # print episode information in the ouput
         # print('-'*50)
-        print(f"<----- workder <{worker.worker_index}>,"
-              f" episode <{episode.episode_id}>,"
-              f" env <{env_index}> ----->")
+        # print(f"<----- workder <{worker.worker_index}>,"
+        #       f" episode <{episode.episode_id}>,"
+        #       f" env <{env_index}> ----->")
         # headers = ['last_timestep', 'episode_length', 'num_consolidated_avg',
         #            'greedy_num_consolidated_avg', 'num_overloaded_avg',
         #            'action_logits_min', 'action_logits_max',
@@ -159,26 +150,27 @@ class CloudCallback(DefaultCallbacks):
         #           greedy_num_consolidated_avg, num_overloaded_avg,
         #           action_logit_max, action_logit_min, action_logit_avg]]
         # print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
-        print("[-- episode info --]")
-        print(f"last_timestep <{last_timestep}>"
-              f", episode_length <{episode.length}>\n"
-              f"num_consolidated_avg <{num_consolidated_avg}>"
-              f", num_overloaded_avg <{num_overloaded_avg}>"
-              f", greedy_num_consolidated_avg <{greedy_num_consolidated_avg}>\n"
-              f"episode_total_reward <{episode_total_reward}>")
-        print("[-- reward info --]")
-        print(f"reward_consolidation_max <{reward_consolidation_max}>"
-              f", reward_illegal_max <{reward_illegal_max}>"
-              f", reward_move_max <{reward_move_max}>"
-              f", reward_variance_max <{reward_variance_max}>")
-        print("[-- last episode state/action info --]")
-        print(f"action_logits_min <{action_logit_max}>"
-              f", action_logits_max <{action_logit_min}>"
-              f", action_logits_avg <{action_logit_avg}>\n")
+        # print("[-- episode info --]")
+        # print(f"last_timestep <{last_timestep}>"
+        #       f", episode_length <{episode.length}>\n"
+        #       f"num_consolidated_avg <{num_consolidated_avg}>"
+        #       f", num_overloaded_avg <{num_overloaded_avg}>"
+        #     #   f", greedy_num_consolidated_avg <{greedy_num_consolidated_avg}>\n"
+        #       f"episode_total_reward <{episode_total_reward}>")
+        # print("[-- reward info --]")
+        # print(f"reward_consolidation_max <{reward_consolidation_max}>"
+        #       f", reward_illegal_max <{reward_illegal_max}>"
+        #       f", reward_move_max <{reward_move_max}>"
+        #       f", reward_variance_max <{reward_variance_max}>")
+        # print("[-- last episode state/action info --]")
+        # print(f"action_logits_min <{action_logit_max}>"
+        #       f", action_logits_max <{action_logit_min}>"
+        #       f", action_logits_avg <{action_logit_avg}>\n")
 
         # add custom metrics to tensorboard
         episode.custom_metrics['num_moves'] = num_moves_avg
         episode.custom_metrics['num_consolidated'] = num_consolidated_avg
+        episode.custom_metrics['users_distances'] = users_distances_avg
         episode.custom_metrics['num_overloaded'] = num_overloaded_avg
         episode.custom_metrics['action_logit_max'] = action_logit_max
         episode.custom_metrics['reward_consolidation_max'] =\
@@ -186,9 +178,10 @@ class CloudCallback(DefaultCallbacks):
         episode.custom_metrics['reward_illegal_max'] = reward_illegal_max
         episode.custom_metrics['reward_move_max'] = reward_move_max
         episode.custom_metrics['reward_variance_max'] = reward_variance_max
-        if episode.user_data["greedy_num_consolidated"][0] is not None:
-            episode.custom_metrics['greedy_num_consolidated_avg'] =\
-                greedy_num_consolidated_avg
+        episode.custom_metrics['reward_latency_max'] = reward_latency_max
+        # if episode.user_data["greedy_num_consolidated"][0] is not None:
+        #     episode.custom_metrics['greedy_num_consolidated_avg'] =\
+        #         greedy_num_consolidated_avg
 
         # # add histogram data
         # episode.hist_data["timestep"] = \
@@ -210,26 +203,26 @@ class CloudCallback(DefaultCallbacks):
         #  'total_episodes']
         # table = [[samples.count, num_episodes,
         #           self.workers_total_episodes[worker.worker_index]]]
-        print('*'*50)
-        print("<--- one sample batch of worker"
-              f" <{worker.worker_index}> ended --->")
-        print(f"rollout_fragment_length <{samples.count}>"
-              f", num_episodes <{num_episodes}>"
-              ", total_episodes "
-              f"<{self.workers_total_episodes[worker.worker_index]}>")
-        # print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
-        print('*'*50, '\n')
+        # print('*'*50)
+        # print("<--- one sample batch of worker"
+        #       f" <{worker.worker_index}> ended --->")
+        # print(f"rollout_fragment_length <{samples.count}>"
+        #       f", num_episodes <{num_episodes}>"
+        #       ", total_episodes "
+        #       f"<{self.workers_total_episodes[worker.worker_index]}>")
+        # # print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
+        # print('*'*50, '\n')
 
     def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch,
                           **kwargs) -> None:
-        print(f"train batch <{self.count}> of"
-              f" size <{train_batch.count}>"
-              f" total <{self.total}>")
+        # print(f"train batch <{self.count}> of"
+        #       f" size <{train_batch.count}>"
+        #       f" total <{self.total}>")
         self.total += train_batch.count
         self.count += 1
 
     def on_train_result(self, *, trainer, result: dict, **kwargs):
-        print("trainer.train() result: <{}> -> <{}> episodes".format(
-            trainer, result["episodes_this_iter"]))
+        # print("trainer.train() result: <{}> -> <{}> episodes".format(
+        #     trainer, result["episodes_this_iter"]))
         # you can mutate the result dict to add new fields to return
         result["callback_ok"] = True

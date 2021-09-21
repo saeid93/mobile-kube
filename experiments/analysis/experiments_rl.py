@@ -165,6 +165,7 @@ def flatten(raw_obs, action, reward, info):
         'num_consolidated': info['num_consolidated'],
         'num_moves': info['num_moves'],
         'num_overloaded': info['num_overloaded'],
+        'users_distances': info['users_distances'],
         'reward_latency': info['rewards']['reward_latency'],
         'reward_move': info['rewards']['reward_move'],
         'reward_illegal': info['rewards']['reward_illegal'],
@@ -185,7 +186,7 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--experiment_id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=1000)
+@click.option('--checkpoint', required=False, type=int, default=100)
 @click.option('--episode-length', required=False, type=int, default=10)
 @click.option('--num-episodes', required=False, type=int, default=10)
 def main(local_mode: bool, config_folder: str, series: int,
