@@ -72,7 +72,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
     # generate the ray_config
     # make the learning config based on the type of the environment
-    ray_config = {"env": make_env_class(type_env),
+    ray_config = {"env": make_env_class('sim-edge'),
                   "env_config": env_config}
     ray_config.update(learn_config)
 
@@ -81,14 +81,20 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
     # example:        env1/dataset/1/workloads/3
     experiments_folder = os.path.join(RESULTS_PATH,
                                       "series",      str(series),
-                                      "envs",        str(type_env),
+                                      "envs",        'sim-edge',
                                       "datasets",    str(dataset_id),
                                       "workloads",   str(workload_id),
                                       "experiments", str(experiment_id),
                                       algorithm)
+    for item in os.listdir(experiments_folder):
+        if 'json' not in item:
+            experiment_string = item
+            break
+
     checkpoint_path = os.path.join(
         experiments_folder,
-        os.listdir(experiments_folder)[0],
+        experiment_string,
+        # os.listdir(experiments_folder)[0],
         f"checkpoint_{checkpoint}",
         f"checkpoint-{checkpoint}"
     )
@@ -135,7 +141,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
-              default='sim-edge')
+              default='kube-edge')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)

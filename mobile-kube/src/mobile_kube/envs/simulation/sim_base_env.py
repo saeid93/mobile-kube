@@ -183,16 +183,6 @@ class SimBaseEnv(gym.Env):
                                         plot_length=80)
             print(Style.RESET_ALL)
 
-        def preprocessor(self, obs):
-            """
-            environment preprocessor
-            depeiding on the observation (state) definition
-            """
-            prep = Preprocessor(self.nodes_resources_cap,
-                                self.services_resources_request)        
-            obs = prep.transform(obs)
-            return obs
-
     # ------------------ common properties ------------------
 
     @property

@@ -232,7 +232,6 @@ atlassian-ide-plugin.xml
 *.code-workspace
 
 # myignores
-constants.py
 .VSCodeCounter
 data/configs/real/*
 data/dataset_metadata/*

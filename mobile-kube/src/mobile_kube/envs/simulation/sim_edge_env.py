@@ -43,8 +43,7 @@ class SimEdgeEnv(SimBaseEnv):
         self.normalise_factor = self.edge_simulator.get_largest_station_node_path() # TODO check
         check_config_edge(config)
         super().__init__(config)
-        # TODO change here and remove the initialiser in the envs
-        # TODO add trace here to the nuseretwork
+
         self.observation_space, self.action_space =\
             self._setup_space()
         _ = self.reset()
@@ -166,7 +165,7 @@ class SimEdgeEnv(SimBaseEnv):
             num_overloaded=self.num_overloaded,
             users_distances=users_distances,
             num_moves=num_moves
-            ) # TODO check rewards
+            )
 
         info = {'num_consolidated': self.num_consolidated,
                 'num_moves': num_moves,

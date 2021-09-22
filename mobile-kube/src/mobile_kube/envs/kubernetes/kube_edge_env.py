@@ -1,9 +1,11 @@
 """base class of edge enviornments
 """
 import numpy as np
+from copy import deepcopy
 from typing import (
     Dict,
-    Any
+    Any,
+    Tuple
 )
 
 from gym.spaces import (
@@ -11,11 +13,13 @@ from gym.spaces import (
     MultiDiscrete
 )
 
+
 from mobile_kube.util import (
     Preprocessor,
     override,
     check_config_edge,
-    load_object
+    load_object,
+    logger
 )
 from mobile_kube.network import NetworkSimulator
 
@@ -23,7 +27,7 @@ from .kube_base_env import KubeBaseEnv
 
 class KubeEdgeEnv(KubeBaseEnv):
     def __init__(self, config: Dict[str, Any]):
-        # the network for edge simulators
+        # the network for edge simulatoirs
         edge_simulator_config = load_object(config['network_path'])
         trace = load_object(config['trace_path'])
 
@@ -36,17 +40,16 @@ class KubeEdgeEnv(KubeBaseEnv):
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
         self.normalise_latency = config['normalise_latency']
-        # self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
+        self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
         check_config_edge(config)
         super().__init__(config)
-        # TODO change here and remove the initialiser in the envs
-        # TODO add trace here to the nuseretwork
+
         self.observation_space, self.action_space =\
-            self._setup_space(config['action_method'])
+            self._setup_space()
         # _ = self.reset()
 
     @override(KubeBaseEnv)
-    def _setup_space(self, action_space_type: str):
+    def _setup_space(self):
         """
         States:
             the whole or a subset of the following dictionary:
@@ -64,6 +67,12 @@ class KubeEdgeEnv(KubeBaseEnv):
                     "users_stations": --> always in the observation
                         self.users_stations
             }
+        users_stations:
+             user_id        user_id                 user_id
+            [station_id,    station_id,    , ... ,  station_id  ]
+                        range:
+                            indices: [0, num_users)
+                            contents: [0, num_stations)
         Actions:
                               nodes
             services [                   ]
@@ -82,13 +91,13 @@ class KubeEdgeEnv(KubeBaseEnv):
             elif elm == "services_nodes":
                 # add the one hot endoded services_resources
                 # number of elements
-                obs_size += (self.num_nodes+1) * self.num_services
+                obs_size += (self.num_nodes) * self.num_services
 
         # add the one hot endoded users_stations
         # number of elements
         obs_size += (self.num_users) * self.num_stations
 
-        higher_bound = 10 # TODO just for test
+        higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
         observation_space = Box(low=0, high=higher_bound, shape=(obs_size, ))
         action_space = MultiDiscrete(np.ones(self.num_services) *
@@ -116,3 +125,58 @@ class KubeEdgeEnv(KubeBaseEnv):
         observation = super().raw_observation
         observation.update({'users_stations': self.users_stations})
         return observation
+
+    @override(KubeBaseEnv)
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, int, bool, dict]:
+        """
+        edge servers here
+        1. move the services based-on current network and nodes state
+        2. do one step of user movements
+        3. update the nodes
+        """
+        # take the action
+        prev_services_nodes = deepcopy(self.services_nodes)
+        assert self.action_space.contains(action)
+
+        self.services_nodes = deepcopy(action)
+        if self.no_action_on_overloaded and self.num_overloaded > 0:
+            print("overloaded state, reverting back ...")
+            self.services_nodes = deepcopy(prev_services_nodes)
+
+        # add migraion here
+        self.services_nodes_obj =  self.nodes[action]
+        self._migrate(self.services_nodes_obj)
+
+        # move to the next timestep
+        self.global_timestep += 1
+        self.timestep = self.global_timestep % self.workload.shape[1]
+
+        # make user movements --> network parts
+        self.users_stations = self.edge_simulator.sample_users_stations(
+            timestep=self.timestep)
+        users_distances = self.edge_simulator.users_distances
+        # update network with the new placements
+        self.edge_simulator.update_services_nodes(self.services_nodes)
+
+        num_moves = len(np.where(
+            self.services_nodes != prev_services_nodes)[0])
+
+        reward, rewards = self._reward(
+            num_overloaded=self.num_overloaded,
+            users_distances=users_distances,
+            num_moves=num_moves
+            )
+
+        info = {'num_consolidated': self.num_consolidated,
+                'num_moves': num_moves,
+                'num_overloaded': self.num_overloaded,
+                'users_distances': np.sum(users_distances),
+                'total_reward': reward,
+                'timestep': self.timestep,
+                'rewards': rewards}
+
+        assert self.observation_space.contains(self.observation),\
+                (f"observation:\n<{self.raw_observation}>\noutside of "
+                f"observation_space:\n <{self.observation_space}>")
+
+        return self.observation, reward, self.done, info

@@ -20,3 +20,7 @@ register(
     id='KubeBinpackingEnv-v0',
     entry_point='mobile_kube.envs:KubeBinpackingEnv',
 )
+register(
+    id='KubeGreedyEnv-v0',
+    entry_point='mobile_kube.envs:KubeGreedyEnv',
+)

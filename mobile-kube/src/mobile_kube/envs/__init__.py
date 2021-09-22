@@ -6,5 +6,6 @@ from .simulation import (
 )
 from .kubernetes import (
     KubeEdgeEnv,
-    KubeBinpackingEnv
+    KubeBinpackingEnv,
+    KubeGreedyEnv
 )

@@ -1,82 +1,83 @@
+"""base class for non learning environments
 """
-base class for non learning environments
-"""
+import numpy as np
 from copy import deepcopy
 from typing import (
     Dict,
-    Any
+    Any,
+    Tuple
 )
+
 from gym.spaces import (
     Box,
     MultiDiscrete
 )
-import numpy as np
 
 from mobile_kube.util import (
-    override
+    Preprocessor,
+    override,
+    check_config_edge,
+    load_object
 )
-from .kube_base_env import KubeBaseEnv
+from mobile_kube.network import NetworkSimulator
 
-class KubeBinpackingEnv(KubeBaseEnv):
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        # reset the environment to the initial state
-        self.observation_space, self.action_space =\
-            self._setup_space(config['action_method'])
-        # _ = self.reset()
+from .kube_edge_env import KubeEdgeEnv
 
-    @override(KubeBaseEnv)
-    def _setup_space(self, action_space_type: str):
+class KubeBinpackingEnv(KubeEdgeEnv):
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, int, bool, dict]:
         """
-        States:
-            the whole or a subset of the following dictionary:
-            observation = {
-                    "services_resources_usage":
-                        self.services_resources_usage,
-                    "nodes_resources_usage":
-                        self.nodes_resources_usage,
-                    "services_resources_frac":
-                        self.services_resources_frac,
-                    "nodes_resources_frac":
-                        self.nodes_resources_frac,
-                    "services_nodes":
-                        self.services_nodes
-            }
-        Actions:
-            absolute:
-                                nodes
-                services  [           ]
+        General overivew:
+        generate the intitial state for nodes_services with a
+        bestfit greedy algorithm.
+            1. iterate over nodes one by one
+            2. pop a node from the nodes lists
+            3. find the nodes with least remained resources
+            4. try to allocate the services to them
+            5. if not possible pop another node
         """
-        # numuber of elements based on the obs in the observation space
-        obs_size = 0
-        for elm in self.obs_elements:
-            if elm == "services_resources_usage":
-                obs_size += self.num_services * self.num_resources
-            elif elm == "nodes_resources_usage":
-                obs_size += self.num_nodes * self.num_resources
-            elif elm == "services_resources_usage_frac":
-                obs_size += self.num_services * self.num_resources
-            elif elm == "nodes_resources_usage_frac":
-                obs_size += self.num_nodes * self.num_resources
-            elif elm == "services_nodes":
-                # add the one hot endoded services_resources
-                # number of elements
-                obs_size += (self.num_nodes+1) * self.num_services
+        # find take the action
+        prev_services_nodes = deepcopy(self.services_nodes)
+        action = self._next_greedy_action(prev_services_nodes)
+        assert self.action_space.contains(action)
+        self.services_nodes = deepcopy(action)
 
-        # generate observation and action spaces
-        observation_space = Box(low=0, high=1, shape=(obs_size, ))
-        if action_space_type == 'probabilistic':
-            action_space = Box(low=self.action_min, high=self.action_max,
-                               shape=(self.num_services * self.num_nodes,))
+        # add migraion here
+        self.services_nodes_obj =  self.nodes[action]
+        self._migrate(self.services_nodes_obj)
 
-        elif action_space_type == 'absolute':
-            action_space = MultiDiscrete(np.ones(self.num_services) *
-                                         self.num_nodes)
-        else:
-            raise ValueError("unkown type of action space "
-                             f"--> {action_space_type}")
+        # move to the next timestep
+        self.global_timestep += 1
+        self.timestep = self.global_timestep % self.workload.shape[1]
 
-        return observation_space, action_space
+        # make user movements --> network parts
+        self.users_stations = self.edge_simulator.sample_users_stations(
+            timestep=self.timestep)
+        users_distances = self.edge_simulator.users_distances
+        # update network with the new placements
+        self.edge_simulator.update_services_nodes(self.services_nodes)
+
+        num_moves = len(np.where(
+            self.services_nodes != prev_services_nodes)[0])
+
+        reward, rewards = self._reward(
+            num_overloaded=self.num_overloaded,
+            users_distances=users_distances,
+            num_moves=num_moves
+            )
+
+        info = {'num_consolidated': self.num_consolidated,
+                'num_moves': num_moves,
+                'num_overloaded': self.num_overloaded,
+                'total_users_latency': np.sum(users_distances),
+                'total_reward': reward,
+                'timestep': self.timestep,
+                'rewards': rewards}
+
+        assert self.observation_space.contains(self.observation),\
+                (f"observation:\n<{self.raw_observation}>\noutside of "
+                f"observation_space:\n <{self.observation_space}>")
+
+        return self.observation, reward, self.done, info
 
     def _next_greedy_action(self, prev_services_nodes) -> np.ndarray:
         """
@@ -103,12 +104,12 @@ class KubeBinpackingEnv(KubeBaseEnv):
                 # current service inside it
                 nodes_sorted = [node for _, node in
                                 sorted(zip(
-                                    self.nodes_resources_remained_frac_avg[
+                                    self.nodes_resources_available_frac_avg[
                                         popped_nodes], popped_nodes))]
                 for node in nodes_sorted:
                     if np.alltrue(
-                        self.services_resources_usage[service_id] <
-                            self.nodes_resources_remained[node]):
+                        self.services_resources_request[service_id] <
+                            self.nodes_resources_available[node]):
                         self.services_nodes[service_id] = node
                         break
                 else:  # no-break
@@ -122,5 +123,4 @@ class KubeBinpackingEnv(KubeBaseEnv):
         # reset the services_nodes to the previous observation
         # for consistency with other envs environments
         self.services_nodes = deepcopy(prev_services_nodes)
-        num_consolidated = self._num_consolidated(action)
-        return num_consolidated, action
+        return action

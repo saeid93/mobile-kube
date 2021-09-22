@@ -6,9 +6,13 @@ from copy import deepcopy
 from typing import (
     List,
     Dict,
-    Any
+    Any,
+    Literal
 )
-
+from colorama import (
+    Fore,
+    Style
+)
 import gym
 from gym.utils import seeding
 import types
@@ -20,10 +24,10 @@ from mobile_kube.util import (
     check_config,
     load_object,
     ACTION_MIN,
-    ACTION_MAX
+    ACTION_MAX,
+    plot_resource_allocation
 )
 from mobile_kube.envs_extensions import (
-    get_action_method_kube,
     get_reward_method
 )
 from mobile_kube.util.kubernetes_utils import (
@@ -68,12 +72,6 @@ class KubeBaseEnv(gym.Env):
             the main indicator of the state (obseravation) if services_nodes
             the rest of the observation dictionary is updated with decorators
             automatically
-
-    Variables:
-            self.mitigation_needed: indicator of whether the mitigation of
-                                    overloading was successful
-            self.mitigation_tries: indicator of how many binpacking mitigations
-                                should be tried
     """
 
     # ------------------ common functions ------------------
@@ -84,11 +82,8 @@ class KubeBaseEnv(gym.Env):
         self.action_min, self.action_max = (
             ACTION_MIN, ACTION_MAX
         )
-
         # initialize seed to ensure reproducible resutls
-        self.seed: int = config['seed']
-        # np.random.seed(self.seed)
-        self.np_random = seeding.np_random(self.seed)
+        self.seed(config['seed'])
 
         check_config(config)
 
@@ -130,12 +125,6 @@ class KubeBaseEnv(gym.Env):
         self.penalty_consolidated: float = config['penalty_consolidated']
         self.penalty_latency: float = config['penalty_latency']
 
-        # binpacking mitigator variables
-        # !!! not all of them are used in all envs
-        # self.mitigation_tries: int = config['mitigation_tries']
-        self.mitigation_needed: bool = False
-        self.auxiliary_node_needed: bool = False
-
         # episode length
         self.episode_length: int = config['episode_length']
 
@@ -144,37 +133,17 @@ class KubeBaseEnv(gym.Env):
         self.placement_reset: bool = config['placement_reset']
         self.global_timestep: int = 0
         self.timestep: int = 0
-        # self.services_nodes = deepcopy(self.initial_services_nodes)
+        self.services_nodes = deepcopy(self.initial_services_nodes)
 
         # what type of environemnt is used
         self.reward_mode = config['reward_mode']
-
-        # whether to compute the greedy_num_consolidated at each
-        # step or not TODO 
-        self.compute_greedy_num_consolidated = config[
-            'compute_greedy_num_consolidated']
-
-        # set the take_action method
-        _take_action, _validate_action = get_action_method_kube(config['action_method'])
-        self._take_action = types.MethodType(_take_action, self)
-        self._validate_action = types.MethodType(_validate_action, self)
-
-        # set the step method
-        step = get_step_method(config['step_method'])
-        self.step = types.MethodType(step, self)
-
-        # set the render method
-        render = get_render_method(config['step_method'])
-        self.render = types.MethodType(render, self)
 
         # set the reward method
         _reward = get_reward_method(config['reward_mode'])
         self._reward = types.MethodType(_reward, self)
 
-        # TODO add it if used
-        # add one auxiliary node with unlimited and autoscaled capacity
-        # TODO make it consistent with Alireza
-        # self.total_num_nodes: int = self.num_nodes + 1
+        # whether to take the overloaded action with negative reward or not
+        self.no_action_on_overloaded = config['no_action_on_overloaded']
 
         # get the kubernetes information
         self.kube_config_file: str = config['kube']['admin_config']
@@ -182,7 +151,7 @@ class KubeBaseEnv(gym.Env):
         self.utilization_image: str = config['kube']['utilization_image']
         self.namespace: str = config['kube']['namespace']
         self.clean_after_exit: bool = config['kube']['clean_after_exit']
-        self.using_auxiliary_server: bool = config['kube']['using_auxiliary_server']
+        self.using_auxiliary_server: bool = False
 
         # construct the kubernetes cluster
         self._cluster = Cluster(
@@ -217,6 +186,14 @@ class KubeBaseEnv(gym.Env):
             self.nodes[id] for id in self.dataset['services_nodes']
         ])
 
+    # @property
+    # def services_nodes(self):
+    #     return np.array(list(map(lambda node: node.id, self.services_nodes_obj)))
+
+    def seed(self, seed):
+        np.random.seed(seed)
+        self.np_random = seeding.np_random(seed)
+
     @override(gym.Env)
     def reset(self) -> np.ndarray:
         """Resets the state of the environment and returns
@@ -234,67 +211,58 @@ class KubeBaseEnv(gym.Env):
         self._initialisation()
         return self.observation
 
-    def preprocessor(self, obs):
+    def render(self, mode: Literal['human', 'ansi'] ='human') -> None:
         """
-        environment preprocessor
-        depeiding on the observation (state) definition
         """
-        prep = Preprocessor(self.nodes_resources_cap,
-                            self.services_resources_request)        
-        obs = prep.transform(obs)
-        return obs
+        print("--------state--------")
+        if not self.num_overloaded:
+            print("nodes_resources_request_frac:")
+            print(self.nodes_resources_request_frac)
+            print("services_nodes:")
+            print(self.services_nodes)
+            if mode == 'ansi':
+                plot_resource_allocation(self.services_nodes,
+                                        self.nodes_resources_cap,
+                                        self.services_resources_request,
+                                        self.services_resources_usage,
+                                        plot_length=80)
+        else:
+            print(Fore.RED, "agent's action lead to an overloaded state!")
+            print("nodes_resources_usage_frac:")
+            print(self.nodes_resources_request_frac)
+            print("services_nodes:")
+            print(self.services_nodes)
+            if mode == 'ansi':
+                plot_resource_allocation(self.services_nodes,
+                                        self.nodes_resources_cap,
+                                        self.services_resources_request,
+                                        self.services_resources_usage,
+                                        plot_length=80)
+            print(Style.RESET_ALL)
 
-    # ------------------ common properties ------------------
-
-    @property
-    def services_nodes(self):
-        return np.array(list(map(lambda node: node.id, self.services_nodes_obj)))
-
-    @property
-    @rounding
-    def services_resources_usage_frac(self) -> np.ndarray:
-        """fraction of usage:
-
-                         ram - cpu
-                        |         |
-            services    |         |
-                        |         |
-
-            range:
-                row inidices: (0, num_services]
-                columns indices: (0, num_resources]
-                enteries: [0, 1] type: float
-        """
-        return self.services_resources_usage / self.services_resources_request
 
     @property
     @rounding
     def services_resources_usage(self) -> np.ndarray:
         """return the fraction of resource usage for each node
         workload at current timestep e.g. at time step 0.
-                         ram - cpu
-                        |         |
-            services    |         |
-                        |         |
+                         ram cpu
+                        |       |
+            services    |       |
+                        |       |
             range:
                 row inidices: (0, num_services]
                 columns indices: (0, num_resources]
                 enteries: [0, node_resource_cap] type: float
         """
-        self.service_metrics = self._load_services_metrics()
-        lst = []
-        for service in self.services:
-            used_memory = ResourceUsage(self.service_metrics.get(service.metadata_name)).memory / 1000
-            used_cpu = ResourceUsage(self.service_metrics.get(service.metadata_name)).cpu / 1000000000
-            lst.append([used_memory, used_cpu])
-        services_resources_usage = np.array(lst)
+        services_resources_usage = (self.services_resources_usage_frac *
+                                      self.services_resources_request)
         return services_resources_usage
 
     @property
-    @rounding
     def nodes_resources_usage(self):
-        """returns the resource usage of
-        each node
+        """return the amount of resource usage
+        on each node
                      ram - cpu
                     |         |
             nodes   |         |
@@ -305,22 +273,47 @@ class KubeBaseEnv(gym.Env):
                 columns indices: (0, num_resources]
                 enteries: [0, node_resource_cap] type: float
         """
-        node_metrics = self._cluster.monitor.get_nodes_metrics()
-        lst = []
-        for node in self.nodes:
-            used_memory = ResourceUsage(node_metrics.get(node.name)).memory / 1000
-            used_cpu = ResourceUsage(node_metrics.get(node.name)).cpu / 1000000000
-            lst.append([used_memory, used_cpu])
-        nodes_resources_usage = np.array(lst)
+        nodes_resources_usage = []
+        for node in range(self.num_nodes):
+            services_in_node = np.where(self.services_nodes == node)[0]
+            node_resources_usage = sum(self.services_resources_usage[
+                services_in_node])
+            if type(node_resources_usage) != np.ndarray:
+                node_resources_usage = np.zeros(self.num_resources)
+            nodes_resources_usage.append(node_resources_usage)
         return np.array(nodes_resources_usage)
+
+    @property
+    def nodes_resources_request(self):
+        """return the amount of resource usage
+        on each node
+        """
+        nodes_resources_request = []
+        for node in range(self.num_nodes):
+            services_in_node = np.where(
+                self.services_nodes == node)[0]
+            node_resources_usage = sum(
+                self.services_resources_request[services_in_node])
+            if type(node_resources_usage) != np.ndarray:
+                node_resources_usage = np.zeros(self.num_resources)
+            nodes_resources_request.append(node_resources_usage)
+        return np.array(nodes_resources_request)
 
     @property
     def services_resources_remained(self) -> np.ndarray:
         return self.services_resources_request - self.services_resources_usage
 
     @property
-    def nodes_resources_remained(self) -> np.ndarray:
-        return self.nodes_resources_request - self.nodes_resources_usage
+    def nodes_resources_remained(self):
+        # The amount of acutally used resources
+        # on the nodes
+        return self.nodes_resources_cap - self.nodes_resources_usage
+
+    @property
+    def nodes_resources_available(self):
+        # The amount of the available
+        # non-requested resources on the nodes
+        return self.nodes_resources_cap - self.nodes_resources_request
 
     @property
     @rounding
@@ -338,8 +331,33 @@ class KubeBaseEnv(gym.Env):
 
     @property
     @rounding
+    def services_resources_usage_frac(self) -> np.ndarray:
+        """fraction of usage:
+
+                         ram - cpu
+                        |         |
+            services    |         |
+                        |         |
+
+            range:
+                row inidices: (0, num_services]
+                columns indices: (0, num_resources]
+                enteries: [0, 1] type: float
+        """
+        workload_services_types = self.workload[:, self.timestep, :]
+        services_resources_usage_frac = list(map(lambda service_type:
+                                                   workload_services_types
+                                                   [:, service_type],
+                                                   self.services_types))
+        services_resources_usage_frac = np.array(
+            services_resources_usage_frac)
+        return services_resources_usage_frac
+
+    @property
+    @rounding
     def nodes_resources_usage_frac(self) -> np.ndarray:
-        """nodes_resources_usage_frac (fraction of usage):
+        """returns the resource usage of
+        each node
                      ram - cpu
                     |         |
             nodes   |         |
@@ -353,6 +371,23 @@ class KubeBaseEnv(gym.Env):
         return self.nodes_resources_usage / self.nodes_resources_cap
 
     @property
+    @rounding
+    def nodes_resources_request_frac(self):
+        """returns the resource requested on
+        each node
+                     ram - cpu
+                    |         |
+            nodes   |         |
+                    |         |
+
+            range:
+                row inidices: (0, num_nodes]
+                columns indices: (0, num_resources]
+                enteries: [0, 1] type: float
+        """
+        return self.nodes_resources_request / self.nodes_resources_cap
+
+    @property
     def num_consolidated(self) -> int:
         """returns the number of consolidated nodes
         """
@@ -363,7 +398,7 @@ class KubeBaseEnv(gym.Env):
         """return the number of resource exceeding nodes
         """
         overloaded_nodes = np.unique(np.where(
-            self.nodes_resources_usage_frac > 1)[0])
+            self.nodes_resources_request_frac > 1)[0])
         return len(overloaded_nodes)
 
     @property
@@ -372,7 +407,7 @@ class KubeBaseEnv(gym.Env):
              contianer_id   contianer_id          contianer_id
             [node_id,       node_id,    , ... ,   node_id     ]
         to:
-                       node_id                    node_id
+                node_id                    node_id
             [[service_id, service_id], ...,[service_id]]
         """
         nodes_services = []
@@ -383,39 +418,20 @@ class KubeBaseEnv(gym.Env):
         return nodes_services
 
     @property
-    def services_in_auxiliary(self) -> np.ndarray:
-        """services in the auxiliary node
-        """
-        services_in_auxiliary = np.where(self.services_nodes ==
-                                           self.num_nodes)[0]
-        return services_in_auxiliary
+    def nodes_resources_remained_frac(self):
+        return self.nodes_resources_remained / self.nodes_resources_cap
 
     @property
-    def nodes_resources_remained_frac(self) -> np.ndarray:
-        return self.nodes_resources_remained / self.nodes_resources_cap
+    def nodes_resources_available_frac(self):
+        return self.nodes_resources_available / self.nodes_resources_cap
 
     @property
     def nodes_resources_remained_frac_avg(self):
         return np.average(self.nodes_resources_remained_frac, axis=1)
 
     @property
-    def num_in_auxiliary(self) -> int:
-        """num of services in the auxiliary node
-        """
-        return len(self.services_in_auxiliary)
-
-    @property
-    @rounding
-    def auxiliary_resources_usage(self) -> np.ndarray:
-        """resource usage in auxiliary node
-        """
-        services_in_auxiliary = np.where(self.services_nodes ==
-                                           self.num_nodes)[0]
-        auxiliary_resources_usage = sum(self.services_resources_usage[
-            services_in_auxiliary])
-        if type(auxiliary_resources_usage) != np.ndarray:
-            auxiliary_resources_usage = np.zeros(self.num_resources)
-        return auxiliary_resources_usage
+    def nodes_resources_available_frac_avg(self):
+        return np.average(self.nodes_resources_available_frac, axis=1)
 
     @property
     def done(self):
@@ -427,14 +443,15 @@ class KubeBaseEnv(gym.Env):
 
     @property
     def complete_raw_observation(self) -> Dict[str, np.ndarray]:
+        """complete observation with all the available elements
+        """
         observation = {
                 "services_resources_usage": self.services_resources_usage,
                 "nodes_resources_usage": self.nodes_resources_usage,
                 "services_resources_usage_frac":
                 self.services_resources_usage_frac,
                 "nodes_resources_usage_frac": self.nodes_resources_usage_frac,
-                "services_nodes": self.services_nodes,
-                "auxiliary_resources_usage": self.auxiliary_resources_usage
+                "services_nodes": self.services_nodes
         }
         return observation
 
@@ -449,8 +466,7 @@ class KubeBaseEnv(gym.Env):
                 "services_resources_usage_frac":
                 self.services_resources_usage_frac,
                 "nodes_resources_usage_frac": self.nodes_resources_usage_frac,
-                "services_nodes": self.services_nodes,
-                "auxiliary_resources_usage": self.auxiliary_resources_usage
+                "services_nodes": self.services_nodes
         }
         selected = dict(zip(self.obs_elements,
                             [observation[k] for k in self.obs_elements]))
@@ -574,81 +590,3 @@ class KubeBaseEnv(gym.Env):
             # append to the list
             services.append(service)
         self.services = np.array(services)
-
-    # def render(self):
-    #     """Show current state of cluster"""
-
-    #     if hasattr(self, 'service_metrics'):
-    #         self.service_metrics = self._load_services_metrics()
-    #         print('\n----[Services Memory and CPU]----\n')
-    #         for service in self.services:
-    #             used_memory = ResourceUsage(self.service_metrics.get(service.metadata_name)).memory / 1000
-    #             used_cpu = ResourceUsage(self.service_metrics.get(service.metadata_name)).cpu / 1000
-    #             print('Memory')
-    #             print("Service({})           ->           {} Mi".format(
-    #                 service.id,
-    #                 used_memory
-    #             ))
-    #             print('CPU:')
-    #             print("Service({})           ->           {} mCPU".format(
-    #                 service.id,
-    #                 used_cpu,
-    #             ))
-
-    #     print('\n----[Servers Memory and CPU Capacity]----\n')
-    #     node_metrics = self._cluster.monitor.get_nodes_metrics()
-    #     for node in self.nodes:
-    #         print('Memory:')
-    #         used_memory = ResourceUsage(node_metrics.get(node.name)).memory / 1000
-    #         total_memory = node.memory / 1000
-    #         print("Node({})           ->           {} Mi / {} Mi ({:.2f}%)".format(
-    #             node.id,
-    #             used_memory,
-    #             total_memory,
-    #             (used_memory / total_memory) * 100
-    #         ))
-    #         print('CPU:')
-    #         used_cpu = ResourceUsage(node_metrics.get(node.name)).cpu / 1000000
-    #         total_cpu = node.cpu * 1000
-    #         print("Node({})           ->           {} mCPU / {} mCPU ({:.2f}%)".format(
-    #             node.id,
-    #             used_cpu,
-    #             total_cpu,
-    #             (used_cpu / total_cpu) * 100
-    #         ))
-
-    #     print('\n----[Service Placements]----\n')
-    #     for service, node in zip(self.services, self.services_nodes_obj):
-    #         print("Service({})           ->           Node({})".format(
-    #             service.id,
-    #             node.id
-    #         ))
-
-    # def _is_illegal_state_done(self, observations):
-    #     """Check if the current memory allocation is feasible
-
-    #     :param observations: np.array
-    #         an array of observations
-
-    #     :return: bool
-    #     """
-
-    #     logger.info('Calculating resources by new observations ...')
-
-    #     # get memory busy of each node
-    #     node_mem_busy = np.zeros(self.num_nodes)
-    #     for i, node in enumerate(self.nodes):
-    #         node_mem_busy[i] = np.sum(mapper(
-    #             lambda service: ResourceUsage(
-    #                 self.service_metrics.get(service.metadata_name)
-    #             ).memory,
-    #             self.services[observations == node]
-    #         ))
-
-    #     # get memory capacity of each node
-    #     node_capacities = np.array(mapper(
-    #         lambda node: node.memory,
-    #         self.nodes
-    #     ))
-
-    #     return np.all(node_capacities < node_mem_busy)
