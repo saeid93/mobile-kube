@@ -6,8 +6,7 @@
                          "nodes_resources_usage" |
                          "services_resources_usage_frac" |
                          "nodes_resources_usage_frac" |
-                         "services_nodes" |
-                         "auxiliary_resources_usage"],
+                         "services_nodes"],
         "penalty_illegal": [int],
         "penalty_move": [int],
         "penalty_variance": [int],
@@ -20,8 +19,6 @@
         "placement_reset": [bool],
         "from_dataset": [bool],
         "reward_mode": ["cloud", "edge", "both"],
-        "action_method": ["absolute", "probabilistic"],
-        "step_method": ["all" | "edge" | "aux" | "greedy"],
         "normalise_latency": [bool],
         "compute_greedy_num_consolidated": [bool],
         "seed": [int]

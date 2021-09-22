@@ -49,7 +49,7 @@ class SimBaseEnv(gym.Env):
 
             range:
                 indices: [0, num_services)
-                contents: [0, num_nodes+1) (+1 for one auxiliary node)
+                contents: [0, num_nodes)
 
         config['workload_start']:
             the start timestep of the entire dataset that we want to use
@@ -131,11 +131,6 @@ class SimBaseEnv(gym.Env):
         _reward = get_reward_method(config['reward_mode'])
         self._reward = types.MethodType(_reward, self)
 
-        # TODO add it if used
-        # add one auxiliary node with unlimited and autoscaled capacity
-        # TODO make it consistent with Alireza
-        self.total_num_nodes: int = self.num_nodes + 1
-
         # whether to take the overloaded action with negative reward or not
         self.no_action_on_overloaded = config['no_action_on_overloaded']
 
@@ -176,7 +171,6 @@ class SimBaseEnv(gym.Env):
                                         plot_length=80)
         else:
             print(Fore.RED, "agent's action lead to an overloaded state!")
-            # before using auxiliary
             print("nodes_resources_usage_frac:")
             print(self.nodes_resources_request_frac)
             print("services_nodes:")
@@ -187,7 +181,6 @@ class SimBaseEnv(gym.Env):
                                         self.services_resources_request,
                                         self.services_resources_usage,
                                         plot_length=80)
-            # after using auxiliary
             print(Style.RESET_ALL)
 
         def preprocessor(self, obs):
@@ -379,14 +372,6 @@ class SimBaseEnv(gym.Env):
         return nodes_services
 
     @property
-    def services_in_auxiliary(self) -> np.ndarray:
-        """services in the auxiliary node
-        """
-        services_in_auxiliary = np.where(self.services_nodes ==
-                                           self.num_nodes)[0]
-        return services_in_auxiliary
-
-    @property
     def nodes_resources_remained_frac(self):
         return self.nodes_resources_remained / self.nodes_resources_cap
 
@@ -401,12 +386,6 @@ class SimBaseEnv(gym.Env):
     @property
     def nodes_resources_available_frac_avg(self):
         return np.average(self.nodes_resources_available_frac, axis=1)
-
-    @property
-    def num_in_auxiliary(self) -> int:
-        """num of services in the auxiliary node
-        """
-        return len(self.services_in_auxiliary)
 
     @property
     def done(self):

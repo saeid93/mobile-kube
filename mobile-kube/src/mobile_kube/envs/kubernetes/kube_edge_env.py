@@ -83,9 +83,6 @@ class KubeEdgeEnv(KubeBaseEnv):
                 # add the one hot endoded services_resources
                 # number of elements
                 obs_size += (self.num_nodes+1) * self.num_services
-            elif elm == "auxiliary_resources_usage":
-                # add the auxiliary resource usage to the number of elements
-                obs_size += self.num_resources
 
         # add the one hot endoded users_stations
         # number of elements

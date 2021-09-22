@@ -92,7 +92,7 @@ class SimEdgeEnv(SimBaseEnv):
             elif elm == "services_nodes":
                 # add the one hot endoded services_resources
                 # number of elements
-                obs_size += (self.num_nodes+1) * self.num_services
+                obs_size += (self.num_nodes) * self.num_services
 
         # add the one hot endoded users_stations
         # number of elements

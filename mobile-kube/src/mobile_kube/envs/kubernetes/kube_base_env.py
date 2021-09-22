@@ -74,10 +74,6 @@ class KubeBaseEnv(gym.Env):
                                     overloading was successful
             self.mitigation_tries: indicator of how many binpacking mitigations
                                 should be tried
-            self.auxiliary_node_needed: indicator of whether the
-                                        _binpacking_mitigator was successful or
-                                        not and if we need to use the
-                                        auxiliary node
     """
 
     # ------------------ common functions ------------------

@@ -27,11 +27,6 @@ class SimBinpackingEnv(SimEdgeEnv):
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, int, bool, dict]:
         """
         General overivew:
-            1. try binpacking without auxiliary
-            2. if doesn't fit add auxiliary as the last server
-                and allocate with considering it (auxiliary has
-                unlimited space)
-        Binpacking:
         generate the intitial state for nodes_services with a
         bestfit greedy algorithm.
             1. iterate over nodes one by one
@@ -93,7 +88,6 @@ class SimBinpackingEnv(SimEdgeEnv):
                remaining resources (already the last popped node)
         """
         self.services_nodes = np.ones(self.num_services, dtype=int) * (-1)
-        # initialise with auxiliary
         nodes = list(np.arange(self.num_nodes))
         popped_nodes = []
         node_id = nodes.pop()

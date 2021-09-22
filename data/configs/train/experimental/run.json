@@ -19,8 +19,7 @@
             "service_image": "sdghafouri/service",
             "namespace": "consolidation",
             "clean_after_exit": true,
-            "utilization_image": "sdghafouri/utilization-server",
-            "using_auxiliary_server": false
+            "utilization_image": "sdghafouri/utilization-server"
         }
     },
     "run_or_experiment": "PPO",

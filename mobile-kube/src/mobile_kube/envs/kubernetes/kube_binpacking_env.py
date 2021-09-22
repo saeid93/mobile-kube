@@ -62,9 +62,6 @@ class KubeBinpackingEnv(KubeBaseEnv):
                 # add the one hot endoded services_resources
                 # number of elements
                 obs_size += (self.num_nodes+1) * self.num_services
-            elif elm == "auxiliary_resources_usage":
-                # add the auxiliary resource usage to the number of elements
-                obs_size += self.num_resources
 
         # generate observation and action spaces
         observation_space = Box(low=0, high=1, shape=(obs_size, ))
@@ -94,7 +91,6 @@ class KubeBinpackingEnv(KubeBaseEnv):
                remaining resources (already the last popped node)
         """
         self.services_nodes = np.ones(self.num_services, dtype=int) * (-1)
-        # initialise with auxiliary
         nodes = list(np.arange(self.num_nodes))
         popped_nodes = []
         node_id = nodes.pop()

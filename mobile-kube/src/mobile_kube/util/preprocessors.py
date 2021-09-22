@@ -25,8 +25,7 @@ class Preprocessor():
            'services_resources_usage_frac': self._none,
            'nodes_resources_usage_frac': self._none,
            'services_nodes': self._one_hot_services_nodes,
-           'users_stations': self._one_hot_users_stations,
-           'auxiliary_resources_usage': self._auxiliary_usage_normalizer
+           'users_stations': self._one_hot_users_stations
         }
         for key, val in observation.items():
             obs = np.concatenate((obs, transformers.get(
@@ -59,17 +58,6 @@ class Preprocessor():
             lst.append(max(self.nodes_resources_cap[:, index]))
         return obs/lst
 
-    def _auxiliary_usage_normalizer(self, obs: np.ndarray) -> np.ndarray:
-        """
-        divides the largest available of each resource by the
-        total capacity of that resource in the cluster
-        e.g for ram:
-            ram_usage_of_auxiliary / total_ram_cap_of_cluster
-        so the size of auxiliary node is proportional to the cluster size
-        """
-        nodes_total = sum(self.nodes_resources_cap)
-        return obs/nodes_total
-
     def _none(self, obs: np.ndarray) -> np.ndarray:
         return obs
 
@@ -86,8 +74,7 @@ class Preprocessor():
         #      look at ray for inspriatino
         obs_prep = np.array([])
         for node in obs:
-            # +1 for auxiliary node
-            one_hot_encoded = np.zeros(self.num_nodes+1)
+            one_hot_encoded = np.zeros(self.num_nodes)
             one_hot_encoded[node] = 1
             obs_prep = np.concatenate((obs_prep, one_hot_encoded))
         return obs_prep
