@@ -42,7 +42,7 @@ class SimBinpackingEnv(SimEdgeEnv):
         """
         # find take the action
         prev_services_nodes = deepcopy(self.services_nodes)
-        _, action = self._next_greedy_action(prev_services_nodes)
+        action = self._next_greedy_action(prev_services_nodes)
         assert self.action_space.contains(action)
         self.services_nodes = deepcopy(action)
 
@@ -125,5 +125,4 @@ class SimBinpackingEnv(SimEdgeEnv):
         # reset the services_nodes to the previous observation
         # for consistency with other envs environments
         self.services_nodes = deepcopy(prev_services_nodes)
-        num_consolidated = self._num_consolidated(action)
-        return num_consolidated, action
+        return action

@@ -319,3 +319,36 @@ class NetworkSimulatorBase:
                                edge_labels=edge_labels, font_size=9)
 
         return f
+
+    # ----------- greedy action -----------
+    def _next_greedy_action(self, nodes_mem_cap, services_mem_request,
+                            nodes_cpu_cap, services_cpu_request):
+        temp_services_nodes = copy.deepcopy(self.services_nodes)
+        def node_station_dis(node_id, station_id):
+            dis = nx.shortest_path_length(self.network,
+                                          source=(station_id, 'station'),
+                                          target=(node_id, 'node'),
+                                          weight='weight',
+                                          method='dijkstra')
+            return dis
+        # iterate through each service one by one to find a new placement for them
+        for service in range(0, self.num_services):
+            service_connected_users = np.argwhere(self.users_services==service).flatten()
+            service_connected_users_stations = self.users_stations[service_connected_users]
+            service_average_nodes_penalties = []
+            for node in range(0, self.num_nodes):
+                station_nodes_penalty = np.array([node_station_dis(node, station_id)
+                                                    for station_id in service_connected_users_stations])
+                service_average_nodes_penalty = np.average(station_nodes_penalty)
+                service_average_nodes_penalties.append(service_average_nodes_penalty)
+            # move it to the first server with lowest latency and available memory
+            sorted_nodes_indices = np.argsort(service_average_nodes_penalties)
+            for node in sorted_nodes_indices:
+                services_in_node = np.argwhere(temp_services_nodes==node).flatten()
+                used_mem = sum(services_mem_request[services_in_node])
+                used_cpu = sum(services_cpu_request[services_in_node])
+                if used_mem + services_mem_request[service] <= nodes_mem_cap[node] and \
+                    used_cpu + services_cpu_request[service] <= nodes_cpu_cap[node]:
+                    temp_services_nodes[service] = node
+                    break
+        return temp_services_nodes

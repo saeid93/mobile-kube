@@ -52,7 +52,7 @@ def learner(*, config: Dict[str, Any],
 
     algorithm = {
 	    'sim-binpacking': 'binpacking',
-        'sim-edge-greedy': 'edge-greedy'
+        'sim-greedy': 'greedy'
     }[type_env]
     env_config_base = config['env_config_base']
 
@@ -137,7 +137,7 @@ def flatten(raw_obs, action, reward, info):
 @click.command()
 @click.option('--config-folder', type=str, default='experimental')
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-binpacking', 'sim-edge-greedy']),
+              type=click.Choice(['sim-binpacking', 'sim-greedy']),
               default='sim-binpacking')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
