@@ -233,11 +233,8 @@ atlassian-ide-plugin.xml
 
 # myignores
 .VSCodeCounter
-data/configs/real/*
-data/dataset_metadata/*
 
 data/experiments
-results
-results-experimental
+data/results
 data/datasets
-plots
+data/plots
