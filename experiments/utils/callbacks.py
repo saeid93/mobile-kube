@@ -91,9 +91,6 @@ class CloudCallback(DefaultCallbacks):
             rewards = episode.last_info_for()['rewards']
             episode.user_data["rewards"].append(rewards)
 
-            # # TODO TEMP
-            # step_reward = episode.prev_reward_for()
-            # episode.user_data["step_reward"].append(step_reward)
 
             # print(f"env: <{episode.env_id}>")
             # print(f"worker: <{worker.worker_index}>")

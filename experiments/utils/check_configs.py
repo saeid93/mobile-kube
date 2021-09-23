@@ -15,7 +15,6 @@ def config_dataset_generation_check(config: Dict[str, Any]):
     """
     check the structure of the dataset generation
     """
-    # TODO add more items into it
     allowed_items = ['notes', 'nums', 'metrics', 'nodes_cap_rng',
                      'services_request_rng', 'cutoff', 'start_workload', 'seed']
     for key, _ in config.items():
@@ -95,14 +94,6 @@ def config_trace_generation_check(config: Dict[str, Any]):
     for item in bools:
         assert type(config[item]) == bool, f"<{item}> must be an boolean"
 
-
-def config_check_learned_check(config: Dict[str, Any]):
-    # TODO implement
-    b = 1
-
-def config_run_check(config: Dict[str, Any]):
-    # TODO implement
-    b = 1
 
 def env_config_base_check(config: Dict[str, Any]):
     """

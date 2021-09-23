@@ -133,6 +133,7 @@ follows:
 |1|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 |2|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 
+Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators. TODO
 
 ## 4.4. [experiments](experiments)
 
