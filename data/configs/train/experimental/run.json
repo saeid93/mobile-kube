@@ -24,7 +24,7 @@
     },
     "run_or_experiment": "PPO",
     "learn_config": {
-        "num_gpus": 0,
+        "num_gpus": 1,
         "num_workers": 1,
         "lr": 1e-2,
         "model": {

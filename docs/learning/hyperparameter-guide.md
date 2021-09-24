@@ -49,7 +49,7 @@ Description:
 ```
 "run_or_experiment": "PPO"
 ```
-5. learn_config: learning configuration of the rllib library, this config is very much dependent on the used RL algorithm. For the complete list of hyperparameters of each algorithm see [rllib algorithms](https://docs.ray.io/en/latest/rllib-algorithms.html). Also, for the complete list of common configs (same hyperparameters across all rl envs) see the [common configs](https://docs.ray.io/en/latest/rllib-training.html#common-parameters).
+5. learn_config: learning configuration of the rllib library, this config is very much dependent on the used RL algorithm. For the complete list of hyperparameters of each algorithm see [rllib algorithms](https://docs.ray.io/en/latest/rllib-algorithms.html). Also, for the complete list of common configs (same hyperparameters across all rl envs) see the [common configs](https://docs.ray.io/en/latest/rllib-training.html#common-parameters). Complete list of the available [huperparameter search options for Tune](https://docs.ray.io/en/latest/tune/api_docs/search_space.html) ara available in the ray documentation.
 For hyperparameter search with tune we have the following options:
 ```
 "uniform": tune.uniform(-5, -1),  # Uniform float between -5 and -1

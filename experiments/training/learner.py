@@ -137,7 +137,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 
 @click.command()
-@click.option('--local-mode', type=bool, default=True)
+@click.option('--local-mode', type=bool, default=False)
 @click.option('--config-folder', type=str, default='experimental')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
