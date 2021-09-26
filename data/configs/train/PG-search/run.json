@@ -5,21 +5,27 @@
         "description": "this is a real experiment"
     },
     "env_config_base": {
-        "obs_elements": ["services_resources_usage",
-                         "nodes_resources_usage",
-                         "services_resources_usage_frac",
-                         "nodes_resources_usage_frac",
-                         "services_nodes"],
+        "obs_elements": ["services_nodes"],
         "penalty_illegal": -1,
-        "penalty_move": -1,
-        "penalty_variance": -1,
-        "penalty_consolidated": 1,
+        "penalty_move": 0,
+        "penalty_variance": 0,
+        "penalty_consolidated": 0.5,
+        "penalty_latency": 0.5,
         "workload_stop": 1,
+        "episode_length": 50,
         "timestep_reset": false,
         "placement_reset": false,
-        "episode_length": 50,
-        "reward_mode": "absolute",
-        "seed": 1
+        "reward_mode":"both",
+        "normalise_latency": true,
+        "no_action_on_overloaded": false,
+        "seed": 1,
+        "kube":{
+            "admin_config": "~/.kube/config",
+            "service_image": "sdghafouri/service",
+            "namespace": "consolidation",
+            "clean_after_exit": true,
+            "utilization_image": "sdghafouri/utilization-server"
+        }
     },
     "run_or_experiment": "PG",
     "learn_config": {

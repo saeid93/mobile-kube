@@ -1,0 +1,46 @@
+
+{
+    "notes": {
+        "env_model": "real experiment",
+        "description": "this is a real experiment"
+    },
+    "env_config_base": {
+        "obs_elements": ["services_nodes"],
+        "penalty_illegal": -1,
+        "penalty_move": 0,
+        "penalty_variance": 0,
+        "penalty_consolidated": 0.5,
+        "penalty_latency": 0.5,
+        "workload_stop": 1,
+        "episode_length": 50,
+        "timestep_reset": false,
+        "placement_reset": false,
+        "reward_mode":"both",
+        "normalise_latency": true,
+        "no_action_on_overloaded": false,
+        "seed": 1,
+        "kube":{
+            "admin_config": "~/.kube/config",
+            "service_image": "sdghafouri/service",
+            "namespace": "consolidation",
+            "clean_after_exit": true,
+            "utilization_image": "sdghafouri/utilization-server"
+        }
+    },
+    "run_or_experiment": "MARWIL",
+    "learn_config": {
+        "num_gpus": 0.25,
+        "num_workers": 4,
+        "lr": 0.0001,
+        "model": {
+            "fcnet_hiddens": [40, 40, 40, 40]
+        },
+        "framework": "torch",
+        "rollout_fragment_length": 200,
+        "train_batch_size": 400
+    },
+    
+    "stop": {
+        "training_iteration": 200
+    }
+}

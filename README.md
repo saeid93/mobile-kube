@@ -195,9 +195,9 @@ Options:
 ```
 For a full list of `config.json` parameters options see [trace-configs-options](docs/configs-parameters/trace-generation.md). The results will be saved in [data/datasets/<dataset_id>/<network_id>/<trace_id>](data/datasets).
 
-### 4.4.2. [Learning](experiments/learning), [checking](experiments/check_scripts) and [analysis](experiments/analysis)
+### 4.4.2. [Training](experiments/training) and [analysis](experiments/analysis)
 
-### 4.4.2.1. [Training the agent](experiments/learning/learner.py)
+### 4.4.2.1. [Training the agent](experiments/training/learner.py)
 
 1. change the training parameters in `<configs-path>/real/<experiment-folder>/config_run.json`. For more information about the hyperparamters in this json file see [hyperparameter guide](docs/learning/hyperparameter-guide.md)
 2. To train the environments go to the parent folder and run the following command.
