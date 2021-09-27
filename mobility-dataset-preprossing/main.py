@@ -21,7 +21,7 @@ def parallel_etl(first, last, interval, path):
               type=str)
 @click.option('--get', '-g', help="Get data set from the internet", type=bool, default=False, show_default=True)
 @click.option('--url', '-u', help="The url of Cabspotting data set", default="", type=str, show_default=True)
-@click.option('--interval', '-i', help="Enter the intervals between two points in seconds", default=100, type=int,
+@click.option('--interval', '-i', help="Enter the intervals between two points in seconds", default=300, type=int,
               show_default=True)
 @click.option('--processes', '-p', help="number of processes", default=1, type=int, show_default=True)
 def main(dataset, get, url, interval, processes):
