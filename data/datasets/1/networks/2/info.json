@@ -1,0 +1,24 @@
+{
+    "notes": "some network",
+    "dataset_id": 1,
+    "num_users": 75,
+    "num_stations": 10,
+    "from_dataset": true,
+    "width": 1,
+    "length": 1,
+    "speed_limit": 30,
+    "nodes_stations_con": 1,
+    "selected_nodes_indexes": [
+        589,
+        218,
+        1015,
+        793,
+        1075,
+        1309,
+        345,
+        677,
+        313,
+        1230
+    ],
+    "seed": 250
+}

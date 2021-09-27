@@ -12,7 +12,7 @@
         "placement_reset": false,
         "reward_mode":"both",
         "normalise_latency": true,
-        "no_action_on_overloaded": false,
+        "no_action_on_overloaded": true,
         "seed": 1,
         "kube":{
             "admin_config": "~/.kube/config",

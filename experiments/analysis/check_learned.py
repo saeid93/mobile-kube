@@ -95,7 +95,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
         experiments_folder,
         experiment_string,
         # os.listdir(experiments_folder)[0],
-        f"checkpoint_{checkpoint}",
+        f"checkpoint_000{checkpoint}",
         f"checkpoint-{checkpoint}"
     )
 
@@ -137,18 +137,18 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--config-folder', type=str, default='experimental')
+@click.option('--config-folder', type=str, default='PPO')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
-              default='kube-edge')
-@click.option('--dataset-id', required=True, type=int, default=3)
+              default='sim-edge')
+@click.option('--dataset-id', required=True, type=int, default=1)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=False)
-@click.option('--experiment_id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=100)
+@click.option('--experiment_id', required=True, type=int, default=1)
+@click.option('--checkpoint', required=False, type=int, default=200)
 def main(local_mode: bool, config_folder: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, use_callback: bool, experiment_id: int,
