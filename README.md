@@ -3,10 +3,9 @@
 This simulator contains many scenarios for both centralised and edge cloud
 
 TODO introduce paper(s), theory and background
-1. edge:
-   1. edge users and network
-   2. latency reduction
-   3. energy comsomption
+1. Objectives
+   1. latency reduction: having the services closer to the users
+   2. energy comsomption: having the minimum number of active Kuberentes nodes
 ## 1.2. RL Agent Characteristics
 **Observations** TODO a [sample observation](docs/learning/raw_observation.txt) with the [preprocessed observation](docs/learning/preprocessed_observation.txt)
 
