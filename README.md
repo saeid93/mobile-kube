@@ -49,6 +49,7 @@ You can find the toturial for creating the cluster on google cloud and locally i
 
 * [Google cloud installation](docs/kubernetes/installation-gcp.md)
 * [Local cluster setup installation](docs/kubernetes/installation-local.md)
+* [Installation using Ansible](docs/kubernetes/installation-ansible.md)
 
 # 4. Project Structure
 
@@ -205,11 +206,11 @@ For a full list of `config.json` parameters options see [trace-configs-options](
 python experiments/learning/learners.py --mode real --local-mode false --config-folder PPO --type-env 0 --dataset-id 0 --workload-id 0 --use-callback true
 ```
 
-### 4.4.2.2. [Test the learned agent - simulation](experiments/check_scripts/check_learned.py)
+### 4.4.2.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
 
 TODO
 
-### 4.4.2.3. [Test the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
+### 4.4.2.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
 
 1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py) 
 TODO
@@ -236,6 +237,8 @@ The main operations that are currently implemented are:
   * get pods resource usage
 
 a sample of using the interface can be found [here](experiments/kube_operations.py)
+
+
 ## 4.4.4. [Extra scripts](experiments/utils)
 
 1. [experiments/utils/data_backup.py](experiments/utils/data_backup.py): Use this for backing up your data folder.
