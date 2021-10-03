@@ -41,7 +41,8 @@ TODO introduce paper(s), theory and background
 9. setup [tensorboard monitoring](docs/monitorings/tensorboard.md)
 
 # 3. Kubernetes Cluster Setup
-There are several options for setting up a Kuberentes cluster. As long as you have access to the kube config address e.g. `~/.kube/config` in your config files specified.
+If you want to do the real world Kubernetes experiemnts of the paper you should also do the following steps.
+There are several options for setting up a Kuberentes cluster. The repo codes can connect to the cluster through the [Python client API](https://github.com/kubernetes-client/python) as long as you have access to the kube config address e.g. `~/.kube/config` in your config files specified.
 
 We have used [Google Cloud Platform](https://cloud.google.com/) for our experiments.
 You can find the toturial for creating the cluster on google cloud and locally in the followings:
@@ -211,7 +212,9 @@ TODO
 
 ### 4.4.2.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
 
-1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py) 
+1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py).
+2. compile and upload the Dockerfile to your Docker registry TODO
+3. Use ansible playbooks in TODO to setup the cluster in gcloud 
 TODO
 
 ### 4.4.2.4. [Analysis](experiments/analysis)
