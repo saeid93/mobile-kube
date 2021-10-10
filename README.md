@@ -196,9 +196,12 @@ Options:
 ```
 For a full list of `config.json` parameters options see [trace-configs-options](docs/configs-parameters/trace-generation.md). The results will be saved in [data/datasets/<dataset_id>/<network_id>/<trace_id>](data/datasets).
 
-### 4.4.2. [Training](experiments/training) and [analysis](experiments/analysis)
+### 4.4.2. [Analysis](experiments/analysis)
+TODO
 
-### 4.4.2.1. [Training the agent](experiments/training/learner.py)
+### 4.4.3. [Training](experiments/training) and [analysis](experiments/analysis)
+
+### 4.4.3.1. [Training the agent](experiments/training/learner.py)
 
 1. change the training parameters in `<configs-path>/real/<experiment-folder>/config_run.json`. For more information about the hyperparamters in this json file see [hyperparameter guide](docs/learning/hyperparameter-guide.md)
 2. To train the environments go to the parent folder and run the following command.
@@ -206,22 +209,22 @@ For a full list of `config.json` parameters options see [trace-configs-options](
 python experiments/learning/learners.py --mode real --local-mode false --config-folder PPO --type-env 0 --dataset-id 0 --workload-id 0 --use-callback true
 ```
 
-### 4.4.2.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
+### 4.4.3.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
 
 TODO
 
-### 4.4.2.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
+### 4.4.3.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
 
 1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py).
 2. compile and upload the Dockerfile to your Docker registry TODO
 3. Use ansible playbooks in TODO to setup the cluster in gcloud 
 TODO
 
-### 4.4.2.4. [Analysis](experiments/analysis)
+### 4.4.3.4. [Analysis](experiments/analysis)
 
 TODO
 
-## 4.4.3. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
+## 4.4.4. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
 
 The Kubernetes interface is designed based-on the Kubernetes [api version 1](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/).
 
@@ -241,7 +244,7 @@ The main operations that are currently implemented are:
 a sample of using the interface can be found [here](experiments/kube_operations.py)
 
 
-## 4.4.4. [Extra scripts](experiments/utils)
+## 4.4.5. [Extra scripts](experiments/utils)
 
 1. [experiments/utils/data_backup.py](experiments/utils/data_backup.py): Use this for backing up your data folder.
 
