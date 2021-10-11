@@ -17,7 +17,8 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
         self, *, services_nodes: np.array,
         users_services: np.array, num_nodes: np.array,
         num_stations: int, width: int, length: int,
-        speed_limit: int, nodes_stations_con: int ,seed: int) -> None:
+        colocated: bool,speed_limit: int, nodes_stations_con: int ,
+        seed: int) -> None:
         """The initialiser for generating the dataset network
         """
         super().__init__(
@@ -29,6 +30,7 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
             speed_limit=speed_limit,
             nodes_stations_con=nodes_stations_con,
             seed=seed)
+        self.colocated = colocated
         self.raw_network = self._make_raw_network()
         self.network = deepcopy(self.raw_network)
         self._make_complete_network()
@@ -68,15 +70,19 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
         network.add_nodes_from(self.stations_idx)
         
         # add location to nodes
-        occupied_locs = set()
-        for node in network.nodes:
-            while True:
-                loc = (round(random.uniform(0, self.length), 2),
-                       round(random.uniform(0, self.width), 2))
-                if loc not in occupied_locs:
-                    network.nodes[node]['loc'] = loc
-                    occupied_locs.add(loc)
-                    break
+        if self.colocated:
+            occupied_locs = set()
+            for node in network.nodes:
+                while True:
+                    loc = (round(random.uniform(0, self.length), 2),
+                        round(random.uniform(0, self.width), 2))
+                    if loc not in occupied_locs:
+                        network.nodes[node]['loc'] = loc
+                        occupied_locs.add(loc)
+                        break
+        else:
+            pass
+            # TODO not colocated here
 
         # adding node-node edges to the network with spanning tree
         nodes_subgraph = nx.complete_graph(

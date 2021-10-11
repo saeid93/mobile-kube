@@ -22,6 +22,7 @@ class NetworkGenerator:
                  users_dataset_path=None,
                  nodes_selection,
                  nodes_list,
+                 colocated,
                  seed):
         """
             edge network generator
@@ -45,6 +46,7 @@ class NetworkGenerator:
         self.users_dataset_path = users_dataset_path
         self.nodes_selection = nodes_selection
         self.nodes_list = nodes_list
+        self.colocated = colocated
         np.random.seed(self.seed)
         random.seed(self.seed)
 
@@ -88,6 +90,7 @@ class NetworkGenerator:
                 width=self.width, length=self.length,
                 speed_limit=self.speed_limit,
                 nodes_stations_con=self.nodes_stations_con,
+                colocated=self.colocated,
                 seed=self.seed)
 
         edge_simulator_config = {

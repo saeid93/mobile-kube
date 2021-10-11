@@ -33,6 +33,7 @@ def generate_network(
     speed_limit: int, nodes_stations_con: int,
     users_services_distributions: str,
     from_dataset: bool, dataset_metadata: int,
+    colocated: bool,
     nodes_selection: str, nodes_list: list,
     seed: int):
     """
@@ -85,6 +86,7 @@ def generate_network(
         stations_dataset_path=stations_dataset_path,
         users_dataset_path=users_dataset_path,
         nodes_selection=nodes_selection,
+        colocated=colocated,
         nodes_list=nodes_list,
         seed=seed)
     edge_simulator, edge_simulator_config = network_generator.make_network()
@@ -100,10 +102,13 @@ def generate_network(
         'length': length,
         'speed_limit': speed_limit,
         'nodes_stations_con': nodes_stations_con,
-        'selected_nodes_indexes':\
-            edge_simulator.selected_nodes_indexes.tolist(),
         'seed': seed
     }
+
+    if from_dataset:
+        info.update({
+            'selected_nodes_indexes':\
+                edge_simulator.selected_nodes_indexes.tolist()})
 
     # save the info and network in the folder
     with open(os.path.join(dir2save, 'info.json'), 'x') as out_file:

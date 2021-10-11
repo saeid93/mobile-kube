@@ -1,6 +1,6 @@
 {
-    "dataset_id": 1,
-    "network_id": 2,
+    "dataset_id": 3,
+    "network_id": 0,
     "speed": 30,
     "timesteps": 3453,
     "from_dataset": true,

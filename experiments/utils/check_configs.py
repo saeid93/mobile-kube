@@ -52,7 +52,7 @@ def config_network_generation_check(config: Dict[str, Any]):
                      'width', 'length', 'speed_limit', 'from_dataset',
                      'users_services_distributions', 'dataset_metadata',
                      'nodes_stations_con', 'nodes_selection', 'nodes_list',
-                     'seed']
+                     'seed', 'colocated']
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the network generation config")
@@ -65,7 +65,7 @@ def config_network_generation_check(config: Dict[str, Any]):
     strs = ['notes', 'users_services_distributions', 'nodes_selection']
     for item in strs:
         assert type(config[item]) == str, f"<{item}> must be an string"
-    bools = ['from_dataset']
+    bools = ['from_dataset', 'colocated']
     for item in bools:
         assert type(config[item]) == bool, f"<{item}> must be an boolean"
     lists = ['nodes_list']

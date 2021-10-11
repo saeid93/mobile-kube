@@ -137,13 +137,13 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 
 @click.command()
-@click.option('--local-mode', type=bool, default=False)
-@click.option('--config-folder', type=str, default='PPO')
+@click.option('--local-mode', type=bool, default=True)
+@click.option('--config-folder', type=str, default='PG')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy']),
               default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=1)
+@click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
