@@ -57,8 +57,11 @@ def config_network_generation_check(config: Dict[str, Any]):
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
                                       " the network generation config")
     # type checks
+    floats = ['width', 'length']
+    for item in floats:
+        assert type(config[item]) == float, f"<{item}> must be an float"
     ints = ['dataset_id', 'num_users', 'num_stations',
-            'width', 'length', 'speed_limit', 'dataset_metadata',
+            'speed_limit', 'dataset_metadata',
             'nodes_stations_con', 'seed']
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"

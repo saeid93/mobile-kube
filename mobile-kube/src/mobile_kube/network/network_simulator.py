@@ -20,8 +20,8 @@ class NetworkSimulator(NetworkSimulatorBase):
         users_services: np.array, num_nodes: np.array,
         num_stations: int, width: int, length: int,
         speed_limit: int, nodes_stations_con: int,
-        from_dataset: bool, users_dataset_path: str,
-        stations_dataset_path: str,
+        from_dataset: bool, users_dataset_path: str = "",
+        stations_dataset_path: str = "",
         network: nx.Graph, raw_network: nx.Graph,
         trace: List[Dict[int, Tuple[float, float]]],
         seed: int, selected_nodes: list=None):

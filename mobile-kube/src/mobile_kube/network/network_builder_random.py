@@ -16,9 +16,9 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
     def __init__(
         self, *, services_nodes: np.array,
         users_services: np.array, num_nodes: np.array,
-        num_stations: int, width: int, length: int,
-        colocated: bool,speed_limit: int, nodes_stations_con: int ,
-        seed: int) -> None:
+        num_stations: int, width: int, length: int, colocated: bool,
+        speed_limit: int, nodes_stations_con: int ,seed: int) -> None:
+
         """The initialiser for generating the dataset network
         """
         super().__init__(
@@ -43,7 +43,9 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
         num_stations: int, width: int, length: int,
         speed_limit: int, nodes_stations_con: int,
         network: nx.Graph, raw_network: nx.Graph,
-        seed: int):
+        users_dataset_path: str = "",
+        stations_dataset_path: str = "", seed: int,
+        selected_nodes: np.array):
         """The initialiser for generating the random network
         """
         ins = cls(
@@ -52,7 +54,8 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
             num_nodes=num_nodes,
             num_stations=num_stations, width=width,
             length=length, speed_limit=speed_limit,
-            nodes_stations_con=nodes_stations_con, seed=seed)
+            colocated=True, nodes_stations_con=nodes_stations_con,
+            seed=seed)
         ins.network = network
         ins.raw_network = raw_network
         return ins
@@ -70,19 +73,29 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
         network.add_nodes_from(self.stations_idx)
         
         # add location to nodes
-        if self.colocated:
+        if not self.colocated:
             occupied_locs = set()
             for node in network.nodes:
                 while True:
-                    loc = (round(random.uniform(0, self.length), 2),
-                        round(random.uniform(0, self.width), 2))
+                    loc = (round(random.uniform(0, 1), 2),
+                        round(random.uniform(0, 1), 2))
                     if loc not in occupied_locs:
                         network.nodes[node]['loc'] = loc
                         occupied_locs.add(loc)
                         break
         else:
-            pass
-            # TODO not colocated here
+            assert self.num_nodes == self.num_stations, \
+                "num of services and nodes should be equal in colocated mode"
+            nudge = 0.0001
+            for station in self.stations_idx:
+                # random station location
+                loc = (round(random.uniform(0, 1), 2),
+                       round(random.uniform(0, 1), 2))
+                network.nodes[station]['loc'] = loc
+                # colocated node in a near location
+                node_loc = tuple(map(lambda x: x + nudge, loc))
+                node_index = (station[0], 'node')
+                network.nodes[node_index]['loc'] = node_loc
 
         # adding node-node edges to the network with spanning tree
         nodes_subgraph = nx.complete_graph(
@@ -116,13 +129,19 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
            place users randomly
            at locations in the map
         """
+        xs = [v['loc'][0] for k, v in self.raw_network.nodes._nodes.items()]
+        ys = [v['loc'][1] for k, v in self.raw_network.nodes._nodes.items()]
+        self.x_min = min(xs) - self.length
+        self.x_max = max(xs) + self.length
+        self.y_min = min(ys) - self.width
+        self.y_max = max(ys) + self.width
         network.add_nodes_from(self.users_idx)
         # add location to nodes
         occupied_loc = set(nx.get_node_attributes(network,'loc').values())
         for node in self.users_idx:
             while True:
-                loc = (round(random.uniform(0, self.length), 2),
-                       round(random.uniform(0, self.width), 2))
+                loc = (round(random.uniform(self.x_min, self.x_max), 2),
+                       round(random.uniform(self.y_min, self.y_max), 2))
                 if loc not in occupied_loc:
                     network.nodes[node]['loc'] = loc
                     occupied_loc.add(loc)
@@ -134,23 +153,28 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
         """
             Randomly moves users with `User.SPEED_LIMIT` in 2d surface
         """
+        xs = [v['loc'][0] for k, v in self.raw_network.nodes._nodes.items()]
+        ys = [v['loc'][1] for k, v in self.raw_network.nodes._nodes.items()]
+        self.x_min = min(xs) - self.length
+        self.x_max = max(xs) + self.length
+        self.y_min = min(ys) - self.width
+        self.y_max = max(ys) + self.width
         for node_id, node_type in self.network.nodes:
             if node_type == 'user':
                 user_speed = self.SPEED_LIMIT
                 # user_speed = np.random.randint(SPEED_LIMIT)
-                dx = (random.random() - 0.5)*user_speed/100*self.width
-                dy = (random.random() - 0.5)*user_speed/100*self.length
+                dx = (random.random() - 0.5)*user_speed/100* (self.x_max - self.x_min)
+                dy = (random.random() - 0.5)*user_speed/100* (self.y_max - self.y_min)
                 node_location = self.network.nodes[
                     (node_id, node_type)]['loc']
                 new_x = node_location[0] + dx
                 new_y = node_location[1] + dy
-                if new_x > self.width:
-                    new_x = self.width
-                if new_x < 0:
-                    new_x = 0
-                if new_y > self.length:
-                    new_y = self.length
-                if new_y < 0:
-                    new_y = 0
-                self.network.nodes[(node_id, node_type)]['loc'] =\
-                    (round(new_x, 2), round(new_y, 2))
+                if new_x > self.x_max:
+                    new_x = self.x_max
+                if new_x < self.x_min:
+                    new_x = self.x_min
+                if new_y > self.y_max:
+                    new_y = self.y_max
+                if new_y < self.y_min:
+                    new_y = self.y_min
+                self.network.nodes[(node_id, node_type)]['loc'] = (new_x, new_y)

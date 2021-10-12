@@ -51,14 +51,15 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
         self.trace = None
 
     @classmethod
-    def with_network(cls, *, services_nodes: np.array,
-                     users_services: np.array, num_nodes: np.array,
-                     num_stations: int, width: int, length: int,
-                     speed_limit: int, nodes_stations_con: int,
-                     network: nx.Graph, raw_network: nx.Graph,
-                     users_dataset_path: str,
-                     stations_dataset_path: str, seed: int,
-                     selected_nodes: np.array):
+    def with_network(
+        cls, *, services_nodes: np.array,
+        users_services: np.array, num_nodes: np.array,
+        num_stations: int, width: int, length: int,
+        speed_limit: int, nodes_stations_con: int,
+        network: nx.Graph, raw_network: nx.Graph,
+        users_dataset_path: str,
+        stations_dataset_path: str, seed: int,
+        selected_nodes: np.array):
         """
             The initialiser for generating the trace
         """
@@ -156,6 +157,7 @@ class NetworkBuilderDataset(NetworkSimulatorBase):
     @override(NetworkSimulatorBase)
     def _users_move_random(self) -> None:
         """
+        users being moved from dataset not random
            fix the naming, the entire structure will be polished
         """
         self.users_parser.read_line()

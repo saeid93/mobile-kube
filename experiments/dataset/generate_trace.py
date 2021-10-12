@@ -55,8 +55,8 @@ def generate_workload(dataset_id: int, network_id: int,
     dir2save = os.path.join(traces_path, str(new_trace))
     os.mkdir(dir2save)
 
-    assert from_dataset == edge_simulator_config['from_dataset'],\
-        "both trace and network must be from_dataset"
+    if from_dataset and not edge_simulator_config['from_dataset']:
+        raise ValueError("random stations cannot go with real movements")
     del edge_simulator_config['from_dataset']
     # generate the trace
     movement_trace_generator = TraceGenerator(
@@ -68,6 +68,7 @@ def generate_workload(dataset_id: int, network_id: int,
 
     # information of the generated trace
     info = {
+        'from_dataset': from_dataset,
         'seed': seed,
         'speed': speed,
         'timesteps': timesteps

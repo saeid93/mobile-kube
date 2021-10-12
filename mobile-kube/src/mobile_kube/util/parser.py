@@ -114,8 +114,10 @@ class StationParser(Parser):
             if line == -1:
                 break
             line = list(map(float, line))
-            # add a small nudge to the dataset for servers 
-            line = list(map(lambda x: x + uniform(-0.001, 0.001), line))
+            # add a small nudge to the dataset for servers
+            # line = list(map(lambda x: x + uniform(-0.001, 0.001), line))
+            nudge = 0.0001
+            line = list(map(lambda x: x + 0.0001, line))
             context.append(line)
 
         return context

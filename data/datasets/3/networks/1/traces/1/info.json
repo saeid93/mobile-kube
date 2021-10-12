@@ -1,0 +1,6 @@
+{
+    "from_dataset": false,
+    "seed": 42,
+    "speed": 30,
+    "timesteps": 100000
+}

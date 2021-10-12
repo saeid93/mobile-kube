@@ -40,7 +40,7 @@ TODO introduce paper(s), theory and background
    ```
 9. setup [tensorboard monitoring](docs/monitorings/tensorboard.md)
 
-# 3. Kubernetes Cluster Setup
+# 2. Kubernetes Cluster Setup
 If you want to do the real world Kubernetes experiemnts of the paper you should also do the following steps.
 There are several options for setting up a Kuberentes cluster. The repo codes can connect to the cluster through the [Python client API](https://github.com/kubernetes-client/python) as long as you have access to the kube config address e.g. `~/.kube/config` in your config files specified.
 
@@ -51,7 +51,7 @@ You can find the toturial for creating the cluster on google cloud and locally i
 * [Local cluster setup installation](docs/kubernetes/installation-local.md)
 * [Installation using Ansible](docs/kubernetes/installation-ansible.md)
 
-# 4. Project Structure
+# 3. Project Structure
 
 1. [data](data)
 2. [docs](docs)
@@ -65,7 +65,7 @@ The code is separated into three modules
    3. [mobile-kube](mobile-kube): the core simulation library with [Open-AI gym](https://gym.openai.com/) interface
    4. [experiments](experiments): experiments of the paper and the reinforcement learning side of codes.
 
-## 4.1. [mobile-kube](mobile-kube)
+## 3.1. [mobile-kube](mobile-kube)
 ### Structure
 * [src](mobile-kube/src): The folder containing the mobile-kube simulators. This should be installed for using.
 
@@ -75,7 +75,7 @@ Go to the [mobile-kube](mobile-kube/mobile-kube) and install the library in the 
    pip install -e .
    ```
 
-## 4.2. [data](data)
+## 3.2. [data](data)
 ### Structure
 Link the data folder (could be placed anywhere in your harddisk) to the project. A sample of the data folder is available at [data](data).
 
@@ -84,7 +84,7 @@ Go to [experiments/utils/constants.py](experiments/utils/constants.py) and set t
    ```
    DATA_PATH = "/Users/saeid/Codes/mobile-kube/data"
    ```
-## 4.3. [mobility dataset preprossing](mobility-dataset-preprossing)
+## 3.3. [mobility dataset preprossing](mobility-dataset-preprossing)
 ### Structure
 * [ETL.py](mobility-dataset-preprossing/ETL.py)
 * [README.md](mobility-dataset-preprossing/README.md)
@@ -136,9 +136,9 @@ follows:
 
 Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators. TODO
 
-## 4.4. [experiments](experiments)
+## 3.4. [experiments](experiments)
 
-### 4.4.1. [Data Generation](experiments/dataset)
+### 3.4.1. [Data Generation](experiments/dataset)
 The dataset, workloads, networks and traces are generated in the following order:
 1. **Datasets**: Nodes, services, their capacities, requested resources and their initial placements. 
 2. **Workloads**: The workload for each dataset that determines the resource usage at each time step. This is built on top of the datasets built on step 1. Each dataset can have several workloads.
@@ -148,7 +148,7 @@ The dataset, workloads, networks and traces are generated in the following order
 
 To generate the datasets, workloads, networks and traces, first go to your data folder (remember data could be anywhere in your disk just point the data folder as  [experiments/utils/constants.py](experiments/utils/constants.py)).
 
-### 4.4.1.1. [Generating the Datasets](experiments/dataset/generate_dataset.py)
+#### 3.4.1.1. [Generating the Datasets](experiments/dataset/generate_dataset.py)
 
 Go to the your dataset generation config [data/configs/dataset-generation/](data/configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-dataset` in the sample [data](data) folder [data/configs/generation-configs/dataset-generation/my-dataset/config.json](data/configs/generation-configs/dataset-generation/my-dataset/config.json). Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
 ```
@@ -160,7 +160,7 @@ Options:
 ```
 For a full list of `config.json` parameters options see [dataset-configs-options](docs/configs-parameters/dataset-generation.md). The results will be saved in [data/datasets/<dataset_id>](data/datasets).
 
-### 4.4.1.2. [Generating the Workloads](experiments/dataset/generate_workload.py)
+#### 4.4.1.2. [Generating the Workloads](experiments/dataset/generate_workload.py)
 
 Go to the your workload generation config [data/configs/generation-configs/workload-generation](data/configs/generation-configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-workload` in the sample [data](data) folder [data/configs/generation-configs/workload-generation/my-workload/config.json](data/configs/generation-configs/dataset-generation/my-workload/config.json). For a full list of `config.json` see TODO. Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
 ```
@@ -184,7 +184,7 @@ Options:
 ```
 For a full list of `config.json` parameters options see [network-configs-options](docs/configs-parameters/network-generation.md). The results will be saved in [data/datasets/<dataset_id>/<network_id>](data/datasets).
 
-### 4.4.1.4. [Generating the Traces](experiments/dataset/generate_trace.py)
+#### 4.4.1.4. [Generating the Traces](experiments/dataset/generate_trace.py)
 
 Go to the your trace generation config [data/configs/generation-configs/trace-generation](data/configs/generation-configs/network-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-trace` in the sample [data](data) folder [data/configs/generation-configs/trace-generation/my-trace/config.json](data/configs/generation-configs/dataset-generation/my-dataset/config.json). Then run the [experiments/dataset/generate_trace.py](experiments/dataset/generate_trace.py) with the following script:
 ```
@@ -196,12 +196,9 @@ Options:
 ```
 For a full list of `config.json` parameters options see [trace-configs-options](docs/configs-parameters/trace-generation.md). The results will be saved in [data/datasets/<dataset_id>/<network_id>/<trace_id>](data/datasets).
 
-### 4.4.2. [Analysis](experiments/analysis)
-TODO
+### 4.4.2. [Training](experiments/training) and [analysis](experiments/analysis)
 
-### 4.4.3. [Training](experiments/training) and [analysis](experiments/analysis)
-
-### 4.4.3.1. [Training the agent](experiments/training/learner.py)
+#### 4.4.2.1. [Training the agent](experiments/training/learner.py)
 
 1. change the training parameters in `<configs-path>/real/<experiment-folder>/config_run.json`. For more information about the hyperparamters in this json file see [hyperparameter guide](docs/learning/hyperparameter-guide.md)
 2. To train the environments go to the parent folder and run the following command.
@@ -209,22 +206,24 @@ TODO
 python experiments/learning/learners.py --mode real --local-mode false --config-folder PPO --type-env 0 --dataset-id 0 --workload-id 0 --use-callback true
 ```
 
-### 4.4.3.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
+### 4.4.2. [Analysis](experiments/analysis)
+TODO
+
+#### 4.4.2.1 [check environment](experiments/analysis)
+
+#### 4.4.3.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
 
 TODO
 
-### 4.4.3.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
+#### 4.4.3.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
 
 1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py).
 2. compile and upload the Dockerfile to your Docker registry TODO
 3. Use ansible playbooks in TODO to setup the cluster in gcloud 
 TODO
 
-### 4.4.3.4. [Analysis](experiments/analysis)
 
-TODO
-
-## 4.4.4. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
+### 4.4.4. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
 
 The Kubernetes interface is designed based-on the Kubernetes [api version 1](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/).
 
@@ -244,13 +243,13 @@ The main operations that are currently implemented are:
 a sample of using the interface can be found [here](experiments/kube_operations.py)
 
 
-## 4.4.5. [Extra scripts](experiments/utils)
+### 4.4.5. [Extra scripts](experiments/utils)
 
 1. [experiments/utils/data_backup.py](experiments/utils/data_backup.py): Use this for backing up your data folder.
 
 2. 
 
-# 5. Other
+# 4. Other
 
 1. [Step by step guide to trainig the code on EECS](docs/step-by-step-guides/EECS.md)
 

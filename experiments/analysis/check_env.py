@@ -42,7 +42,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     env = gym.make(type_env, config=env_config)
 
     i = 1
-    total_timesteps = 1000
+    total_timesteps = 100
     _ = env.reset()
     env.render()
     while i < total_timesteps:
@@ -53,7 +53,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         _, reward, done, info = env.step(action)
         env.render()
         # env.edge_simulator.visualize_debug().savefig(
-        #     os.path.join(DATA_PATH, 'plots', f'{i}.png'))
+        #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
         # print(f"\niteration <{i}>:")
         # print(f"reward:\n <{reward}>")
         print('info:')
@@ -68,7 +68,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=3)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=0)
+@click.option('--network-id', required=False, type=int, default=1)
 @click.option('--trace-id', required=False, type=int, default=0)
 def main(type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):
