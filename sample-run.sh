@@ -1,1 +1,0 @@
-python /homes/sg324/CCGrid-paper/experiments/learning/learner.py --mode real --local-mode false --config-folder 2-PPO --series 0 --type-env sim-edge --dataset-id 4 --workload-id 0 --network-id 0 --trace-id 0 --use-callback true --checkpoint-freq 100

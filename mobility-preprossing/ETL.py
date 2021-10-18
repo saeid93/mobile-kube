@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from datetime import datetime, timedelta
 from Utils import Utils
@@ -136,5 +137,5 @@ class ETL:
                     ]
                 )
 
-    def load(self):
-        self.final_frame.to_csv(self.file_path.replace("data", "cleaned_dataset"), encoding='utf-8', index=False)
+    def load(self, output_path):
+        self.final_frame.to_csv(os.path.join(output_path, os.path.basename(self.file_path)), encoding='utf-8', index=False)
