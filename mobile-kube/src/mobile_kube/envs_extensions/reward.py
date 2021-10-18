@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from typing import Tuple, Dict, Any
 
-def _reward_both_edge(
+def reward(
     self, *, num_moves: int,
     num_overloaded: int,
     users_distances: np.array = None) -> Tuple[

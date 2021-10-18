@@ -18,7 +18,6 @@
         "timestep_reset": false,
         "placement_reset": false,
         "episode_length": 50,
-        "reward_mode": "absolute",
         "seed": 1
     },
     "run_or_experiment": "A3C",

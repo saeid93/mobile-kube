@@ -15,7 +15,6 @@
         "episode_length": 50,
         "timestep_reset": false,
         "placement_reset": false,
-        "reward_mode": "absolute",
         "compute_greedy_num_consolidated": false,
         "seed": 1
     },
