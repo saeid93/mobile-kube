@@ -10,8 +10,7 @@ def check_config(config: Dict[str, Any]):
     allowed_items = ['obs_elements', 'penalty_illegal', 'penalty_move',
                      'penalty_variance', 'penalty_latency',
                      'penalty_consolidated', 'workload_stop',
-                     'episode_length', 'timestep_reset',
-                     'placement_reset', 'reward_mode',
+                     'episode_length', 'timestep_reset', 'placement_reset',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
                      'workload', 'nodes_cap_rng', 'services_request_rng',
                      'num_users', 'num_stations', 'network', 'normalise_latency',
@@ -73,21 +72,9 @@ def check_config(config: Dict[str, Any]):
     assert set(config['kube']).issubset(
         set(kube)), "wrong input for the kube"
 
-
-    # check the reward methods
-    assert config['reward_mode'] in ['cloud', 'edge', 'both'],\
-        f"Unkown reward option: <{config['reward_mode']}>"
-
     # check workload arguments
     if "workload_stop" in config:
         assert config['workload_stop'] <= 1, \
             "workload_stop is greater than 1"
         assert config['workload_stop'] >= 0, \
             "workload_stop is smaller than 0"
-
-def check_config_edge(config: Dict[str, Any]):
-    """check if it is a legal combination for the edge envs
-    """
-    assert config['reward_mode'] in ['edge', 'both'],\
-        f"reward_mode <{config['reward_mode']}> is not compatible with edge env"
-

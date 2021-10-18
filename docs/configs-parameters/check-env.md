@@ -16,7 +16,6 @@
         "timestep_reset": [bool],
         "placement_reset": [bool],
         "from_dataset": [bool],
-        "reward_mode": ["cloud", "edge", "both"],
         "normalise_latency": [bool],
         "seed": [int] // seed for generating reproducible results
     }

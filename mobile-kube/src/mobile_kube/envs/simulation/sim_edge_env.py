@@ -17,7 +17,6 @@ from gym.spaces import (
 from mobile_kube.util import (
     Preprocessor,
     override,
-    check_config_edge,
     load_object,
     logger
 )
@@ -41,7 +40,6 @@ class SimEdgeEnv(SimBaseEnv):
         self.num_stations = self.edge_simulator.num_stations
         self.normalise_latency = config['normalise_latency']
         self.normalise_factor = self.edge_simulator.get_largest_station_node_path() # TODO check
-        check_config_edge(config)
         super().__init__(config)
 
         self.observation_space, self.action_space =\

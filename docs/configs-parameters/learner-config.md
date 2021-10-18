@@ -18,7 +18,6 @@
         "timestep_reset": [bool],
         "placement_reset": [bool],
         "from_dataset": [bool],
-        "reward_mode": ["cloud", "edge", "both"],
         "normalise_latency": [bool],
         "compute_greedy_num_consolidated": [bool],
         "seed": [int]

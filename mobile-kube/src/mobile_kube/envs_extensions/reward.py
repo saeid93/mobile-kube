@@ -2,14 +2,6 @@ import numpy as np
 from copy import deepcopy
 from typing import Tuple, Dict, Any
 
-def get_reward_method(reward_method):
-    reward_methods = {
-       'cloud': _reward_cloud,
-       'edge': _reward_edge,
-       'both': _reward_both_edge,
-    }
-    return reward_methods[reward_method]
-
 def _reward_both_edge(
     self, *, num_moves: int,
     num_overloaded: int,
@@ -63,11 +55,11 @@ def _reward_cloud(self, *, num_moves: int,
     }
     return reward_total, rewards
 
-def _reward_edge(
-self, *, num_moves: int = None,
-    users_distances: np.array = None) -> Tuple[float, Dict[str, Any]]:
-    reward_total, rewards = _reward_latency(self, users_distances)
-    return reward_total, rewards
+# def _reward_edge(
+# self, *, num_moves: int = None,
+#     users_distances: np.array = None) -> Tuple[float, Dict[str, Any]]:
+#     reward_total, rewards = _reward_latency(self, users_distances)
+#     return reward_total, rewards
 
 
 def _reward_latency(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:

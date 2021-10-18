@@ -9,7 +9,7 @@
                          "nodes_resources_usage",
                          "services_resources_usage_frac",
                          "nodes_resources_usage_frac",
-                         "services_nodes",],
+                         "services_nodes"],
         "penalty_illegal": -1,
         "penalty_move": -1,
         "penalty_variance": -1,
@@ -18,7 +18,6 @@
         "timestep_reset": false,
         "placement_reset": false,
         "episode_length": 50,
-        "reward_mode": "absolute",
         "seed": 1
     },
     "run_or_experiment": "ES",

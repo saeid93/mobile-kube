@@ -16,7 +16,6 @@ from gym.spaces import (
 from mobile_kube.util import (
     Preprocessor,
     override,
-    check_config_edge,
     load_object
 )
 from mobile_kube.network import NetworkSimulator

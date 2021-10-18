@@ -107,7 +107,7 @@ def env_config_base_check(config: Dict[str, Any]):
                      'penalty_variance', 'penalty_latency',
                      'penalty_consolidated', 'mitigation_tries',
                      'workload_stop', 'episode_length', 'timestep_reset',
-                     'placement_reset', 'reward_mode',
+                     'placement_reset',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
                      'workload', 'nodes_cap_rng', 'services_request_rng',
                      'num_users', 'num_stations', 'network',
@@ -159,11 +159,6 @@ def env_config_base_check(config: Dict[str, Any]):
 
     assert set(config['kube']).issubset(
         set(kube)), "wrong input for the kube"
-
-
-    # check the reward methods
-    assert config['reward_mode'] in ['cloud', 'edge', 'both'],\
-        f"Unkown reward option: <{config['reward_mode']}>"
 
     # check workload arguments
     if "workload_stop" in config:
