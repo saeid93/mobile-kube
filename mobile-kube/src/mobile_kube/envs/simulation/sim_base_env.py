@@ -29,7 +29,7 @@ from mobile_kube.util import (
     plot_resource_allocation
 )
 from mobile_kube.envs_extensions import (
-    reward
+    _reward
 )
 
 
@@ -125,7 +125,7 @@ class SimBaseEnv(gym.Env):
         self.services_nodes = deepcopy(self.initial_services_nodes)
 
         # set the reward method
-        self._reward = types.MethodType(reward, self)
+        self._reward = types.MethodType(_reward, self)
 
         # whether to take the overloaded action with negative reward or not
         self.no_action_on_overloaded = config['no_action_on_overloaded']

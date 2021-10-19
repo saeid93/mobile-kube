@@ -73,8 +73,12 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
     # generate the ray_config
     # make the learning config based on the type of the environment
-    ray_config = {"env": make_env_class(type_env),
-                  "env_config": env_config}
+    if type_env not in ['CartPole-v0', 'Pendulum-v0']:
+        ray_config = {"env": make_env_class(type_env),
+                    "env_config": env_config}
+    else:
+        ray_config = {"env": type_env}
+    # TODO HERE add config here
 
     # generate the path
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
@@ -108,7 +112,8 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
     ray_config.update(learn_config)
 
     # if callback is specified add it here
-    if use_callback:
+    if use_callback and\
+        type_env not in ['CartPole-v0', 'Pendulum-v0']:
         ray_config.update({'callbacks': CloudCallback})
 
     ray.init(local_mode=local_mode)
@@ -138,12 +143,13 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--config-folder', type=str, default='PG')
+@click.option('--config-folder', type=str, default='PPO')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy']),
+              type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
+                                 'CartPole-v0', 'Pendulum-v0']),
               default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=3)
+@click.option('--dataset-id', required=True, type=int, default=2)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)

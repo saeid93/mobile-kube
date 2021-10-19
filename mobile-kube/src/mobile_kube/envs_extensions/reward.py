@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from typing import Tuple, Dict, Any
 
-def reward(
+def _reward(
     self, *, num_moves: int,
     num_overloaded: int,
     users_distances: np.array = None) -> Tuple[
@@ -55,27 +55,22 @@ def _reward_cloud(self, *, num_moves: int,
     }
     return reward_total, rewards
 
-# def _reward_edge(
-# self, *, num_moves: int = None,
-#     users_distances: np.array = None) -> Tuple[float, Dict[str, Any]]:
-#     reward_total, rewards = _reward_latency(self, users_distances)
-#     return reward_total, rewards
-
 
 def _reward_latency(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
     """
     calcuate the edge reward
     """
+    # normalise distances with the largest distance
+    if self.normalise_latency:
+        users_distances = users_distances/self.normalise_factor
     reward = np.sum(users_distances)
     reward *= self.penalty_latency
-    reward_total = reward
+    reward = 1/reward
+    # clip the reward if it's greater 10 
+    if reward > 10:
+        reward = 10
     rewards = {'reward_latency': reward}
-    # TODO fix the latency with some working factor
-    if self.normalise_latency:
-        users_distances = np.round(
-            users_distances/self.normalise_factor, 2)
-
-    return reward_total, rewards
+    return reward, rewards
 
 
 def _reward_move(self, num_moves: int):

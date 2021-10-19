@@ -37,9 +37,11 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         network_id=network_id,
         trace_id=trace_id
     )
-    type_env = ENVSMAP[type_env]
-    # make the approperiate env based on the type
-    env = gym.make(type_env, config=env_config)
+    if type_env not in ['CartPole-v0', 'Pendulum-v0']:
+        type_env = ENVSMAP[type_env]
+        env = gym.make(type_env, config=env_config)
+    else:
+        env = gym.make(type_env)
 
     i = 1
     total_timesteps = 100
@@ -64,8 +66,9 @@ def check_env(*, config: Dict[str, Any], type_env: str,
 @click.command()
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-greedy',
-                                 'kube-edge', 'kube-binpacking', 'kube-greedy']),
-              default='sim-edge')
+                                 'kube-edge', 'kube-binpacking', 'kube-greedy',
+                                 'CartPole-v0', 'Pendulum-v0']),
+              default='Pendulum-v0')
 @click.option('--dataset-id', required=True, type=int, default=2)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)

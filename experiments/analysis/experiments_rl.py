@@ -42,14 +42,29 @@ from experiments.utils import (
 torch, nn = try_import_torch()
 
 
-def learner(*, config: Dict[str, Any],
-            series: int, type_env: str, dataset_id: int,
+def learner(*, series: int, type_env: str, dataset_id: int,
             workload_id: int, network_id: int, trace_id: int,
-            checkpoint: int, experiment_id: int,
-            num_episodes: int, episode_length: int,
-            local_mode: bool):
+            checkpoint: int, experiment_id: int, local_mode: bool,
+            episode_length, num_episodes: int):
     """
     """
+    path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
+    experiments_config_folder = os.path.join(
+        RESULTS_PATH,
+        "series",      str(series),
+        "envs",        path_env,
+        "datasets",    str(dataset_id),
+        "workloads",   str(workload_id),
+        "experiments", str(experiment_id),
+        "experiment_config.json")
+
+    with open(experiments_config_folder) as cf:
+        config = json.loads(cf.read())
+
+    pp = pprint.PrettyPrinter(indent=4)
+    print('start experiments with the following config:\n')
+    pp.pprint(config)
+
     # extract differnt parts of the input_config
     learn_config = config['learn_config']
     algorithm = config["run_or_experiment"]
@@ -69,49 +84,62 @@ def learner(*, config: Dict[str, Any],
         network_id=network_id,
         trace_id=trace_id
     )
-    env = gym.make(ENVSMAP[type_env], config=env_config)
 
-    # generate the ray_config
-    # make the learning config based on the type of the environment
-    ray_config = {"env": make_env_class(type_env),
-                  "env_config": env_config}
-    ray_config.update(learn_config)
+    # trained ray agent should always be simulation
+    # however the agent outside it can be kuber agent or
+    # other types of agent
+    if type_env not in ['CartPole-v0', 'Pendulum-v0']:
+        env = gym.make(ENVSMAP[type_env], config=env_config)
+        ray_config = {"env": make_env_class('sim-edge'),
+                    "env_config": env_config}
+        ray_config.update(learn_config)
+    else:
+        ray_config = {"env": type_env}
+        ray_config.update(learn_config)
 
+    path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
     # generate the path
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
     # example:        env1/dataset/1/workloads/3
     experiments_folder = os.path.join(RESULTS_PATH,
                                       "series",      str(series),
-                                      "envs",        str(type_env),
+                                      "envs",        path_env,
                                       "datasets",    str(dataset_id),
                                       "workloads",   str(workload_id),
                                       "experiments", str(experiment_id),
                                       algorithm)
+    for item in os.listdir(experiments_folder):
+        if 'json' not in item:
+            experiment_string = item
+            break
+
     checkpoint_path = os.path.join(
         experiments_folder,
-        os.listdir(experiments_folder)[0],
+        experiment_string,
+        # os.listdir(experiments_folder)[0],
         f"checkpoint_{checkpoint}",
         f"checkpoint-{checkpoint}"
     )
 
     ray.init(local_mode=local_mode)
 
+    alg_env = make_env_class(type_env)
     if algorithm == 'PPO':
         agent = ppo.PPOTrainer(
             config=ray_config,
-            env=make_env_class(type_env))
+            env=alg_env)
     elif algorithm == 'A3C':
         agent = a3c.A3CTrainer(
             config=ray_config,
-            env=make_env_class(type_env))
+            env=alg_env)
     elif algorithm == 'PG':
         agent = pg.PGTrainer(
             config=ray_config,
-            env=make_env_class(type_env))
+            env=alg_env)
     elif algorithm == 'DQN':
         agent = dqn.DQNTrainer(
             config=ray_config,
-            env=make_env_class(type_env))
+            env=alg_env)
 
     episodes = []
     for i in range(0, num_episodes):
@@ -176,12 +204,11 @@ def flatten(raw_obs, action, reward, info):
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--config-folder', type=str, default='experimental')
 @click.option('--series', required=True, type=int, default=1)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge']),
               default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=3)
+@click.option('--dataset-id', required=True, type=int, default=2)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
@@ -189,10 +216,10 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--checkpoint', required=False, type=int, default=100)
 @click.option('--episode-length', required=False, type=int, default=10)
 @click.option('--num-episodes', required=False, type=int, default=10)
-def main(local_mode: bool, config_folder: str, series: int,
-         type_env: str, dataset_id: int, workload_id: int, network_id: int,
-         trace_id: int, experiment_id: int,
-	     checkpoint: int, num_episodes: int, episode_length: int):
+def main(local_mode: bool, series: int, type_env: str,
+         dataset_id: int, workload_id: int, network_id: int,
+         trace_id: int, experiment_id: int, checkpoint: int,
+         num_episodes: int, episode_length: int):
     """[summary]
 
     Args:
@@ -207,22 +234,22 @@ def main(local_mode: bool, config_folder: str, series: int,
         network_id (int): edge network of some dataset
         trace_id (int): user movement traces
     """
-    config_file_path = os.path.join(
-        CONFIGS_PATH, 'train', config_folder,
-        'run.json')
-    with open(config_file_path) as cf:
-        config = json.loads(cf.read())
+    # config_file_path = os.path.join(
+    #     CONFIGS_PATH, 'train', config_folder,
+    #     'run.json')
+    # with open(config_file_path) as cf:
+    #     config = json.loads(cf.read())
 
-    pp = pprint.PrettyPrinter(indent=4)
-    print('start experiments with the following config:\n')
-    pp.pprint(config)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # print('start experiments with the following config:\n')
+    # pp.pprint(config)
 
-    learner(config=config, series=series,
-            type_env=type_env, dataset_id=dataset_id,
-            workload_id=workload_id, network_id=network_id,
-            trace_id=trace_id, experiment_id=experiment_id,
-            checkpoint=checkpoint, num_episodes=num_episodes,
-            episode_length=episode_length, local_mode=local_mode)
+    learner(series=series, type_env=type_env,
+            dataset_id=dataset_id, workload_id=workload_id,
+            network_id=network_id, trace_id=trace_id,
+            experiment_id=experiment_id, checkpoint=checkpoint,
+            num_episodes=num_episodes, episode_length=episode_length,
+            local_mode=local_mode)
 
 
 if __name__ == "__main__":

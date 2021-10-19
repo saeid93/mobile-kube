@@ -7,7 +7,6 @@ from mobile_kube.envs import (
     KubeBinpackingEnv,
     KubeGreedyEnv
 )
-
 # dfined by the user
 # DATA_PATH = "/home/jdoyledithencom/data-repos/myenv"
 DATA_PATH = "/Users/saeid/Codes/mobile-kube/data"
