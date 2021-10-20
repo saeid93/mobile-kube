@@ -65,6 +65,8 @@ def _reward_latency(self, users_distances: np.array) -> Tuple[float, Dict[str, A
         users_distances = users_distances/self.normalise_factor
     reward = np.sum(users_distances)
     reward *= self.penalty_latency
+    if reward == 0:
+        reward = 100000000
     reward = 1/reward
     # clip the reward if it's greater 10 
     if reward > 10:

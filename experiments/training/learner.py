@@ -78,7 +78,6 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
                     "env_config": env_config}
     else:
         ray_config = {"env": type_env}
-    # TODO HERE add config here
 
     # generate the path
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
