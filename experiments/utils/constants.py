@@ -9,8 +9,8 @@ from mobile_kube.envs import (
 )
 # dfined by the user
 # DATA_PATH = "/home/jdoyledithencom/data-repos/myenv"
-DATA_PATH = "/Users/saeid/Codes/mobile-kube/data"
-# DATA_PATH = "/homes/sg324/CCGrid-data-repo/myenv"
+# DATA_PATH = "/Users/saeid/Codes/mobile-kube/data"
+DATA_PATH = "/homes/sg324/mobile-kube/data"
 # DATA_PATH = "/home/sdghafouri/mobile-kube/data"
 
 # generated baesd on the users' path

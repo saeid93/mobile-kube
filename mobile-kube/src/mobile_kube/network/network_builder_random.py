@@ -85,7 +85,7 @@ class NetworkBuilderRandom(NetworkSimulatorBase):
                         break
         else:
             assert self.num_nodes == self.num_stations, \
-                "num of services and nodes should be equal in colocated mode"
+                "num of stations and nodes should be equal in colocated mode"
             nudge = 0.0001
             for station in self.stations_idx:
                 # random station location

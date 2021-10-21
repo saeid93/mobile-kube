@@ -48,6 +48,9 @@ def generate_workload(dataset_id: int, network_id: int,
         raise FileNotFoundError((f"network <{network_id}> does not exist"
                                  f" for dataset <{dataset_id}>")) 
 
+    if from_dataset and not edge_simulator_config['from_dataset']:
+        raise ValueError("random stations cannot go with real movements")
+
     # fix foldering per dataset
     traces_path = os.path.join(network_path, 'traces')
     content = os.listdir(traces_path)
@@ -55,8 +58,6 @@ def generate_workload(dataset_id: int, network_id: int,
     dir2save = os.path.join(traces_path, str(new_trace))
     os.mkdir(dir2save)
 
-    if from_dataset and not edge_simulator_config['from_dataset']:
-        raise ValueError("random stations cannot go with real movements")
     del edge_simulator_config['from_dataset']
     # generate the trace
     movement_trace_generator = TraceGenerator(

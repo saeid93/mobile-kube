@@ -2,10 +2,10 @@
     "notes":"small dataset to fix the namings",
     "nums": {
         "nodes": 2,
-        "services": 2,
+        "services": 4,
         "resources": 2,
         "services_types": 1,
-        "services_types_map": [2]
+        "services_types_map": [4]
     },
     "metrics": {
         "ram":"mb",
@@ -30,7 +30,7 @@
     "services_request_rng": {
         "0":
             {
-            "num": 2,
+            "num": 4,
             "ram": {
                 "min": 250,
                 "max": 250,
