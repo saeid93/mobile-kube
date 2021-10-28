@@ -91,17 +91,12 @@ def generate_workload(notes: str, dataset_id: int,
         fig.savefig(os.path.join(figures_dir, f'services_type_{i}.png'))
 
 
-@click.command()
-@click.option('--workload-config', type=str, default='workload')
-def main(workload_config: str):
-    print('generating workload from the following config:')
-    pp.pprint(workload_config)
+def main():
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
-        'workload-generation',
-        f'{workload_config}.json')
+        'workload.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     config_workload_generation_check(config=config)

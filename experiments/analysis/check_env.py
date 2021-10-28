@@ -53,7 +53,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
-        # env.render()
+        env.render()
         # env.edge_simulator.visualize_debug().savefig(
         #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
         # print(f"\niteration <{i}>:")
@@ -68,8 +68,8 @@ def check_env(*, config: Dict[str, Any], type_env: str,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
-              default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=2)
+              default='sim-binpacking')
+@click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)

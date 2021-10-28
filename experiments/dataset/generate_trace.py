@@ -83,15 +83,12 @@ def generate_workload(dataset_id: int, network_id: int,
     print(f"\n\nGenerated data saved in <{dir2save}>\n\n")
 
 
-@click.command()
-@click.option('--trace-config', type=str, default='trace')
-def main(trace_config: str):
+def main():
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
-        'trace-generation',
-        f'{trace_config}.json')
+        'trace.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     print('generating trace from the following config:')

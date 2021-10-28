@@ -1,8 +1,8 @@
 {
     "notes": "some network",
-    "dataset_id": 3,
-    "num_users": 4,
-    "num_stations": 2,
+    "dataset_id": 6,
+    "num_users": 16,
+    "num_stations": 8,
     "width": 0.0001,
     "length": 0.0001,
     "speed_limit": 30,

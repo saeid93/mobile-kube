@@ -128,15 +128,12 @@ def generate_network(
     os.mkdir(os.path.join(dir2save, 'traces'))
 
 
-@click.command()
-@click.option('--network-config', type=str, default='network')
-def main(network_config: str):
+def main():
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
-        'network-generation',
-        f'{network_config}.json')
+        'network.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     print('generating dataset from the following config:')

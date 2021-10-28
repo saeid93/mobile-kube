@@ -66,15 +66,12 @@ def generate_dataset(config):
     os.mkdir(os.path.join(dir2save, 'networks'))
 
 
-@click.command()
-@click.option('--dataset-config', type=str, default='dataset')
-def main(dataset_config: str):
+def main():
     # read the config file
     config_file_path = os.path.join(
         CONFIGS_PATH,
         'generation-configs',
-        'dataset-generation',
-        f'{dataset_config}.json')
+        'dataset.json')
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
     print('generating dataset from the following config:')
