@@ -30,7 +30,6 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
     RESULTS_PATH,
-    CONFIGS_PATH,
     ENVSMAP
 )
 from experiments.utils import (

@@ -142,8 +142,8 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
-@click.option('--config-folder', type=str, default='PPO-search')
-@click.option('--series', required=True, type=int, default=3)
+@click.option('--config-file', type=str, default='PPO')
+@click.option('--series', required=True, type=int, default=4)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
@@ -154,14 +154,14 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=True)
 @click.option('--checkpoint-freq', required=False, type=int, default=100)
-def main(local_mode: bool, config_folder: str, series: int,
+def main(local_mode: bool, config_file: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, use_callback: bool, checkpoint_freq: int):
     """[summary]
 
     Args:
         local_mode (bool): run in local mode for having the 
-        config_folder (str): name of the config folder (only used in real mode)
+        config_file (str): name of the config folder (only used in real mode)
         use_callback (bool): whether to use callbacks or storing and visualising
         checkpoint_freq (int): checkpoint the ml model at each (n-th) step
         series (int): to gather a series of datasets in a folder
@@ -172,8 +172,7 @@ def main(local_mode: bool, config_folder: str, series: int,
         trace_id (int): user movement traces
     """
     config_file_path = os.path.join(
-        CONFIGS_PATH, 'train', config_folder,
-        'run.json')
+        CONFIGS_PATH, 'train', f"{config_file}.json")
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
 

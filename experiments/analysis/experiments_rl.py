@@ -224,7 +224,7 @@ def main(local_mode: bool, series: int, type_env: str,
 
     Args:
         local_mode (bool): run in local mode for having the 
-        config_folder (str): name of the config folder (only used in real mode)
+        config_file (str): name of the config folder (only used in real mode)
         use_callback (bool): whether to use callbacks or storing and visualising
         checkpoint_freq (int): checkpoint the ml model at each (n-th) step
         series (int): to gather a series of datasets in a folder

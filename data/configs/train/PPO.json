@@ -4,8 +4,8 @@
         "penalty_illegal": -1,
         "penalty_move": 0,
         "penalty_variance": 0,
-        "penalty_consolidated": 1,
-        "penalty_latency": 0,
+        "penalty_consolidated": 0,
+        "penalty_latency": 1,
         "workload_stop": 1,
         "episode_length": 50,
         "timestep_reset": false,
@@ -22,19 +22,19 @@
         }
     },
     "run_or_experiment": "PPO",
+    "framework": "torch",
     "learn_config": {
-        "num_gpus": 2,
+        "num_gpus": 1,
         "model": {
-            "fcnet_hiddens": [128],
+            "fcnet_hiddens": [64, 64],
             "fcnet_activation": "linear",
             "vf_share_layers": true
         },
-        "framework": "torch",
         "gamma": 0.99,
         "lr": 0.0003,
-        "num_workers": 10,
+        "num_workers": 5,
         "observation_filter": "MeanStdFilter",
-        "num_sgd_iter": 6,
+        "num_sgd_iter": 1,
         "vf_loss_coeff": 0.01,
         "seed": 203
     },

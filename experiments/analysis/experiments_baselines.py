@@ -135,7 +135,7 @@ def flatten(raw_obs, action, reward, info):
 
 
 @click.command()
-@click.option('--config-folder', type=str, default='experimental')
+@click.option('--config-file', type=str, default='experimental')
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-binpacking', 'sim-greedy']),
               default='sim-binpacking')
@@ -144,13 +144,13 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--episode-length', required=False, type=int, default=10)
-def main(config_folder: str, type_env: str, dataset_id: int,
+def main(config_file: str, type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int,
          episode_length: int):
     """[summary]
 
     Args:
-        config_folder (str): name of the config folder (only used in real mode)
+        config_file (str): name of the config folder (only used in real mode)
         type_env (str): the type of the used environment
         dataset_id (int): used cluster dataset
         workload_id (int): the workload used in that dataset
@@ -158,8 +158,7 @@ def main(config_folder: str, type_env: str, dataset_id: int,
         trace_id (int): user movement traces
     """
     config_file_path = os.path.join(
-        CONFIGS_PATH, 'train', config_folder,
-        'run.json')
+        CONFIGS_PATH, 'train', f"{config_file}.json")
     with open(config_file_path) as cf:
         config = json.loads(cf.read())
 
