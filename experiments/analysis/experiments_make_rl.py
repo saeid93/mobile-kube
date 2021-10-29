@@ -204,17 +204,17 @@ def flatten(raw_obs, action, reward, info):
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--series', required=True, type=int, default=1)
+@click.option('--series', required=True, type=int, default=5)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge']),
               default='sim-edge')
-@click.option('--dataset-id', required=True, type=int, default=2)
+@click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
-@click.option('--experiment_id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=100)
-@click.option('--episode-length', required=False, type=int, default=10)
+@click.option('--experiment-id', required=True, type=int, default=0)
+@click.option('--checkpoint', required=False, type=int, default=500)
+@click.option('--episode-length', required=False, type=int, default=50)
 @click.option('--num-episodes', required=False, type=int, default=10)
 def main(local_mode: bool, series: int, type_env: str,
          dataset_id: int, workload_id: int, network_id: int,

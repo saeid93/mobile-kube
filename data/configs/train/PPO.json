@@ -4,8 +4,8 @@
         "penalty_illegal": -1,
         "penalty_move": 0,
         "penalty_variance": 0,
-        "penalty_consolidated": 0,
-        "penalty_latency": 1,
+        "penalty_consolidated": 1,
+        "penalty_latency": 0,
         "workload_stop": 1,
         "episode_length": 50,
         "timestep_reset": false,
@@ -23,6 +23,8 @@
     },
     "run_or_experiment": "PPO",
     "framework": "torch",
+    "sgd_minibatch_size": 128,
+    "train_batch_size": 1000,
     "learn_config": {
         "num_gpus": 1,
         "model": {
@@ -39,6 +41,6 @@
         "seed": 203
     },
     "stop": {
-        "timesteps_total": 600000
+        "timesteps_total": 2000000
     }
 }

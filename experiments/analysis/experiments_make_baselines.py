@@ -139,11 +139,11 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-binpacking', 'sim-greedy']),
               default='sim-binpacking')
-@click.option('--dataset-id', required=True, type=int, default=3)
+@click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
-@click.option('--episode-length', required=False, type=int, default=10)
+@click.option('--episode-length', required=False, type=int, default=50)
 def main(config_file: str, type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int,
          episode_length: int):
