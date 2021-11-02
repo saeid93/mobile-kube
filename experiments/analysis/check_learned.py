@@ -105,8 +105,8 @@ def learner(*, series: int, type_env: str, dataset_id: int,
                                       "envs",        path_env,
                                       "datasets",    str(dataset_id),
                                       "workloads",   str(workload_id),
-                                      "networks",     str(network_id),
-                                      "traces",       str(trace_id),
+                                      "networks",    str(network_id),
+                                      "traces",      str(trace_id),
                                       "experiments", str(experiment_id),
                                       algorithm)
     for item in os.listdir(experiments_folder):

@@ -1,4 +1,4 @@
-# activting tensorboard
+# Activting tensorboard
 
 If you are running tensorboard locally:
 
@@ -14,3 +14,14 @@ If your are running tensorboard on a ssh host:
 2. On you local machine
    1. open a tmux windonw
    2. ssh -N -f -L localhost:6006:localhost:6006 [user]@[remote-host]
+
+
+# Using tensorboard
+
+To filter out certain experiments with different dataset, workload, network and trace use the following regex format:
+
+(?=series/[8-9]).*.(?=datasets/[5-6]) for selecting series 8 to 9 and datasets 5 to 6
+
+![dddddd](images/tensorboard-regex.png)
+
+
