@@ -22,6 +22,6 @@ To filter out certain experiments with different dataset, workload, network and 
 
 (?=series/[8-9]).*.(?=datasets/[5-6]) for selecting series 8 to 9 and datasets 5 to 6
 
-![dddddd](images/tensorboard-regex.png)
+![dddddd](../images/tensorboard-regex.png)
 
 
