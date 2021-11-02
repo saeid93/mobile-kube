@@ -87,6 +87,8 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
                                       "envs",       str(type_env),
                                       "datasets",   str(dataset_id),
                                       "workloads",  str(workload_id),
+                                      "networks",   str(network_id),
+                                      "traces",     str(trace_id),
                                       "experiments")
     # make the base path if it does not exists
     if not os.path.isdir(experiments_folder):
@@ -142,8 +144,8 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
-@click.option('--config-file', type=str, default='PPO-search')
-@click.option('--series', required=True, type=int, default=6)
+@click.option('--config-file', type=str, default='PPO')
+@click.option('--series', required=True, type=int, default=10)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),

@@ -55,6 +55,8 @@ def learner(*, series: int, type_env: str, dataset_id: int,
         "envs",        path_env,
         "datasets",    str(dataset_id),
         "workloads",   str(workload_id),
+        "networks",    str(network_id),
+        "traces",      str(trace_id),
         "experiments", str(experiment_id),
         "experiment_config.json")
 
@@ -98,14 +100,13 @@ def learner(*, series: int, type_env: str, dataset_id: int,
         ray_config.update(learn_config)
 
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
-    # generate the path
-    # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
-    # example:        env1/dataset/1/workloads/3
     experiments_folder = os.path.join(RESULTS_PATH,
                                       "series",      str(series),
                                       "envs",        path_env,
                                       "datasets",    str(dataset_id),
                                       "workloads",   str(workload_id),
+                                      "networks",     str(network_id),
+                                      "traces",       str(trace_id),
                                       "experiments", str(experiment_id),
                                       algorithm)
     for item in os.listdir(experiments_folder):

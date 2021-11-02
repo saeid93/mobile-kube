@@ -54,6 +54,8 @@ def learner(*, series: int, type_env: str, dataset_id: int,
         "envs",        path_env,
         "datasets",    str(dataset_id),
         "workloads",   str(workload_id),
+        "networks",    str(network_id),
+        "traces",      str(trace_id),
         "experiments", str(experiment_id),
         "experiment_config.json")
 
@@ -98,14 +100,13 @@ def learner(*, series: int, type_env: str, dataset_id: int,
         ray_config.update(learn_config)
 
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
-    # generate the path
-    # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
-    # example:        env1/dataset/1/workloads/3
     experiments_folder = os.path.join(RESULTS_PATH,
                                       "series",      str(series),
                                       "envs",        path_env,
                                       "datasets",    str(dataset_id),
                                       "workloads",   str(workload_id),
+                                      "networks",     str(network_id),
+                                      "traces",       str(trace_id),
                                       "experiments", str(experiment_id),
                                       algorithm)
     for item in os.listdir(experiments_folder):
@@ -171,17 +172,17 @@ def learner(*, series: int, type_env: str, dataset_id: int,
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--series', required=True, type=int, default=1)
+@click.option('--series', required=True, type=int, default=10)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge',
                                  'CartPole-v0', 'Pendulum-v0']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=2)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=0)
+@click.option('--network-id', required=False, type=int, default=1)
 @click.option('--trace-id', required=False, type=int, default=0)
-@click.option('--experiment_id', required=True, type=int, default=1)
-@click.option('--checkpoint', required=False, type=int, default=50)
+@click.option('--experiment_id', required=True, type=int, default=0)
+@click.option('--checkpoint', required=False, type=int, default=100)
 @click.option('--episode-length', required=False, type=int, default=1000)
 def main(local_mode: bool, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
