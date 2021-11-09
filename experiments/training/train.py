@@ -15,7 +15,7 @@ project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
-    RESULTS_PATH,
+    TRAIN_RESULTS_PATH,
     CONFIGS_PATH,
     ENVSMAP
 )
@@ -82,7 +82,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
     # generate the path
     # folder formats: <environmet>/datasets/<dataset>/workloads/<workload>
     # example:        env1/dataset/1/workloads/3
-    experiments_folder = os.path.join(RESULTS_PATH,
+    experiments_folder = os.path.join(TRAIN_RESULTS_PATH,
                                       "series",     str(series),
                                       "envs",       str(type_env),
                                       "datasets",   str(dataset_id),
@@ -145,7 +145,11 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
 @click.option('--config-file', type=str, default='PPO')
+<<<<<<< HEAD:experiments/training/learner.py
 @click.option('--series', required=True, type=int, default=10)
+=======
+@click.option('--series', required=True, type=int, default=16)
+>>>>>>> test scrips complete:experiments/training/train.py
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
@@ -155,7 +159,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=True)
-@click.option('--checkpoint-freq', required=False, type=int, default=100)
+@click.option('--checkpoint-freq', required=False, type=int, default=1000)
 def main(local_mode: bool, config_file: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, use_callback: bool, checkpoint_freq: int):

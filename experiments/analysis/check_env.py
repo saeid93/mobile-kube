@@ -71,7 +71,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
               default='sim-binpacking')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=0)
+@click.option('--network-id', required=False, type=int, default=7)
 @click.option('--trace-id', required=False, type=int, default=0)
 def main(type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):

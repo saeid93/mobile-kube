@@ -1,8 +1,5 @@
 """
-scripts to check a learned agent
-based-on:
-https://github.com/ray-project/ray/issues/9123
-https://github.com/ray-project/ray/issues/7983
+Testing phase of the experiments on the test data
 """
 import os
 import sys
@@ -10,15 +7,9 @@ import pickle
 import click
 from typing import Dict, Any
 import json
-
-import ray
 from ray.rllib.utils.framework import try_import_torch
 import pprint
 import gym
-import ray.rllib.agents.ppo as ppo
-import ray.rllib.agents.a3c as a3c
-import ray.rllib.agents.pg as pg
-import ray.rllib.agents.dqn as dqn
 import pandas as pd
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
@@ -29,9 +20,8 @@ project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
-    RESULTS_PATH,
-    CONFIGS_PATH,
-    EXPERIMENTS_PATH,
+    TRAIN_RESULTS_PATH,
+    TESTS_RESULTS_PATH,
     ENVSMAP
 )
 from experiments.utils import (
@@ -42,16 +32,16 @@ from experiments.utils import (
 torch, nn = try_import_torch()
 
 
-def learner(*, series: int, type_env: str, dataset_id: int,
-            workload_id: int, network_id: int, trace_id: int,
-            checkpoint: int, experiment_id: int, local_mode: bool,
-            episode_length, num_episodes: int):
+def run_experiments(
+    *, test_series: int, train_series: int, type_env: str, dataset_id: int,
+    workload_id: int, network_id: int, trace_id: int,
+    experiment_id: int, episode_length):
     """
     """
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
     experiments_config_folder = os.path.join(
-        RESULTS_PATH,
-        "series",      str(series),
+        TRAIN_RESULTS_PATH,
+        "series",      str(train_series),
         "envs",        path_env,
         "datasets",    str(dataset_id),
         "workloads",   str(workload_id),
@@ -100,91 +90,56 @@ def learner(*, series: int, type_env: str, dataset_id: int,
         ray_config.update(learn_config)
 
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
-    experiments_folder = os.path.join(RESULTS_PATH,
-                                      "series",      str(series),
-                                      "envs",        path_env,
-                                      "datasets",    str(dataset_id),
-                                      "workloads",   str(workload_id),
-                                      "networks",     str(network_id),
-                                      "traces",       str(trace_id),
-                                      "experiments", str(experiment_id),
-                                      algorithm)
-    for item in os.listdir(experiments_folder):
-        if 'json' not in item:
-            experiment_string = item
-            break
+    # experiments_folder = os.path.join(TRAIN_RESULTS_PATH,
+    #                                   "series",      str(series),
+    #                                   "envs",        path_env,
+    #                                   "datasets",    str(dataset_id),
+    #                                   "workloads",   str(workload_id),
+    #                                   "networks",     str(network_id),
+    #                                   "traces",       str(trace_id),
+    #                                   "experiments", str(experiment_id),
+    #                                   algorithm)
 
-    checkpoint_path = os.path.join(
-        experiments_folder,
-        experiment_string,
-        # os.listdir(experiments_folder)[0],
-        f"checkpoint_{checkpoint}",
-        f"checkpoint-{checkpoint}"
-    )
-
-    ray.init(local_mode=local_mode)
-
-    alg_env = make_env_class(type_env)
-    if algorithm == 'PPO':
-        agent = ppo.PPOTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'A3C':
-        agent = a3c.A3CTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'PG':
-        agent = pg.PGTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'DQN':
-        agent = dqn.DQNTrainer(
-            config=ray_config,
-            env=alg_env)
-
-    episodes = []
-    for i in range(0, num_episodes):
-        print(f"episode: {i}")
-        agent.restore(checkpoint_path=checkpoint_path)
-        episode_reward = 0
-        done = False
-        states = []
-        obs = env.reset()
-        while not done:
-            action = agent.compute_action(obs)
-            obs, reward, done, info = env.step(action)
-            state = flatten(env.raw_observation, action, reward, info)
-            states.append(state)
-            episode_reward += reward
-        states = pd.DataFrame(states)
-        print(f"episode reward: {episode_reward}")
-        episodes.append(states)
+    episode_reward = 0
+    done = False
+    states = []
+    _ = env.reset()
+    while not done:
+        action = env.action_space.sample()
+        obs, reward, done, info = env.step(action)
+        state = flatten(env.raw_observation, action, reward, info)
+        states.append(state)
+        episode_reward += reward
+    states = pd.DataFrame(states)
+    print(f"episode reward: {episode_reward}")
     info = {
-        'series': series,
         'type_env': type_env,
         'dataset_id': dataset_id,
         'workload_id': workload_id,
         'network_id': network_id,
         'trace_id': trace_id,
-        'checkpint': checkpoint,
-        'experiments': experiment_id,
         'episode_length': episode_length,
-        'num_episodes': num_episodes,
         'algorithm': algorithm
     }
     # make the new experiment folder
-    content = os.listdir(EXPERIMENTS_PATH)
-    new_experiment = len(content)
-    this_experiment_folder = os.path.join(EXPERIMENTS_PATH,
-                                          str(new_experiment))
-    os.mkdir(this_experiment_folder)
+    test_series_path = os.path.join(
+        TESTS_RESULTS_PATH,
+        'series', str(test_series),
+        'tests')
+    if not os.path.isdir(test_series_path):
+        os.makedirs(test_series_path)
+    content = os.listdir(test_series_path)
+    new_test = len(content)
+    this_test_folder = os.path.join(test_series_path,
+                                    str(new_test))
+    os.makedirs(this_test_folder)
 
     # save the necesarry information
-    with open(os.path.join(this_experiment_folder, 'info.json'), 'x') as out_file:
+    with open(os.path.join(this_test_folder, 'info.json'), 'x') as out_file:
         json.dump(info, out_file, indent=4)
-    with open(os.path.join(this_experiment_folder, 'episodes.pickle'), 'wb') as out_pickle:
-        pickle.dump(episodes, out_pickle)
-
+    with open(os.path.join(
+        this_test_folder, 'episodes.pickle'), 'wb') as out_pickle:
+        pickle.dump([states], out_pickle)
 
 def flatten(raw_obs, action, reward, info):
     return {
@@ -205,19 +160,20 @@ def flatten(raw_obs, action, reward, info):
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--series', required=True, type=int, default=5)
+@click.option('--test-series', required=True, type=int, default=1)
+@click.option('--train-series', required=True, type=int, default=11)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=0)
+@click.option('--network-id', required=False, type=int, default=7)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--experiment-id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=500)
+@click.option('--checkpoint', required=False, type=int, default=10000)
 @click.option('--episode-length', required=False, type=int, default=50)
 @click.option('--num-episodes', required=False, type=int, default=10)
-def main(local_mode: bool, series: int, type_env: str,
+def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
          dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, experiment_id: int, checkpoint: int,
          num_episodes: int, episode_length: int):
@@ -235,22 +191,14 @@ def main(local_mode: bool, series: int, type_env: str,
         network_id (int): edge network of some dataset
         trace_id (int): user movement traces
     """
-    # config_file_path = os.path.join(
-    #     CONFIGS_PATH, 'train', config_folder,
-    #     'run.json')
-    # with open(config_file_path) as cf:
-    #     config = json.loads(cf.read())
 
-    # pp = pprint.PrettyPrinter(indent=4)
-    # print('start experiments with the following config:\n')
-    # pp.pprint(config)
-
-    learner(series=series, type_env=type_env,
-            dataset_id=dataset_id, workload_id=workload_id,
-            network_id=network_id, trace_id=trace_id,
-            experiment_id=experiment_id, checkpoint=checkpoint,
-            num_episodes=num_episodes, episode_length=episode_length,
-            local_mode=local_mode)
+    run_experiments(
+        test_series=test_series,
+        train_series=train_series, type_env=type_env,
+        dataset_id=dataset_id, workload_id=workload_id,
+        network_id=network_id, trace_id=trace_id,
+        experiment_id=experiment_id,
+        episode_length=episode_length)
 
 
 if __name__ == "__main__":

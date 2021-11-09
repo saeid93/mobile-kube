@@ -13,7 +13,7 @@ sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
 
 from experiments.utils.constants import (
     DATASETS_PATH,
-    RESULTS_PATH,
+    TRAIN_RESULTS_PATH,
     DATA_PATH,
     BACKUP_PATH
 )
@@ -46,7 +46,7 @@ def main():
         directory = DATASETS_PATH
         saved_file_path = os.path.join(BACKUP_PATH, 'dataset.zip')
     elif args.backup == 'results':
-        directory = RESULTS_PATH
+        directory = TRAIN_RESULTS_PATH
         saved_file_path = os.path.join(BACKUP_PATH, 'results.zip')
     elif args.backup == 'data':
         directory = DATA_PATH

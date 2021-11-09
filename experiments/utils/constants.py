@@ -15,11 +15,12 @@ DATA_PATH = "/homes/sg324/mobile-kube/data"
 
 # generated baesd on the users' path
 DATASETS_PATH = os.path.join(DATA_PATH, "datasets")
-RESULTS_PATH = os.path.join(DATA_PATH, "results")
+TRAIN_RESULTS_PATH = os.path.join(DATA_PATH, "train-results")
+TESTS_RESULTS_PATH = os.path.join(DATA_PATH, "test-results")
+
 CONFIGS_PATH = os.path.join(DATA_PATH, "configs")
 BACKUP_PATH = os.path.join(DATA_PATH, "backup")
 PLOTS_PATH = os.path.join(DATA_PATH, "plots")
-EXPERIMENTS_PATH = os.path.join(DATA_PATH, "experiments")
 DATASETS_METADATA_PATH = os.path.join(DATA_PATH, "dataset_metadata") 
 
 def _create_dirs():
@@ -28,14 +29,14 @@ def _create_dirs():
     """
     if not os.path.exists(DATASETS_PATH):
         os.makedirs(DATASETS_PATH)
-    if not os.path.exists(RESULTS_PATH):
-        os.makedirs(RESULTS_PATH)
+    if not os.path.exists(TRAIN_RESULTS_PATH):
+        os.makedirs(TRAIN_RESULTS_PATH)
     if not os.path.exists(CONFIGS_PATH):
         os.makedirs(CONFIGS_PATH)
     if not os.path.exists(BACKUP_PATH):
         os.makedirs(BACKUP_PATH)
-    if not os.path.exists(EXPERIMENTS_PATH):
-        os.makedirs(EXPERIMENTS_PATH)
+    if not os.path.exists(TESTS_RESULTS_PATH):
+        os.makedirs(TESTS_RESULTS_PATH)
     if not os.path.exists(DATASETS_METADATA_PATH):
         os.makedirs(DATASETS_METADATA_PATH)
     if not os.path.exists(PLOTS_PATH):

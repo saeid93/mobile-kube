@@ -26,15 +26,25 @@
     "sgd_minibatch_size": 128,
     "train_batch_size": 1000,
     "learn_config": {
+<<<<<<< HEAD
         "num_gpus": 1,
+=======
+        "sgd_minibatch_size": 128,
+        "train_batch_size": 1000,
+        "num_gpus": 0.6,
+>>>>>>> test scrips complete
         "model": {
-            "fcnet_hiddens": [64, 64],
+            "fcnet_hiddens": [64, 64, 64, 64],
             "fcnet_activation": "linear",
             "vf_share_layers": true
         },
         "gamma": 0.99,
         "lr": 0.0003,
+<<<<<<< HEAD
         "num_workers": 8,
+=======
+        "num_workers": 9,
+>>>>>>> test scrips complete
         "observation_filter": "MeanStdFilter",
         "num_sgd_iter": 1,
         "vf_loss_coeff": 0.01,

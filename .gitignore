@@ -235,5 +235,8 @@ atlassian-ide-plugin.xml
 .VSCodeCounter
 
 data/experiments
-data/results
+data/test-results
+data/train-results
 data/plots
+data/datasets
+data.zip
