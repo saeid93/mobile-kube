@@ -14,10 +14,10 @@ import pandas as pd
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
 
-
 # get an absolute path to the directory that contains parent files
 project_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 sys.path.append(os.path.normpath(os.path.join(project_dir, '..', '..')))
+
 
 from experiments.utils.constants import (
     TRAIN_RESULTS_PATH,
@@ -35,19 +35,18 @@ torch, nn = try_import_torch()
 def run_experiments(
     *, test_series: int, train_series: int, type_env: str, dataset_id: int,
     workload_id: int, network_id: int, trace_id: int,
-    experiment_id: int, episode_length):
+    comp_experiment_id: int, episode_length):
     """
     """
-    path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
     experiments_config_folder = os.path.join(
         TRAIN_RESULTS_PATH,
         "series",      str(train_series),
-        "envs",        path_env,
+        "envs",        'sim-edge',
         "datasets",    str(dataset_id),
         "workloads",   str(workload_id),
         "networks",    str(network_id),
         "traces",      str(trace_id),
-        "experiments", str(experiment_id),
+        "experiments", str(comp_experiment_id),
         "experiment_config.json")
 
     with open(experiments_config_folder) as cf:
@@ -56,10 +55,13 @@ def run_experiments(
     pp = pprint.PrettyPrinter(indent=4)
     print('start experiments with the following config:\n')
     pp.pprint(config)
-
     # extract differnt parts of the input_config
     learn_config = config['learn_config']
-    algorithm = config["run_or_experiment"]
+    algorithm = {
+        'sim-binpacking': 'binpacking',
+        'kube-binpacking': 'binpacking',
+        'sim-greedy': 'latency_greedy',
+        'kube-greedy': 'latency_greedy'}[type_env]
     env_config_base = config['env_config_base']
 
     # add evn_config_base updates
@@ -82,23 +84,13 @@ def run_experiments(
     # other types of agent
     if type_env not in ['CartPole-v0', 'Pendulum-v0']:
         env = gym.make(ENVSMAP[type_env], config=env_config)
-        ray_config = {"env": make_env_class('sim-edge'),
-                    "env_config": env_config}
-        ray_config.update(learn_config)
+        # ray_config = {"env": make_env_class('sim-edge'),
+        #             "env_config": env_config}
+        # ray_config.update(learn_config)
     else:
-        ray_config = {"env": type_env}
-        ray_config.update(learn_config)
-
-    path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
-    # experiments_folder = os.path.join(TRAIN_RESULTS_PATH,
-    #                                   "series",      str(series),
-    #                                   "envs",        path_env,
-    #                                   "datasets",    str(dataset_id),
-    #                                   "workloads",   str(workload_id),
-    #                                   "networks",     str(network_id),
-    #                                   "traces",       str(trace_id),
-    #                                   "experiments", str(experiment_id),
-    #                                   algorithm)
+        env = gym.make(type_env)
+        # ray_config = {"env": type_env}
+        # ray_config.update(learn_config)
 
     episode_reward = 0
     done = False
@@ -113,7 +105,6 @@ def run_experiments(
     states = pd.DataFrame(states)
     print(f"episode reward: {episode_reward}")
     info = {
-        'type_env': type_env,
         'dataset_id': dataset_id,
         'workload_id': workload_id,
         'network_id': network_id,
@@ -157,47 +148,45 @@ def flatten(raw_obs, action, reward, info):
         'reward': reward
     }
 
-
 @click.command()
-@click.option('--local-mode', type=bool, default=True)
 @click.option('--test-series', required=True, type=int, default=1)
-@click.option('--train-series', required=True, type=int, default=11)
+@click.option('--comp-train-series', required=True, type=int, default=11)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge']),
-              default='sim-edge')
+              type=click.Choice(['sim-binpacking', 'sim-greedy',
+                                 'kube-binpacking', 'kube-greedy']),
+              default='sim-greedy')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=7)
 @click.option('--trace-id', required=False, type=int, default=0)
-@click.option('--experiment-id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=10000)
+@click.option('--comp-experiment-id', required=True, type=int, default=0)
 @click.option('--episode-length', required=False, type=int, default=50)
-@click.option('--num-episodes', required=False, type=int, default=10)
-def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
+def main(test_series: int, comp_train_series: int, type_env: str,
          dataset_id: int, workload_id: int, network_id: int,
-         trace_id: int, experiment_id: int, checkpoint: int,
-         num_episodes: int, episode_length: int):
+         trace_id: int, comp_experiment_id: int,
+         episode_length: int):
     """[summary]
 
-    Args:
-        local_mode (bool): run in local mode for having the 
-        config_file (str): name of the config folder (only used in real mode)
-        use_callback (bool): whether to use callbacks or storing and visualising
-        checkpoint_freq (int): checkpoint the ml model at each (n-th) step
-        series (int): to gather a series of datasets in a folder
+    Args: 
+        test-series (int): series of the tests
+        comp-train-series (int): series of the trainining phase for loading config
+        test-series (int): testing series to save
         type_env (str): the type of the used environment
         dataset_id (int): used cluster dataset
         workload_id (int): the workload used in that dataset
         network_id (int): edge network of some dataset
         trace_id (int): user movement traces
+        comp-experiment-id (int): the trained agent experiment-id
+                    that we want to compare against
+        episode-length (int): number of steps in the test episode
     """
 
     run_experiments(
         test_series=test_series,
-        train_series=train_series, type_env=type_env,
+        train_series=comp_train_series, type_env=type_env,
         dataset_id=dataset_id, workload_id=workload_id,
         network_id=network_id, trace_id=trace_id,
-        experiment_id=experiment_id,
+        comp_experiment_id=comp_experiment_id,
         episode_length=episode_length)
 
 

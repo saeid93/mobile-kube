@@ -101,13 +101,13 @@ def run_experiments(
 
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
     experiments_folder = os.path.join(TRAIN_RESULTS_PATH,
-                                      "series",      str(train_series),
-                                      "envs",        path_env,
-                                      "datasets",    str(dataset_id),
-                                      "workloads",   str(workload_id),
+                                      "series",       str(train_series),
+                                      "envs",         path_env,
+                                      "datasets",     str(dataset_id),
+                                      "workloads",    str(workload_id),
                                       "networks",     str(network_id),
                                       "traces",       str(trace_id),
-                                      "experiments", str(experiment_id),
+                                      "experiments",  str(experiment_id),
                                       algorithm)
     for item in os.listdir(experiments_folder):
         if 'json' not in item:
@@ -161,7 +161,6 @@ def run_experiments(
         episodes.append(states)
     info = {
         'series': train_series,
-        'type_env': type_env,
         'dataset_id': dataset_id,
         'workload_id': workload_id,
         'network_id': network_id,
@@ -214,7 +213,7 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--test-series', required=True, type=int, default=1)
 @click.option('--train-series', required=True, type=int, default=11)
 @click.option('--type-env', required=True,
-              type=click.Choice(['sim-edge']),
+              type=click.Choice(['sim-edge', 'kube-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
@@ -232,15 +231,16 @@ def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
 
     Args:
         local_mode (bool): run in local mode for having the 
-        config_file (str): name of the config folder (only used in real mode)
-        use_callback (bool): whether to use callbacks or storing and visualising
-        checkpoint_freq (int): checkpoint the ml model at each (n-th) step
-        series (int): to gather a series of datasets in a folder
+        test-series (int): series of the tests
+        train-series (int): series of the trainining phase
         type_env (str): the type of the used environment
         dataset_id (int): used cluster dataset
         workload_id (int): the workload used in that dataset
         network_id (int): edge network of some dataset
         trace_id (int): user movement traces
+        checkpoint (int): training checkpoint to load
+        experiment-id (int): the trained agent experiment id
+        episode-length (int): number of steps in the test episode
     """
 
     run_experiments(

@@ -67,7 +67,7 @@ class KubeBinpackingEnv(KubeEdgeEnv):
         info = {'num_consolidated': self.num_consolidated,
                 'num_moves': num_moves,
                 'num_overloaded': self.num_overloaded,
-                'total_users_latency': np.sum(users_distances),
+                'users_distances': np.sum(users_distances),
                 'total_reward': reward,
                 'timestep': self.timestep,
                 'rewards': rewards}
