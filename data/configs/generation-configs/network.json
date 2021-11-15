@@ -1,11 +1,7 @@
 {
     "notes": "some network",
     "dataset_id": 6,
-<<<<<<< HEAD
-    "num_users": 16,
-=======
     "num_users": 160,
->>>>>>> test scrips complete
     "num_stations": 8,
     "width": 0.0001,
     "length": 0.0001,

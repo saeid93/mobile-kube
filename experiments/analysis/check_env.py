@@ -68,7 +68,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
-              default='sim-binpacking')
+              default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=7)

@@ -25,7 +25,9 @@ class Preprocessor():
            'services_resources_usage_frac': self._none,
            'nodes_resources_usage_frac': self._none,
            'services_nodes': self._one_hot_services_nodes,
+        #    'services_nodes': self._none,
            'users_stations': self._one_hot_users_stations
+        #    'users_stations': self._none
         }
         for key, val in observation.items():
             obs = np.concatenate((obs, transformers.get(

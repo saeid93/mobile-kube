@@ -2,12 +2,7 @@
     "dataset_id": 6,
     "network_id": 10,
     "speed": 30,
-<<<<<<< HEAD
     "timesteps": 3453,
     "from_dataset": false,
-=======
-    "timesteps": 100000,
-    "from_dataset": true,
->>>>>>> test scrips complete
     "seed": 42
 }

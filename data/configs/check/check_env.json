@@ -4,7 +4,7 @@
         "penalty_illegal": -1,
         "penalty_move": 0,
         "penalty_variance": 0,
-        "penalty_consolidated": 0,
+        "penalty_consolidated": 1,
         "penalty_latency": 1,
         "workload_stop": 1,
         "episode_length": 50,

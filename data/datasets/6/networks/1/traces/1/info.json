@@ -1,4 +1,5 @@
 {
+    "notes": "small fake timestep",
     "from_dataset": false,
     "seed": 42,
     "speed": 30,

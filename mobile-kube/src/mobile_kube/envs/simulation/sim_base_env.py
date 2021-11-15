@@ -417,6 +417,7 @@ class SimBaseEnv(gym.Env):
         """preprocessed observation of each environment
         """
         obs = self.preprocessor(self.raw_observation)
+        obs = np.array(list(map(int, obs)))
         return obs
 
     def _num_consolidated(self, services_nodes) -> int:

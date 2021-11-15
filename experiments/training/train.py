@@ -145,11 +145,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
 @click.option('--config-file', type=str, default='PPO')
-<<<<<<< HEAD:experiments/training/learner.py
-@click.option('--series', required=True, type=int, default=10)
-=======
-@click.option('--series', required=True, type=int, default=16)
->>>>>>> test scrips complete:experiments/training/train.py
+@click.option('--series', required=True, type=int, default=19)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),

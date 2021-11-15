@@ -174,22 +174,27 @@ class NetworkSimulatorBase:
 
     def get_largest_station_node_path(self):
         max_station_node = 0
+        min_station_node = 10000
         for start, dests in nx.floyd_warshall(self.network).items():
             if start[1] == 'station':
                 for dest, path_length in dests.items():
                     if dest[1] == 'node' and path_length != np.inf\
                         and path_length > max_station_node:
                         max_station_node = path_length
-        return max_station_node
+                    # choose the second smallest as the min station_node
+                    if dest[1] == 'node' and path_length != 0\
+                        and path_length < min_station_node:
+                        min_station_node = path_length
+        return min_station_node, max_station_node
 
-    def get_largets_station_node(self):
-        """
-            get the largest station-node distance in the entire network
-        """
-        edges = nx.get_edge_attributes(self.network,'weight')
-        nodes_stations_edges = dict(filter(lambda edge: edge[0][0][1] !=\
-            edge[0][1][1], edges.items()))
-        return max(nodes_stations_edges.values())
+    # def get_largets_station_node(self):
+    #     """
+    #         get the largest station-node distance in the entire network
+    #     """
+    #     edges = nx.get_edge_attributes(self.network,'weight')
+    #     nodes_stations_edges = dict(filter(lambda edge: edge[0][0][1] !=\
+    #         edge[0][1][1], edges.items()))
+    #     return max(nodes_stations_edges.values())
 
     def _euclidean_dis(self, loc1, loc2):
         dis = math.sqrt(sum([(a - b) ** 2 for a, b in zip(loc1, loc2)]))

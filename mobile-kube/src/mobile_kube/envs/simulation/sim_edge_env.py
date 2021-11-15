@@ -1,5 +1,6 @@
 """base class of edge enviornments
 """
+from types import DynamicClassAttribute
 import numpy as np
 from copy import deepcopy
 from typing import (
@@ -38,8 +39,8 @@ class SimEdgeEnv(SimBaseEnv):
         self.users_stations = self.edge_simulator.users_stations
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
-        self.normalise_latency = config['normalise_latency']
-        self.normalise_factor = self.edge_simulator.get_largest_station_node_path() # TODO check
+        # self.normalise_latency = config['normalise_latency']
+        # self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
         super().__init__(config)
 
         self.observation_space, self.action_space =\
@@ -98,6 +99,10 @@ class SimEdgeEnv(SimBaseEnv):
         higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
         observation_space = Box(low=0, high=higher_bound, shape=(obs_size, ))
+        # observation_space_vector = np.concatenate((
+        #     np.ones(self.num_users, dtype=int) * self.num_stations,
+        #     np.ones(self.num_services, dtype=int)* self.num_nodes))
+        # observation_space = MultiDiscrete(observation_space_vector)
         action_space = MultiDiscrete(np.ones(self.num_services) *
                                      self.num_nodes)
 
