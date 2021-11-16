@@ -35,10 +35,12 @@ class SimEdgeEnv(SimBaseEnv):
             trace=trace,
             **edge_simulator_config
             )
-
+        self.min_station_node, self.average_station_node, self.max_station_node =\
+            self.edge_simulator.paths_bounds()
         self.users_stations = self.edge_simulator.users_stations
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
+        self.latency_reward_option = config['latency_reward_option']
         # self.normalise_latency = config['normalise_latency']
         # self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
         super().__init__(config)

@@ -240,3 +240,5 @@ data/train-results
 data/plots
 data/datasets
 data.zip
+
+reward_scaling_samples_1

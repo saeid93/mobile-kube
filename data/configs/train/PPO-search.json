@@ -10,7 +10,7 @@
         "episode_length": 50,
         "timestep_reset": false,
         "placement_reset": false,
-        "normalise_latency": true,
+        "latency_reward_option": 1,
         "no_action_on_overloaded": false,
         "seed": 1,
         "kube":{

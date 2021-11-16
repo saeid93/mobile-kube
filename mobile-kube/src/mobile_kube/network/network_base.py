@@ -2,7 +2,7 @@ import networkx as nx
 import copy
 from networkx.algorithms import tree
 from operator import itemgetter
-from networkx.algorithms.shortest_paths.generic import shortest_path 
+from networkx.algorithms.shortest_paths.generic import average_shortest_path_length, shortest_path 
 import numpy as np
 import random
 import math
@@ -172,20 +172,26 @@ class NetworkSimulatorBase:
         """
         raise NotImplementedError
 
-    def get_largest_station_node_path(self):
-        max_station_node = 0
-        min_station_node = 10000
+    def paths_bounds(self):
+        maximum = 0
+        minimum = 10000
+        total_path_length = 0
+        number_paths = 0
         for start, dests in nx.floyd_warshall(self.network).items():
             if start[1] == 'station':
                 for dest, path_length in dests.items():
+                    if dest[1] == 'node':
+                        number_paths += 1
+                        total_path_length += path_length
                     if dest[1] == 'node' and path_length != np.inf\
-                        and path_length > max_station_node:
-                        max_station_node = path_length
+                        and path_length > maximum:
+                        maximum = path_length
                     # choose the second smallest as the min station_node
                     if dest[1] == 'node' and path_length != 0\
-                        and path_length < min_station_node:
-                        min_station_node = path_length
-        return min_station_node, max_station_node
+                        and path_length < minimum:
+                        minimum = path_length
+        average = total_path_length/number_paths
+        return minimum, average, maximum
 
     # def get_largets_station_node(self):
     #     """

@@ -2,11 +2,14 @@ import os
 import sys
 import gym
 import click
+import matplotlib
 import numpy as np
 from typing import Dict, Any
 import time
 import json
 from pprint import PrettyPrinter
+import matplotlib.pyplot as plt
+matplotlib.use("Agg")
 pp = PrettyPrinter(indent=4)
 
 # get an absolute path to the directory that contains parent files
@@ -46,22 +49,51 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     i = 1
     total_timesteps = 100
     _ = env.reset()
-    # env.render()
+
+    reward_latency_1 = []
+    reward_latency_2 = []
+    reward_latency_3 = []
+    reward_latency_4 = []
+    reward_consolidation = []
+    users_distances = []
+
     while i < total_timesteps:
         action = env.action_space.sample()
-        print("\n\n--------action--------")
-        print(action)
+        # print("\n\n--------action--------")
+        # print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
-        env.render()
+        # env.render()
         # env.edge_simulator.visualize_debug().savefig(
         #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
         # print(f"\niteration <{i}>:")
         # print(f"reward:\n <{reward}>")
+        reward_latency_1.append(
+            info['rewards'][1])
+        reward_latency_2.append(
+            info['rewards'][2])
+        reward_latency_3.append(
+            info['rewards'][3])
+        reward_latency_4.append(
+            info['rewards'][4])
+        reward_consolidation.append(
+            info['rewards']['reward_consolidation'])
+        users_distances.append(
+            info['users_distances'])
         print('info:')
         pp.pprint(info)
         i += 1
-
+    x = np.arange(total_timesteps-1)
+    # plt.plot(x, np.array(reward_latency_1), label = "1")
+    # plt.plot(x, np.array(reward_latency_2), label = "2")
+    plt.plot(x, np.array(reward_latency_3), label = "3")
+    # plt.plot(x, np.array(reward_latency_4), label = "4")
+    # plt.plot(x, users_distances, label = "users_distances")
+    # plt.plot(x, 1/np.array(users_distances), label = "1/users_distances")
+    plt.plot(x, reward_consolidation, label = "reward consolidation")
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'pic_network_{network_id}')
 
 @click.command()
 @click.option('--type-env', required=True,
@@ -72,7 +104,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=7)
-@click.option('--trace-id', required=False, type=int, default=0)
+@click.option('--trace-id', required=False, type=int, default=2)
 def main(type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):
     """[summary]

@@ -113,7 +113,7 @@ def env_config_base_check(config: Dict[str, Any]):
                      'num_users', 'num_stations', 'network',
                      'normalise_latency', 'trace', 'from_dataset',
                      'edge_simulator_config', 'action_method', 'step_method',
-                     'kube', "no_action_on_overloaded"]
+                     'kube', "no_action_on_overloaded", "latency_reward_option"]
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
@@ -128,8 +128,7 @@ def env_config_base_check(config: Dict[str, Any]):
     for item in floats:
         assert type(config[item])==float or type(config[item])==int,\
             f"[{item}] must be a float"
-    bools = ['timestep_reset',  'placement_reset',# 'from_dataset',
-             'normalise_latency']
+    bools = ['timestep_reset',  'placement_reset']
     for item in bools:
         assert type(config[item]) == bool, f"<{item}> must be a boolean"
     assert type(config['obs_elements']) == list,\

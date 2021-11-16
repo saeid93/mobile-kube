@@ -9,58 +9,43 @@ def _reward(
         float, Dict[str, Any]]:
 
     if num_overloaded > 0:
-        return _reward_illegal(self, num_overloaded), {
+        reward_illegal = _reward_illegal(self, num_overloaded)
+        return reward_illegal, {
             "reward_move": 0,
-            "reward_illegal": 0,
+            "reward_illegal": reward_illegal,
             "reward_consolidation": 0,
             "reward_variance": 0,
             "reward_latency": 0
             }
 
-    reward_total_edge, rewards_edge = _reward_latency(self, users_distances)
-    reward_total_cloud, rewards_cloud = _reward_cloud(
-        self,
-        num_moves=num_moves,
-        num_overloaded=num_overloaded)
-    reward_total = reward_total_edge + reward_total_cloud
-    rewards_edge.update(rewards_cloud)
-    rewards = deepcopy(rewards_edge)
-    return reward_total, rewards
-
-def _reward_cloud(self, *, num_moves: int,
-                num_overloaded: int = 0) -> Tuple[float, Dict[str, Any]]:
-    """absolute reward function based-on the absolute number
-    of consolidated servers
-    steps:
-        1. normalise
-        2. times penalties
-        3. only negative rewards in overloaded states
-    """
-    reward_move = 0
-    reward_illegal = 0
-    reward_consolidation = 0
-    reward_variance = 0
+    rewards_latency = {
+        1: _reward_latency_1(self, users_distances),
+        2: _reward_latency_2(self, users_distances),
+        3: _reward_latency_3(self, users_distances),
+        4: _reward_latency_4(self, users_distances),
+        # 4: _reward_latency_5(self, users_distances)
+    }
+    reward_latency = rewards_latency[self.latency_reward_option]
     reward_move = _reward_move(self, num_moves)
     reward_variance = _reward_variance(self)
     reward_consolidation = _reward_consolidation(self)
-
-    reward_total = reward_move + reward_illegal + \
-        reward_consolidation + reward_variance
-
+    reward_total = reward_latency + reward_consolidation +\
+        reward_move + reward_variance
     rewards = {
         "reward_move": reward_move,
-        "reward_illegal": reward_illegal,
+        "reward_illegal": 0,
         "reward_consolidation": reward_consolidation,
-        "reward_variance": reward_variance
+        "reward_variance": reward_variance,
+        "reward_latency": reward_latency,
     }
+    rewards.update(rewards_latency)
     return reward_total, rewards
 
-
 def rescale(values, old_min = 0, old_max = 1, new_min = 0, new_max = 100):
-    assert np.min(values)>=old_min,\
-        f"value {np.min(values)} smaller than old min {old_min}"
-    assert np.max(values)<=old_max,\
-        f"value {np.max(values)} greater than old max {old_max}"
+    # assert np.min(values)>=old_min,\
+    #     f"value {np.min(values)} smaller than old min {old_min}"
+    # assert np.max(values)<=old_max,\
+    #     f"value {np.max(values)} greater than old max {old_max}"
     output = []
     # old_min, old_max = min(values), max(values)
 
@@ -70,27 +55,100 @@ def rescale(values, old_min = 0, old_max = 1, new_min = 0, new_max = 100):
 
     return np.array(output)
 
-def _reward_latency(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
+# --------- different reward latency options ---------
+
+def _reward_latency_1(self, users_distances):
     """
     calcuate the edge reward
     """
-    # TODO normalise the all the values in the array
-    min_station_node, max_station_node = self.edge_simulator.get_largest_station_node_path()
-    reward_min = 1/max_station_node
-    reward_max = 1/min_station_node
+    # normalise distances with the largest distance
+    users_distances_normalised = users_distances/self.max_station_node
+    reward = np.sum(users_distances_normalised)
+    reward *= self.penalty_latency
+    if reward == 0:
+        reward = 100000000
+    reward = 1/reward
+    # clip the reward if it's greater 10 
+    if reward > 10:
+        reward = 10
+    return reward
+
+def _reward_latency_2(self, users_distances):
+    """
+    calcuate the edge reward
+    """
+    # normalise distances with the largest distance
+    users_distances_sum = np.sum(users_distances)
+    # reward *= self.penalty_latency
+    # if reward == 0:
+    #     reward = 100000000
+    reward_raw = 1/users_distances_sum
+    users_distances_min_sum = self.min_station_node * self.num_users
+    max_reward = 1/users_distances_min_sum
+    reward_normalised = reward_raw/max_reward
+    # clip the reward if it's greater 10 
+    # if reward > 10:
+    #     reward = 10
+    reward = reward_normalised * self.penalty_latency
+    return reward
+
+def _reward_latency_3(self, users_distances):
+    """
+    calcuate the edge reward
+    """
+    # normalise distances with the largest distance
+    users_distances_sum = np.sum(users_distances)
+    # reward *= self.penalty_latency
+    # if reward == 0:
+    #     reward = 100000000
+    reward_raw = 1/users_distances_sum
+    users_distances_min_sum = self.average_station_node * self.num_users
+    max_reward = 1/users_distances_min_sum
+    reward_normalised = reward_raw/max_reward
+    # clip the reward if it's greater 10 
+    # if reward > 10:
+    #     reward = 10
+    reward = reward_normalised * self.penalty_latency
+    return reward
+
+def _reward_latency_4(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
+    """
+    calcuate the edge reward
+    """
+    # reward_min = 1/self.max_station_node
+    reward_max = 1/self.min_station_node
     rewards_per_users = 1/users_distances
     rewards_per_users[rewards_per_users==np.inf] = reward_max
     reward_per_users_scaled = rescale(
         values=rewards_per_users,
-        old_min=reward_min,
+        old_min=0, # just because of python precsion problem
         old_max=reward_max,
         new_min=0, new_max=1)
     reward = np.average(reward_per_users_scaled)
-    rewards = {
-        'reward_latency': reward,
-        'reward_latency_old': _reward_latency_old(
-        self, users_distances, max_station_node)}
-    return reward, rewards
+    return reward
+
+# def _reward_latency_5(self, users_distances):
+#     """
+#     calcuate the edge reward
+#     """
+#     # normalise distances with the largest distance
+#     users_distances_sum = np.sum(users_distances)
+#     # reward *= self.penalty_latency
+#     # if reward == 0:
+#     #     reward = 100000000
+#     reward_raw = 1/users_distances_sum
+#     users_distances_min_sum = self.min_station_node * self.num_users
+#     reward_max = 1/users_distances_min_sum
+#     # reward_normalised = reward_raw/max_reward
+#     reward = rescale(
+#         values=[reward_raw],
+#         old_min=0, # just because of python precsion problem
+#         old_max=reward_max,
+#         new_min=0, new_max=1)
+#     reward = reward * self.penalty_latency
+#     return reward
+
+# ------------- other rewards ---------------
 
 def _reward_move(self, num_moves: int):
     """reward for the number of moves
@@ -123,23 +181,3 @@ def _reward_illegal(self, prev_num_overloaded: int):
     nodes_overloaded_factor = prev_num_overloaded/self.num_nodes
     reward_illegal = self.penalty_illegal * nodes_overloaded_factor
     return reward_illegal
-
-# TEMP TODO delete it
-
-def _reward_latency_old(self, users_distances, normalise_factor):
-    """
-    calcuate the edge reward
-    """
-    normalise_latency = True
-    # normalise distances with the largest distance
-    if normalise_latency:
-        users_distances_1 = np.copy(users_distances/normalise_factor)
-    reward = np.sum(users_distances_1)
-    reward *= self.penalty_latency
-    if reward == 0:
-        reward = 100000000
-    reward = 1/reward
-    # clip the reward if it's greater 10 
-    if reward > 10:
-        reward = 10
-    return reward
