@@ -51,12 +51,6 @@ class SimBaseEnv(gym.Env):
                 indices: [0, num_services)
                 contents: [0, num_nodes)
 
-        config['workload_start']:
-            the start timestep of the entire dataset that we want to use
-
-        config['workload_stop']:
-            the final timestep of the entire dataset that we want to use
-
     Remarks:
             the main indicator of the state (obseravation) if services_nodes
             the rest of the observation dictionary is updated with decorators
@@ -100,8 +94,7 @@ class SimBaseEnv(gym.Env):
         self.total_timesteps: int = self.workload.shape[1]
 
         # start and stop timestep
-        stop_timestep: int = int(
-            config['workload_stop']*self.total_timesteps)
+        stop_timestep: int = self.total_timesteps
         self.workload = self.workload[:, 0:stop_timestep, :]
 
         # initial states
@@ -118,8 +111,8 @@ class SimBaseEnv(gym.Env):
         self.episode_length: int = config['episode_length']
 
         # whether to reset timestep and placement at every episode
-        self.timestep_reset: bool = config['timestep_reset']
-        self.placement_reset: bool = config['placement_reset']
+        self.timestep_reset: bool = False
+        self.placement_reset: bool = False
         self.global_timestep: int = 0
         self.timestep: int = 0
         self.services_nodes = deepcopy(self.initial_services_nodes)
@@ -132,7 +125,9 @@ class SimBaseEnv(gym.Env):
 
     def seed(self, seed):
         np.random.seed(seed)
-        self.np_random = seeding.np_random(seed)
+        self.np_random, seed = seeding.np_random(seed)
+        self._env_seed = seed
+        return [seed]
 
     @override(gym.Env)
     def reset(self) -> np.ndarray:

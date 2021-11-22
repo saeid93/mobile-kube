@@ -9,15 +9,17 @@ def check_config(config: Dict[str, Any]):
     # check the for illegal items
     allowed_items = ['obs_elements', 'penalty_illegal', 'penalty_move',
                      'penalty_variance', 'penalty_latency',
-                     'penalty_consolidated', 'workload_stop',
-                     'episode_length', 'timestep_reset', 'placement_reset',
+                     'penalty_consolidated',
+                     'episode_length',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
                      'workload', 'nodes_cap_rng', 'services_request_rng',
                      'num_users', 'num_stations', 'network', 'normalise_latency',
                      'trace', 'from_dataset', 'edge_simulator_config',
                      'action_method', 'step_method', 'kube',
                      'dataset_path', 'workload_path', 'network_path', 'trace_path',
-                     'no_action_on_overloaded', 'latency_reward_option']
+                     'no_action_on_overloaded', 'latency_reward_option',
+                     'latency_lower', 'latency_upper', 'consolidation_lower',
+                     'consolidation_upper']
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
@@ -27,16 +29,12 @@ def check_config(config: Dict[str, Any]):
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"
 
-    floats = ['workload_stop', 'penalty_illegal', 'penalty_illegal',
+    floats = ['penalty_illegal', 'penalty_illegal',
               'penalty_variance', 'penalty_consolidated',
               'penalty_latency', ]
     for item in floats:
         assert type(config[item])==float or type(config[item])==int,\
             f"[{item}] must be a float"
-
-    bools = ['timestep_reset',  'placement_reset']
-    for item in bools:
-        assert type(config[item]) == bool, f"<{item}> must be a boolean"
 
     lists = ['obs_elements']
     for item in lists:
@@ -70,10 +68,4 @@ def check_config(config: Dict[str, Any]):
 
     assert set(config['kube']).issubset(
         set(kube)), "wrong input for the kube"
-
-    # check workload arguments
-    if "workload_stop" in config:
-        assert config['workload_stop'] <= 1, \
-            "workload_stop is greater than 1"
-        assert config['workload_stop'] >= 0, \
-            "workload_stop is smaller than 0"
+    

@@ -13,7 +13,6 @@
         "penalty_consolidatefd": [int],
         "penalty_latency": [int],
         "mitigation_tries": [int],
-        "workload_stop": [int],
         "episode_length": [int],
         "timestep_reset": [bool],
         "placement_reset": [bool],

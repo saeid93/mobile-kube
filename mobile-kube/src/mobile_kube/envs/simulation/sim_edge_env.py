@@ -1,5 +1,6 @@
 """base class of edge enviornments
 """
+from random import seed
 from types import DynamicClassAttribute
 import numpy as np
 from copy import deepcopy
@@ -40,7 +41,11 @@ class SimEdgeEnv(SimBaseEnv):
         self.users_stations = self.edge_simulator.users_stations
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
-        self.latency_reward_option = config['latency_reward_option']
+        # self.latency_reward_option = config['latency_reward_option']
+        self.latency_lower = config['latency_lower']
+        self.latency_upper = config['latency_upper']
+        self.consolidation_lower = config['consolidation_lower']
+        self.consolidation_upper = config['consolidation_upper']
         # self.normalise_latency = config['normalise_latency']
         # self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
         super().__init__(config)
@@ -100,13 +105,14 @@ class SimEdgeEnv(SimBaseEnv):
 
         higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
-        observation_space = Box(low=0, high=higher_bound, shape=(obs_size, ))
+        observation_space = Box(
+            low=0, high=higher_bound, shape=(obs_size, ),dtype=np.float64, seed=self._env_seed)
         # observation_space_vector = np.concatenate((
         #     np.ones(self.num_users, dtype=int) * self.num_stations,
         #     np.ones(self.num_services, dtype=int)* self.num_nodes))
         # observation_space = MultiDiscrete(observation_space_vector)
         action_space = MultiDiscrete(np.ones(self.num_services) *
-                                     self.num_nodes)
+                                     self.num_nodes, seed=self._env_seed)
 
         return observation_space, action_space
 

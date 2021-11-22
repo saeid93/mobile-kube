@@ -1,13 +1,18 @@
 import numpy as np
-from copy import deepcopy
 from typing import Tuple, Dict, Any
+
+latency_option = 5
+consolidation_option = 2
+# latency_lower = 0.75
+# latency_upper = 2
+# consolidation_lower = 0
+# consolidation_upper_bound = 0.75
 
 def _reward(
     self, *, num_moves: int,
     num_overloaded: int,
     users_distances: np.array = None) -> Tuple[
         float, Dict[str, Any]]:
-    self.consolidation_reward_option = 2
     if num_overloaded > 0:
         reward_illegal = _reward_illegal(self, num_overloaded)
         return reward_illegal, {
@@ -19,27 +24,20 @@ def _reward(
             }
 
     rewards_latency = {
-        1: _reward_latency_1(self, users_distances),
-        2: _reward_latency_2(self, users_distances),
-        3: _reward_latency_3(self, users_distances),
-        4: _reward_latency_4(self, users_distances),
-        5: _reward_latency_5(self, users_distances),
-        # 4: _reward_latency_5(self, users_distances)
-    }
-    rewards_consolidation = {
-        1: _reward_consolidation_1(self),
-        2: _reward_consolidation_2(self)
+        # 1: _reward_latency_1(self, users_distances),
+        # 2: _reward_latency_2(self, users_distances),
         # 3: _reward_latency_3(self, users_distances),
         # 4: _reward_latency_4(self, users_distances),
-        # 5: _reward_latency_5(self, users_distances),
-        # 4: _reward_latency_5(self, users_distances)
+        5: _reward_latency_5(self, users_distances),
     }
-    reward_latency = rewards_latency[self.latency_reward_option]
+    rewards_consolidation = {
+        # 1: _reward_consolidation_1(self),
+        2: _reward_consolidation_2(self)
+    }
+    reward_latency = rewards_latency[latency_option]
     reward_move = _reward_move(self, num_moves)
     reward_variance = _reward_variance(self)
-    reward_consolidation = rewards_consolidation[
-        self.consolidation_reward_option]
-    # TODO come back here!
+    reward_consolidation = rewards_consolidation[consolidation_option]
     reward_total = reward_latency + reward_consolidation +\
         reward_move + reward_variance
     rewards = {
@@ -54,12 +52,7 @@ def _reward(
     return reward_total, rewards
 
 def rescale(values, old_min = 0, old_max = 1, new_min = 0, new_max = 100):
-    # assert np.min(values)>=old_min,\
-    #     f"value {np.min(values)} smaller than old min {old_min}"
-    # assert np.max(values)<=old_max,\
-    #     f"value {np.max(values)} greater than old max {old_max}"
     output = []
-    # old_min, old_max = min(values), max(values)
 
     for v in values:
         new_v = (new_max - new_min) / (old_max - old_min) * (v - old_min) + new_min
@@ -91,16 +84,10 @@ def _reward_latency_2(self, users_distances):
     """
     # normalise distances with the largest distance
     users_distances_sum = np.sum(users_distances)
-    # reward *= self.penalty_latency
-    # if reward == 0:
-    #     reward = 100000000
     reward_raw = 1/users_distances_sum
     users_distances_min_sum = self.min_station_node * self.num_users
     max_reward = 1/users_distances_min_sum
     reward_normalised = reward_raw/max_reward
-    # clip the reward if it's greater 10 
-    # if reward > 10:
-    #     reward = 10
     reward = reward_normalised * self.penalty_latency
     return reward
 
@@ -110,16 +97,10 @@ def _reward_latency_3(self, users_distances):
     """
     # normalise distances with the largest distance
     users_distances_sum = np.sum(users_distances)
-    # reward *= self.penalty_latency
-    # if reward == 0:
-    #     reward = 100000000
     reward_raw = 1/users_distances_sum
     users_distances_min_sum = self.average_station_node * self.num_users
     max_reward = 1/users_distances_min_sum
     reward_normalised = reward_raw/max_reward
-    # clip the reward if it's greater 10 
-    # if reward > 10:
-    #     reward = 10
     reward = reward_normalised * self.penalty_latency
     return reward
 
@@ -133,7 +114,7 @@ def _reward_latency_4(self, users_distances: np.array) -> Tuple[float, Dict[str,
     rewards_per_users[rewards_per_users==np.inf] = reward_max
     reward_per_users_scaled = rescale(
         values=rewards_per_users,
-        old_min=0, # just because of python precsion problem
+        old_min=0,
         old_max=reward_max,
         new_min=0, new_max=1)
     reward = np.average(reward_per_users_scaled)
@@ -152,39 +133,17 @@ def _reward_latency_5(self, users_distances: np.array) -> Tuple[float, Dict[str,
     reward_normalised = reward_raw/max_reward
     reward_scaled = rescale(
         values=[reward_normalised],
-        old_min=0.75, # just because of python precsion problem
-        old_max=2,
+        old_min=self.latency_lower,
+        old_max=self.latency_upper,
         new_min=0, new_max=1)[0]
     reward = reward_scaled * self.penalty_latency
     return reward
-
-# def _reward_latency_5(self, users_distances):
-#     """
-#     calcuate the edge reward
-#     """
-#     # normalise distances with the largest distance
-#     users_distances_sum = np.sum(users_distances)
-#     # reward *= self.penalty_latency
-#     # if reward == 0:
-#     #     reward = 100000000
-#     reward_raw = 1/users_distances_sum
-#     users_distances_min_sum = self.min_station_node * self.num_users
-#     reward_max = 1/users_distances_min_sum
-#     # reward_normalised = reward_raw/max_reward
-#     reward = rescale(
-#         values=[reward_raw],
-#         old_min=0, # just because of python precsion problem
-#         old_max=reward_max,
-#         new_min=0, new_max=1)
-#     reward = reward * self.penalty_latency
-#     return reward
 
 # ------------- consolidatino rewards ---------------
 
 def _reward_consolidation_1(self):
     """reward for the num_consolidated
     """
-    # TODO use the rescale here too
     consolidation_factor = self.num_consolidated/self.num_nodes
     reward_consolidation = self.penalty_consolidated *\
         consolidation_factor
@@ -193,12 +152,11 @@ def _reward_consolidation_1(self):
 def _reward_consolidation_2(self):
     """reward for the num_consolidated
     """
-    # TODO use the rescale here too
     consolidation_factor = self.num_consolidated/self.num_nodes
     reward_scaled = rescale(
         values=[consolidation_factor],
-        old_min=0, # just because of python precsion problem
-        old_max=0.75,
+        old_min=self.consolidation_lower, 
+        old_max=self.consolidation_upper,
         new_min=0, new_max=1)[0]
     reward = self.penalty_consolidated * reward_scaled
     return reward

@@ -106,14 +106,15 @@ def env_config_base_check(config: Dict[str, Any]):
     allowed_items = ['obs_elements', 'penalty_illegal', 'penalty_move',
                      'penalty_variance', 'penalty_latency',
                      'penalty_consolidated', 'mitigation_tries',
-                     'workload_stop', 'episode_length', 'timestep_reset',
-                     'placement_reset',
+                     'episode_length', 'placement_reset',
                      'compute_greedy_num_consolidated', 'seed', 'dataset',
                      'workload', 'nodes_cap_rng', 'services_request_rng',
                      'num_users', 'num_stations', 'network',
                      'normalise_latency', 'trace', 'from_dataset',
                      'edge_simulator_config', 'action_method', 'step_method',
-                     'kube', "no_action_on_overloaded", "latency_reward_option"]
+                     'kube', "no_action_on_overloaded", "latency_reward_option",
+                     'latency_lower', 'latency_upper', 'consolidation_lower',
+                     'consolidation_upper']
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
@@ -122,17 +123,17 @@ def env_config_base_check(config: Dict[str, Any]):
     ints = ['episode_length', 'seed']
     for item in ints:
         assert type(config[item]) == int, f"<{item}> must be an integer"
-    floats = ['workload_stop', 'penalty_illegal', 'penalty_illegal',
+    floats = ['penalty_illegal', 'penalty_illegal',
               'penalty_variance', 'penalty_consolidated',
               'penalty_latency', ]
     for item in floats:
         assert type(config[item])==float or type(config[item])==int,\
             f"[{item}] must be a float"
-    bools = ['timestep_reset',  'placement_reset']
-    for item in bools:
-        assert type(config[item]) == bool, f"<{item}> must be a boolean"
-    assert type(config['obs_elements']) == list,\
-        "obs_elements' must be a list"
+    # bools = ['placement_reset']
+    # for item in bools:
+    #     assert type(config[item]) == bool, f"<{item}> must be a boolean"
+    # assert type(config['obs_elements']) == list,\
+    #     "obs_elements' must be a list"
 
     # observation checks
     all_obs_elements: List[str] = ["services_resources_usage",
@@ -158,10 +159,3 @@ def env_config_base_check(config: Dict[str, Any]):
 
     assert set(config['kube']).issubset(
         set(kube)), "wrong input for the kube"
-
-    # check workload arguments
-    if "workload_stop" in config:
-        assert config['workload_stop'] <= 1, \
-            "workload_stop is greater than 1"
-        assert config['workload_stop'] >= 0, \
-            "workload_stop is smaller than 0"

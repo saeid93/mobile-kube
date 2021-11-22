@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
-
+import matplotlib
+matplotlib.use("Agg")
 
 def plot_workload(timesteps, workload, plot_smoothing, i):
     """

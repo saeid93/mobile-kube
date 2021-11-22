@@ -145,7 +145,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
 @click.option('--config-file', type=str, default='PPO')
-@click.option('--series', required=True, type=int, default=19)
+@click.option('--series', required=True, type=int, default=36)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),

@@ -47,7 +47,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         env = gym.make(type_env)
 
     i = 1
-    total_timesteps = 1000
+    total_timesteps = 100
     _ = env.reset()
 
     reward_latency_1 = []
@@ -63,7 +63,9 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     while i < total_timesteps:
         action = env.action_space.sample()
         # print("\n\n--------action--------")
-        # print(action)
+        print(f'timestamp {i}')
+        print(env.raw_observation)
+        print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
         # env.render()
@@ -88,23 +90,23 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         reward_total.append(reward)
         users_distances.append(
             info['users_distances'])
-        print('info:')
-        pp.pprint(info)
+        # print('info:')
+        # pp.pprint(info)
         i += 1
     x = np.arange(total_timesteps-1)
     # plt.plot(x, np.array(reward_latency_1), label = "L1")
     # plt.plot(x, np.array(reward_latency_2), label = "L2")
-    plt.plot(x, np.array(reward_latency_3), label = "L3")
+    # plt.plot(x, np.array(reward_latency_3), label = "L3")
     # plt.plot(x, np.array(reward_latency_4), label = "L4")
     plt.plot(x, np.array(reward_latency_5), label = "L5")
     # plt.plot(x, users_distances, label = "users_distances")
     # plt.plot(x, 1/np.array(users_distances), label = "1/users_distances")
     # plt.plot(x, reward_consolidation_1, label = "C1")
     plt.plot(x, reward_consolidation_2, label = "C2")
-    # plt.plot(x, reward_total, label = "reward")
+    plt.plot(x, reward_total, label = "reward")
     plt.legend()
     plt.grid()
-    plt.savefig(f'pic_network_1')
+    plt.savefig(f'pic_network_2')
 
 @click.command()
 @click.option('--type-env', required=True,

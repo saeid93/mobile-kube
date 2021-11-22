@@ -1,21 +1,17 @@
 
 {
-    "notes": {
-        "env_model": "real experiment",
-        "description": "this is a real experiment"
-    },
     "env_config_base": {
         "obs_elements": ["services_nodes"],
         "penalty_illegal": -1,
         "penalty_move": 0,
         "penalty_variance": 0,
-        "penalty_consolidated": 0.5,
-        "penalty_latency": 0.5,
-        "workload_stop": 1,
+        "penalty_consolidated": 1,
+        "penalty_latency": 1,
         "episode_length": 50,
-        "timestep_reset": false,
-        "placement_reset": false,
-        "latency_reward_option": 1,
+        "latency_lower": 0.75,
+        "latency_upper": 2,
+        "consolidation_lower": 0,
+        "consolidation_upper": 1,
         "no_action_on_overloaded": false,
         "seed": 1,
         "kube":{

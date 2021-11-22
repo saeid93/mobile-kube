@@ -38,10 +38,9 @@ Description:
     "penalty_normal": 0, // penalty for normal steps -- mandatory
     "penalty_consolidated": 1, // penalty for consolidation reward -- mandatory
     "mitigation_tries": 4, // mitigation tries for the greey mitigator -- mandatory
-    "workload_stop": 0.5, // workload stopping point -- mandatory
     "episode_length": 5, // length of trainig episodes -- mandatory
-    "timestep_reset": false, // whether to reset at each episode or not -- mandatory
-    "placement_reset": false, // whether to reset services_node at each episode or not -- mandatory
+    "latency_lower": 0.75, // whether to reset at each episode or not -- mandatory
+    "latency_upper": 2, // whether to reset services_node at each episode or not -- mandatory
     "seed": 1 // random seed for the env environment dynamics -- mandatory
 }
 ```
