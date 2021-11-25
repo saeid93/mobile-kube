@@ -1,0 +1,5 @@
+/homes/sg324/.conda/envs/central/bin/python /homes/sg324/mobile-kube/experiments/training/train.py --series 38 --config-file PG-0 --dataset-id 6 --network-id 1 --trace-id 2
+/homes/sg324/.conda/envs/central/bin/python /homes/sg324/mobile-kube/experiments/training/train.py --series 38 --config-file PG-1 --dataset-id 6 --network-id 1 --trace-id 2
+/homes/sg324/.conda/envs/central/bin/python /homes/sg324/mobile-kube/experiments/training/train.py --series 38 --config-file PG-2 --dataset-id 6 --network-id 1 --trace-id 2
+/homes/sg324/.conda/envs/central/bin/python /homes/sg324/mobile-kube/experiments/training/train.py --series 38 --config-file PG-3 --dataset-id 6 --network-id 1 --trace-id 2
+/homes/sg324/.conda/envs/central/bin/python /homes/sg324/mobile-kube/experiments/training/train.py --series 38 --config-file PG-4 --dataset-id 6 --network-id 1 --trace-id 2

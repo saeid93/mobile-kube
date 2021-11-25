@@ -47,7 +47,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         env = gym.make(type_env)
 
     i = 1
-    total_timesteps = 100
+    total_timesteps = 15
     _ = env.reset()
 
     reward_latency_1 = []
@@ -64,7 +64,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         action = env.action_space.sample()
         # print("\n\n--------action--------")
         print(f'timestamp {i}')
-        print(env.raw_observation)
+        # print(env.raw_observation)
         print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
@@ -73,25 +73,26 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
         # print(f"\niteration <{i}>:")
         # print(f"reward:\n <{reward}>")
-        reward_latency_1.append(
-            info['rewards']['latency_rewards'][1])
-        reward_latency_2.append(
-            info['rewards']['latency_rewards'][2])
-        reward_latency_3.append(
-            info['rewards']['latency_rewards'][3])
-        reward_latency_4.append(
-            info['rewards']['latency_rewards'][4])
-        reward_latency_5.append(
-            info['rewards']['latency_rewards'][5])
-        reward_consolidation_1.append(
-            info['rewards']['consolidation_rewards'][1])
-        reward_consolidation_2.append(
-            info['rewards']['consolidation_rewards'][2])
+        # reward_latency_1.append(
+        #     info['rewards']['latency_rewards'][1])
+        # reward_latency_2.append(
+        #     info['rewards']['latency_rewards'][2])
+        # reward_latency_3.append(
+        #     info['rewards']['latency_rewards'][3])
+        # reward_latency_4.append(
+        #     info['rewards']['latency_rewards'][4])
+        # reward_latency_5.append(
+        #     info['rewards']['latency_rewards'][5])
+        # reward_consolidation_1.append(
+        #     info['rewards']['consolidation_rewards'][1])
+        # reward_consolidation_2.append(
+        #     info['rewards']['consolidation_rewards'][2])
         reward_total.append(reward)
-        users_distances.append(
-            info['users_distances'])
+        # users_distances.append(
+        #     info['users_distances'])
         # print('info:')
         # pp.pprint(info)
+        # print(f'done: {done}')
         i += 1
     x = np.arange(total_timesteps-1)
     # plt.plot(x, np.array(reward_latency_1), label = "L1")

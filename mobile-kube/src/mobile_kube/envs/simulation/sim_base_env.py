@@ -127,6 +127,7 @@ class SimBaseEnv(gym.Env):
         np.random.seed(seed)
         self.np_random, seed = seeding.np_random(seed)
         self._env_seed = seed
+        self.base_env_seed = seed
         return [seed]
 
     @override(gym.Env)

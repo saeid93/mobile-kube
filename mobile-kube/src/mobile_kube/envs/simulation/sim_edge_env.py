@@ -1,7 +1,6 @@
 """base class of edge enviornments
 """
 from random import seed
-from types import DynamicClassAttribute
 import numpy as np
 from copy import deepcopy
 from typing import (
@@ -184,7 +183,9 @@ class SimEdgeEnv(SimBaseEnv):
                 'users_distances': np.sum(users_distances),
                 'total_reward': reward,
                 'timestep': self.timestep,
-                'rewards': rewards}
+                'global_timestep': self.global_timestep,
+                'rewards': rewards,
+                'seed': self.base_env_seed}
 
         assert self.observation_space.contains(self.observation),\
                 (f"observation:\n<{self.raw_observation}>\noutside of "

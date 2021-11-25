@@ -3,9 +3,15 @@ from typing import Dict
 from tabulate import tabulate
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.env import BaseEnv
-from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
-from ray.rllib.policy.sample_batch import SampleBatch
+from typing import Dict, Optional, TYPE_CHECKING
+
+from ray.rllib.env import BaseEnv
 from ray.rllib.policy import Policy
+from ray.rllib.policy.sample_batch import SampleBatch
+from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
+from ray.rllib.utils.annotations import PublicAPI
+from ray.rllib.utils.deprecation import deprecation_warning
+from ray.rllib.utils.typing import AgentID, PolicyID
 
 
 class CloudCallback(DefaultCallbacks):
@@ -41,7 +47,7 @@ class CloudCallback(DefaultCallbacks):
         self.count = 0
         self.total = 0
 
-    def on_episode_start(self, *, worker: RolloutWorker,
+    def on_episode_start(self, *, worker,
                          base_env: BaseEnv,
                          policies: Dict[str, Policy],
                          episode: MultiAgentEpisode,
@@ -50,6 +56,9 @@ class CloudCallback(DefaultCallbacks):
         # timestep of the dataset
         episode.user_data["timestep"] = []
         episode.hist_data["timestep"] = []
+        # global timestep of the dataset
+        episode.user_data["global_timestep"] = []
+        episode.hist_data["global_timestep"] = []
         # num_consolidated placeholder lists
         episode.user_data["num_consolidated"] = []
         episode.hist_data["num_consolidated"] = []
@@ -66,7 +75,7 @@ class CloudCallback(DefaultCallbacks):
         episode.user_data["users_distances"] = []
         episode.hist_data["users_distances"] = []
 
-    def on_episode_step(self, *, worker: RolloutWorker,
+    def on_episode_step(self, *, worker,
                         base_env: BaseEnv,
                         episode: MultiAgentEpisode,
                         env_index: int, **kwargs):
@@ -75,6 +84,9 @@ class CloudCallback(DefaultCallbacks):
             # extract the timestep of the current step from the dict
             timestep = episode.last_info_for()['timestep']
             episode.user_data["timestep"].append(timestep)
+            # extract the global timestep of the current step from the dict
+            global_timestep = episode.last_info_for()['global_timestep']
+            episode.user_data["global_timestep"].append(global_timestep)
             # extract the number of conolidated from the info dict
             num_consolidated = episode.last_info_for()['num_consolidated']
             episode.user_data["num_consolidated"].append(num_consolidated)
@@ -112,11 +124,12 @@ class CloudCallback(DefaultCallbacks):
         num_consolidated_avg = np.mean(episode.user_data["num_consolidated"])
         users_distances_avg = np.mean(episode.user_data["users_distances"])
         num_overloaded_avg = np.mean(episode.user_data["num_overloaded"])
-        last_timestep = np.max(episode.user_data["timestep"])
-        episode_total_reward = episode.total_reward
+        timestep = np.max(episode.user_data["timestep"])
+        global_timestep = np.max(episode.user_data["global_timestep"])
+        # episode_total_reward = episode.total_reward
         action_logit_max = round(max(episode.last_action_for()).item(), 2)
-        action_logit_min = round(min(episode.last_action_for()).item(), 2)
-        action_logit_avg = round(np.mean(episode.last_action_for()).item(), 2)
+        # action_logit_min = round(min(episode.last_action_for()).item(), 2)
+        # action_logit_avg = round(np.mean(episode.last_action_for()).item(), 2)
 
         # extract episodes rewards info
         reward_consolidation_max = max([a['reward_consolidation']
@@ -176,6 +189,8 @@ class CloudCallback(DefaultCallbacks):
         episode.custom_metrics['reward_move_max'] = reward_move_max
         episode.custom_metrics['reward_variance_max'] = reward_variance_max
         episode.custom_metrics['reward_latency_max'] = reward_latency_max
+        episode.custom_metrics['timestep'] = timestep
+        episode.custom_metrics['global_timestep'] = global_timestep
         # if episode.user_data["greedy_num_consolidated"][0] is not None:
         #     episode.custom_metrics['greedy_num_consolidated_avg'] =\
         #         greedy_num_consolidated_avg
@@ -192,23 +207,44 @@ class CloudCallback(DefaultCallbacks):
         # episode.hist_data["num_moves"] = \
         #     episode.user_data["num_moves"]
 
+    def on_postprocess_trajectory(
+            self, *, worker: "RolloutWorker", episode: MultiAgentEpisode,
+            agent_id: AgentID, policy_id,
+            policies: Dict[PolicyID, Policy], postprocessed_batch: SampleBatch,
+            original_batches: Dict[AgentID, SampleBatch], **kwargs) -> None:
+        if self.legacy_callbacks.get("on_postprocess_traj"):
+            self.legacy_callbacks["on_postprocess_traj"]({
+                "episode": episode,
+                "agent_id": agent_id,
+                "pre_batch": original_batches[agent_id],
+                "post_batch": postprocessed_batch,
+                "all_pre_batches": original_batches,
+            })
+
+
+
+
     def on_sample_end(self, *, worker: RolloutWorker, samples: SampleBatch,
                       **kwargs):
         num_episodes = np.unique(samples['eps_id']).size
-        self.workers_total_episodes[worker.worker_index] += num_episodes
+        # self.workers_total_episodes[worker.worker_index] += num_episodes
         # headers = ['rollout_fragment_length', 'num_episodes',
         #  'total_episodes']
         # table = [[samples.count, num_episodes,
         #           self.workers_total_episodes[worker.worker_index]]]
         # print('*'*50)
+        # print(f"episode: {self.count}")
         # print("<--- one sample batch of worker"
         #       f" <{worker.worker_index}> ended --->")
+        # print(samples['actions'])
         # print(f"rollout_fragment_length <{samples.count}>"
         #       f", num_episodes <{num_episodes}>"
         #       ", total_episodes "
         #       f"<{self.workers_total_episodes[worker.worker_index]}>")
         # # print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
+        # self.count += 1
         # print('*'*50, '\n')
+        pass
 
     def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch,
                           **kwargs) -> None:
@@ -219,7 +255,39 @@ class CloudCallback(DefaultCallbacks):
         self.count += 1
 
     def on_train_result(self, *, trainer, result: dict, **kwargs):
+        """Called at the end of Trainable.train().
+
+        Args:
+            trainer (Trainer): Current trainer instance.
+            result (dict): Dict of results returned from trainer.train() call.
+                You can mutate this object to add additional metrics.
+            kwargs: Forward compatibility placeholder.
+        """
         # print("trainer.train() result: <{}> -> <{}> episodes".format(
         #     trainer, result["episodes_this_iter"]))
         # you can mutate the result dict to add new fields to return
         result["callback_ok"] = True
+        if self.legacy_callbacks.get("on_train_result"):
+            self.legacy_callbacks["on_train_result"]({
+                "trainer": trainer,
+                "result": result,
+            })
+
+    def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch,
+                          result: dict, **kwargs) -> None:
+        """Called at the beginning of Policy.learn_on_batch().
+
+        Note: This is called before 0-padding via
+        `pad_batch_to_sequences_of_same_size`.
+
+        Args:
+            policy (Policy): Reference to the current Policy object.
+            train_batch (SampleBatch): SampleBatch to be trained on. You can
+                mutate this object to modify the samples generated.
+            result (dict): A results dict to add custom metrics to.
+            kwargs: Forward compatibility placeholder.
+        """
+        pass
+
+
+

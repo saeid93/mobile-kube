@@ -137,6 +137,8 @@ def _reward_latency_5(self, users_distances: np.array) -> Tuple[float, Dict[str,
         old_max=self.latency_upper,
         new_min=0, new_max=1)[0]
     reward = reward_scaled * self.penalty_latency
+    # if reward > 10000000000000:
+    #     a = 5
     return reward
 
 # ------------- consolidatino rewards ---------------
@@ -159,6 +161,8 @@ def _reward_consolidation_2(self):
         old_max=self.consolidation_upper,
         new_min=0, new_max=1)[0]
     reward = self.penalty_consolidated * reward_scaled
+    # if reward > 10000000000000:
+    #     a = 5
     return reward
 
 # ------------- consolidatino rewards ---------------
