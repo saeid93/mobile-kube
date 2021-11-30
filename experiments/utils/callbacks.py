@@ -288,6 +288,3 @@ class CloudCallback(DefaultCallbacks):
             kwargs: Forward compatibility placeholder.
         """
         pass
-
-
-
