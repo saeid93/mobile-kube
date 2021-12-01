@@ -16,6 +16,7 @@ from ray.rllib.utils.framework import try_import_torch
 import pprint
 import gym
 import ray.rllib.agents.ppo as ppo
+import ray.rllib.agents.impala as impala
 import ray.rllib.agents.a3c as a3c
 import ray.rllib.agents.pg as pg
 import ray.rllib.agents.dqn as dqn
@@ -45,7 +46,8 @@ def run_experiments(
     *, test_series: int, train_series: int, type_env: str, dataset_id: int,
     workload_id: int, network_id: int, trace_id: int,
     checkpoint: int, experiment_id: int, local_mode: bool,
-    episode_length, num_episodes: int):
+    episode_length, num_episodes: int, workload_id_test: int,
+    trace_id_test: int):
     """
     """
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
@@ -82,9 +84,9 @@ def run_experiments(
     env_config = add_path_to_config_edge(
         config=env_config_base,
         dataset_id=dataset_id,
-        workload_id=workload_id,
+        workload_id=workload_id_test,
         network_id=network_id,
-        trace_id=trace_id
+        trace_id=trace_id_test
     )
 
     # trained ray agent should always be simulation
@@ -118,7 +120,7 @@ def run_experiments(
         experiments_folder,
         experiment_string,
         # os.listdir(experiments_folder)[0],
-        f"checkpoint_{checkpoint}",
+        f"checkpoint_00{checkpoint}",
         f"checkpoint-{checkpoint}"
     )
 
@@ -129,7 +131,11 @@ def run_experiments(
         agent = ppo.PPOTrainer(
             config=ray_config,
             env=alg_env)
-    elif algorithm == 'A3C':
+    if algorithm == 'IMPALA':
+        agent = impala.ImpalaTrainer(
+            config=ray_config,
+            env=alg_env)
+    elif algorithm == 'A3C' or algorithm == 'A2C':
         agent = a3c.A3CTrainer(
             config=ray_config,
             env=alg_env)
@@ -210,23 +216,26 @@ def flatten(raw_obs, action, reward, info):
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=1)
-@click.option('--train-series', required=True, type=int, default=11)
+@click.option('--test-series', required=True, type=int, default=2)
+@click.option('--train-series', required=True, type=int, default=44)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=7)
-@click.option('--trace-id', required=False, type=int, default=0)
+@click.option('--network-id', required=False, type=int, default=5)
+@click.option('--trace-id', required=False, type=int, default=2)
 @click.option('--experiment-id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=10000)
+@click.option('--checkpoint', required=False, type=int, default=1667)
 @click.option('--episode-length', required=False, type=int, default=50)
 @click.option('--num-episodes', required=False, type=int, default=10)
+@click.option('--workload-id-test', required=False, type=int, default=0)
+@click.option('--trace-id-test', required=False, type=int, default=0)
 def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
          dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, experiment_id: int, checkpoint: int,
-         num_episodes: int, episode_length: int):
+         num_episodes: int, episode_length: int,
+         workload_id_test: int, trace_id_test: int):
     """[summary]
 
     Args:
@@ -250,7 +259,8 @@ def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
         network_id=network_id, trace_id=trace_id,
         experiment_id=experiment_id, checkpoint=checkpoint,
         num_episodes=num_episodes, episode_length=episode_length,
-        local_mode=local_mode)
+        local_mode=local_mode, workload_id_test=workload_id_test,
+        trace_id_test=trace_id_test)
 
 
 if __name__ == "__main__":
