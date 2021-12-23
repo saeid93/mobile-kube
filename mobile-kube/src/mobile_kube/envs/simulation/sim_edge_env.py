@@ -11,7 +11,8 @@ from typing import (
 
 from gym.spaces import (
     Box,
-    MultiDiscrete
+    MultiDiscrete,
+    Discrete
 )
 
 
@@ -19,6 +20,7 @@ from mobile_kube.util import (
     Preprocessor,
     override,
     load_object,
+    Discrete2MultiDiscrete,
     logger
 )
 from mobile_kube.network import NetworkSimulator
@@ -105,13 +107,20 @@ class SimEdgeEnv(SimBaseEnv):
         higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
         observation_space = Box(
-            low=0, high=higher_bound, shape=(obs_size, ),dtype=np.float64, seed=self._env_seed)
-        # observation_space_vector = np.concatenate((
-        #     np.ones(self.num_users, dtype=int) * self.num_stations,
-        #     np.ones(self.num_services, dtype=int)* self.num_nodes))
-        # observation_space = MultiDiscrete(observation_space_vector)
-        action_space = MultiDiscrete(np.ones(self.num_services) *
-                                     self.num_nodes, seed=self._env_seed)
+            low=0, high=higher_bound, shape=(obs_size, ),
+            dtype=np.float64, seed=self._env_seed)
+
+        if self.discrete_actions:
+            action_space = Discrete(
+                self.num_nodes**self.num_services, seed=self._env_seed)
+            self.discrete_action_converter = Discrete2MultiDiscrete(
+                self.num_nodes, self.num_services)
+        else:
+            action_space = MultiDiscrete(np.ones(self.num_services) *
+                                        self.num_nodes, seed=self._env_seed)
+        # action_space = Box(
+        #     low=0, high=self.num_nodes-1, shape=(
+        #         self.num_services,), dtype=int, seed=self._env_seed)
 
         return observation_space, action_space
 
@@ -147,7 +156,9 @@ class SimEdgeEnv(SimBaseEnv):
         # take the action
         prev_services_nodes = deepcopy(self.services_nodes)
         assert self.action_space.contains(action)
-
+        if self.discrete_actions:
+            action = self.discrete_action_converter[action]
+        
         # TODO not possible to roll back in the real world
         # take the action in the real world only if possible
         # simulation therefore should co-exist

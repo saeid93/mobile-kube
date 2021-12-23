@@ -5,8 +5,8 @@
         "penalty_move": 0,
         "penalty_variance": 0,
         "penalty_consolidated": 0,
-        "penalty_latency": 10,
-        "episode_length": 10,
+        "penalty_latency": 1,
+        "episode_length": {"grid_search": [25, 50, 1000]},
         "latency_lower": 0.75,
         "latency_upper": 2,
         "consolidation_lower": 0,
@@ -24,7 +24,7 @@
     "run_or_experiment": "PPO",
     "learn_config": {
         "sgd_minibatch_size": 128,
-        "train_batch_size": {"grid_search": [1000, 2000, 4000, 8000]},
+        "train_batch_size": 1000,
         "num_gpus": 0.5,
         "model": {
             "fcnet_hiddens": [64, 64],
@@ -33,13 +33,13 @@
         },
         "gamma": 0.99,
         "lr": 0.0003,
-        "num_workers": 5,
+        "num_workers": 6,
         "observation_filter": "MeanStdFilter",
         "num_sgd_iter": 1,
         "vf_loss_coeff": 0.01,
         "seed": 203
     },
     "stop": {
-        "timesteps_total": 5000000
+        "timesteps_total": 2000000
     }
 }

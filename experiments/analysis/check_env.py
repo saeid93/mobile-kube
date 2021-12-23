@@ -47,25 +47,24 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         env = gym.make(type_env)
 
     i = 1
-    total_timesteps = 15
+    total_timesteps = 1000
     _ = env.reset()
 
-    reward_latency_1 = []
-    reward_latency_2 = []
-    reward_latency_3 = []
-    reward_latency_4 = []
-    reward_latency_5 = []
-    reward_consolidation_1 = []
-    reward_consolidation_2 = []
+
+    latency_rewards = []
+    latency_negative_rewards = []
+    consolidation_rewards = []
     reward_total = []
     users_distances = []
-
+    episode_total_latency_reward = 0
+    episode_total_latency_negative_reward = 0
+    episode_total_consolidation_reward = 0
     while i < total_timesteps:
         action = env.action_space.sample()
         # print("\n\n--------action--------")
-        print(f'timestamp {i}')
+        # print(f'timestamp {i}')
         # print(env.raw_observation)
-        print(action)
+        # print(action)
         # time.sleep(1)
         _, reward, done, info = env.step(action)
         # env.render()
@@ -73,37 +72,33 @@ def check_env(*, config: Dict[str, Any], type_env: str,
         #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
         # print(f"\niteration <{i}>:")
         # print(f"reward:\n <{reward}>")
-        # reward_latency_1.append(
-        #     info['rewards']['latency_rewards'][1])
-        # reward_latency_2.append(
-        #     info['rewards']['latency_rewards'][2])
-        # reward_latency_3.append(
-        #     info['rewards']['latency_rewards'][3])
-        # reward_latency_4.append(
-        #     info['rewards']['latency_rewards'][4])
-        # reward_latency_5.append(
-        #     info['rewards']['latency_rewards'][5])
-        # reward_consolidation_1.append(
-        #     info['rewards']['consolidation_rewards'][1])
-        # reward_consolidation_2.append(
-        #     info['rewards']['consolidation_rewards'][2])
+        latency_reward = info['rewards']['reward_latency']
+        consolidation_reward = info['rewards']['reward_consolidation']
+        latency_rewards.append(latency_reward)
+        consolidation_rewards.append(consolidation_reward)
         reward_total.append(reward)
+        if latency_reward < 0:
+            latency_negative_rewards.append(latency_reward)
+            episode_total_latency_reward += latency_reward
+        else:
+            latency_negative_rewards.append(0)
         # users_distances.append(
         #     info['users_distances'])
         # print('info:')
         # pp.pprint(info)
         # print(f'done: {done}')
         i += 1
+        episode_total_consolidation_reward += consolidation_reward
+        episode_total_latency_reward += latency_reward
+    print(f'episode_total_latency_reward: {episode_total_latency_reward}')
+    print(f'episode_total_latency_negative_rewards: {episode_total_latency_negative_reward}')
+    print(f'episode_total_consolidation_reward: {episode_total_consolidation_reward}')
     x = np.arange(total_timesteps-1)
-    # plt.plot(x, np.array(reward_latency_1), label = "L1")
-    # plt.plot(x, np.array(reward_latency_2), label = "L2")
-    # plt.plot(x, np.array(reward_latency_3), label = "L3")
-    # plt.plot(x, np.array(reward_latency_4), label = "L4")
-    plt.plot(x, np.array(reward_latency_5), label = "L5")
+    plt.plot(x, np.array(latency_negative_rewards), label = "LN")
+    plt.plot(x, np.array(latency_rewards), label = "L")
     # plt.plot(x, users_distances, label = "users_distances")
     # plt.plot(x, 1/np.array(users_distances), label = "1/users_distances")
-    # plt.plot(x, reward_consolidation_1, label = "C1")
-    plt.plot(x, reward_consolidation_2, label = "C2")
+    plt.plot(x, consolidation_rewards, label = "C")
     plt.plot(x, reward_total, label = "reward")
     plt.legend()
     plt.grid()
@@ -117,8 +112,8 @@ def check_env(*, config: Dict[str, Any], type_env: str,
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=1)
-@click.option('--trace-id', required=False, type=int, default=2)
+@click.option('--network-id', required=False, type=int, default=5)
+@click.option('--trace-id', required=False, type=int, default=1)
 def main(type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):
     """[summary]

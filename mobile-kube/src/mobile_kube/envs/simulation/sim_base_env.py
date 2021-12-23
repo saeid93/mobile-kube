@@ -111,14 +111,27 @@ class SimBaseEnv(gym.Env):
         self.episode_length: int = config['episode_length']
 
         # whether to reset timestep and placement at every episode
-        self.timestep_reset: bool = False
-        self.placement_reset: bool = False
+        if 'timestep_reset' in config:
+            self.timestep_reset: bool = config['timestep_reset']
+        else:
+            self.timestep_reset: bool = False
+        if 'placement_reset' in config:
+            self.placement_reset: bool = config['placement_reset']
+        else:
+            self.placement_reset: bool = False
         self.global_timestep: int = 0
         self.timestep: int = 0
         self.services_nodes = deepcopy(self.initial_services_nodes)
 
         # set the reward method
         self._reward = types.MethodType(_reward, self)
+
+        # value based methods needs to have a convertor of
+        # discrete state to multidiscrete
+        if 'discrete_actions' in config:
+            self.discrete_actions: bool = config['discrete_actions']
+        else:
+            self.discrete_actions: bool = False
 
         # whether to take the overloaded action with negative reward or not
         self.no_action_on_overloaded = config['no_action_on_overloaded']

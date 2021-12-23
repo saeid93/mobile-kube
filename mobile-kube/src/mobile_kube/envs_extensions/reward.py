@@ -47,8 +47,8 @@ def _reward(
         "reward_variance": reward_variance,
         "reward_latency": reward_latency,
     }
-    rewards.update({'latency_rewards' : rewards_latency})
-    rewards.update({'consolidation_rewards' : rewards_consolidation})
+    # rewards.update({'latency_rewards' : rewards_latency})
+    # rewards.update({'consolidation_rewards' : rewards_consolidation})
     return reward_total, rewards
 
 def rescale(values, old_min = 0, old_max = 1, new_min = 0, new_max = 100):
@@ -62,64 +62,64 @@ def rescale(values, old_min = 0, old_max = 1, new_min = 0, new_max = 100):
 
 # --------- different reward latency options ---------
 
-def _reward_latency_1(self, users_distances):
-    """
-    calcuate the edge reward
-    """
-    # normalise distances with the largest distance
-    users_distances_normalised = users_distances/self.max_station_node
-    reward = np.sum(users_distances_normalised)
-    reward *= self.penalty_latency
-    if reward == 0:
-        reward = 100000000
-    reward = 1/reward
-    # clip the reward if it's greater 10 
-    if reward > 10:
-        reward = 10
-    return reward
+# def _reward_latency_1(self, users_distances):
+#     """
+#     calcuate the edge reward
+#     """
+#     # normalise distances with the largest distance
+#     users_distances_normalised = users_distances/self.max_station_node
+#     reward = np.sum(users_distances_normalised)
+#     reward *= self.penalty_latency
+#     if reward == 0:
+#         reward = 100000000
+#     reward = 1/reward
+#     # clip the reward if it's greater 10 
+#     if reward > 10:
+#         reward = 10
+#     return reward
 
-def _reward_latency_2(self, users_distances):
-    """
-    calcuate the edge reward
-    """
-    # normalise distances with the largest distance
-    users_distances_sum = np.sum(users_distances)
-    reward_raw = 1/users_distances_sum
-    users_distances_min_sum = self.min_station_node * self.num_users
-    max_reward = 1/users_distances_min_sum
-    reward_normalised = reward_raw/max_reward
-    reward = reward_normalised * self.penalty_latency
-    return reward
+# def _reward_latency_2(self, users_distances):
+#     """
+#     calcuate the edge reward
+#     """
+#     # normalise distances with the largest distance
+#     users_distances_sum = np.sum(users_distances)
+#     reward_raw = 1/users_distances_sum
+#     users_distances_min_sum = self.min_station_node * self.num_users
+#     max_reward = 1/users_distances_min_sum
+#     reward_normalised = reward_raw/max_reward
+#     reward = reward_normalised * self.penalty_latency
+#     return reward
 
-def _reward_latency_3(self, users_distances):
-    """
-    calcuate the edge reward
-    """
-    # normalise distances with the largest distance
-    users_distances_sum = np.sum(users_distances)
-    reward_raw = 1/users_distances_sum
-    users_distances_min_sum = self.average_station_node * self.num_users
-    max_reward = 1/users_distances_min_sum
-    reward_normalised = reward_raw/max_reward
-    reward = reward_normalised * self.penalty_latency
-    return reward
+# def _reward_latency_3(self, users_distances):
+#     """
+#     calcuate the edge reward
+#     """
+#     # normalise distances with the largest distance
+#     users_distances_sum = np.sum(users_distances)
+#     reward_raw = 1/users_distances_sum
+#     users_distances_min_sum = self.average_station_node * self.num_users
+#     max_reward = 1/users_distances_min_sum
+#     reward_normalised = reward_raw/max_reward
+#     reward = reward_normalised * self.penalty_latency
+#     return reward
 
-def _reward_latency_4(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
-    """
-    calcuate the edge reward
-    """
-    # reward_min = 1/self.max_station_node
-    reward_max = 1/self.min_station_node
-    rewards_per_users = 1/users_distances
-    rewards_per_users[rewards_per_users==np.inf] = reward_max
-    reward_per_users_scaled = rescale(
-        values=rewards_per_users,
-        old_min=0,
-        old_max=reward_max,
-        new_min=0, new_max=1)
-    reward = np.average(reward_per_users_scaled)
-    reward = reward * self.penalty_latency
-    return reward
+# def _reward_latency_4(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
+#     """
+#     calcuate the edge reward
+#     """
+#     # reward_min = 1/self.max_station_node
+#     reward_max = 1/self.min_station_node
+#     rewards_per_users = 1/users_distances
+#     rewards_per_users[rewards_per_users==np.inf] = reward_max
+#     reward_per_users_scaled = rescale(
+#         values=rewards_per_users,
+#         old_min=0,
+#         old_max=reward_max,
+#         new_min=0, new_max=1)
+#     reward = np.average(reward_per_users_scaled)
+#     reward = reward * self.penalty_latency
+#     return reward
 
 def _reward_latency_5(self, users_distances: np.array) -> Tuple[float, Dict[str, Any]]:
     """
@@ -143,13 +143,13 @@ def _reward_latency_5(self, users_distances: np.array) -> Tuple[float, Dict[str,
 
 # ------------- consolidatino rewards ---------------
 
-def _reward_consolidation_1(self):
-    """reward for the num_consolidated
-    """
-    consolidation_factor = self.num_consolidated/self.num_nodes
-    reward_consolidation = self.penalty_consolidated *\
-        consolidation_factor
-    return reward_consolidation
+# def _reward_consolidation_1(self):
+#     """reward for the num_consolidated
+#     """
+#     consolidation_factor = self.num_consolidated/self.num_nodes
+#     reward_consolidation = self.penalty_consolidated *\
+#         consolidation_factor
+#     return reward_consolidation
 
 def _reward_consolidation_2(self):
     """reward for the num_consolidated

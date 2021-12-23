@@ -10,6 +10,7 @@ import pickle
 import click
 from typing import Dict, Any
 import json
+import copy
 
 import ray
 from ray.rllib.utils.framework import try_import_torch
@@ -43,11 +44,11 @@ torch, nn = try_import_torch()
 
 
 def run_experiments(
-    *, test_series: int, train_series: int, type_env: str, dataset_id: int,
-    workload_id: int, network_id: int, trace_id: int,
-    checkpoint: int, experiment_id: int, local_mode: bool,
+    *, test_series: int, train_series: int, type_env: str,
+    dataset_id: int, workload_id: int, network_id: int,
+    trace_id: int, experiment_id: int, local_mode: bool,
     episode_length, num_episodes: int, workload_id_test: int,
-    trace_id_test: int):
+    trace_id_test: int, checkpoint_to_load: str):
     """
     """
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
@@ -65,41 +66,43 @@ def run_experiments(
     with open(experiments_config_folder) as cf:
         config = json.loads(cf.read())
 
-    pp = pprint.PrettyPrinter(indent=4)
-    print('start experiments with the following config:\n')
-    pp.pprint(config)
-
-    # extract differnt parts of the input_config
-    learn_config = config['learn_config']
-    algorithm = config["run_or_experiment"]
-    env_config_base = config['env_config_base']
-
-    # add evn_config_base updates
-    env_config_base.update({
-        'episode_length': episode_length,
-        'no_action_on_overloaded': True
-    })
-
-    # add the additional nencessary arguments to the edge config
-    env_config = add_path_to_config_edge(
-        config=env_config_base,
+    # fix the grid searches
+    algorithm, env_configs, learn_configs, num_workers = fix_grid_searches(
+        config=config,
         dataset_id=dataset_id,
-        workload_id=workload_id_test,
+        workload_id_test=workload_id_test,
         network_id=network_id,
-        trace_id=trace_id_test
+        trace_id_test=trace_id_test,
+        episode_length=episode_length
     )
 
-    # trained ray agent should always be simulation
-    # however the agent outside it can be kuber agent or
-    # other types of agent
-    if type_env not in ['CartPole-v0', 'Pendulum-v0']:
-        env = gym.make(ENVSMAP[type_env], config=env_config)
-        ray_config = {"env": make_env_class('sim-edge'),
-                    "env_config": env_config}
-        ray_config.update(learn_config)
-    else:
-        ray_config = {"env": type_env}
-        ray_config.update(learn_config)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # print('start experiments with the following config:\n')
+    # pp.pprint(config)
+
+    # # extract differnt parts of the input_config
+    # learn_config = config['learn_config']
+    # algorithm = config["run_or_experiment"]
+    # env_config_base = config['env_config_base']
+
+    # # update the difffent part of the envs
+    # env_config_base.update({
+    #     'episode_length': episode_length,
+    #     'no_action_on_overloaded': True,
+    #     'timestep_reset': True,
+    #     'placement_reset': True
+    # })
+    # num_workers = 4
+    # learn_config.update({"num_workers": num_workers})
+
+    # # add the additional nencessary arguments to the edge config
+    # env_config = add_path_to_config_edge(
+    #     config=env_config_base,
+    #     dataset_id=dataset_id,
+    #     workload_id=workload_id_test,
+    #     network_id=network_id,
+    #     trace_id=trace_id_test
+    # )
 
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'
     experiments_folder = os.path.join(TRAIN_RESULTS_PATH,
@@ -111,91 +114,151 @@ def run_experiments(
                                       "traces",       str(trace_id),
                                       "experiments",  str(experiment_id),
                                       algorithm)
-    for item in os.listdir(experiments_folder):
-        if 'json' not in item:
-            experiment_string = item
-            break
-
-    checkpoint_path = os.path.join(
-        experiments_folder,
-        experiment_string,
-        # os.listdir(experiments_folder)[0],
-        f"checkpoint_00{checkpoint}",
-        f"checkpoint-{checkpoint}"
-    )
 
     ray.init(local_mode=local_mode)
+    experiments_str = []
+    for item in os.listdir(experiments_folder):
+        if 'json' not in item:
+            experiments_str.append(item)
 
-    alg_env = make_env_class(type_env)
-    if algorithm == 'PPO':
-        agent = ppo.PPOTrainer(
-            config=ray_config,
-            env=alg_env)
-    if algorithm == 'IMPALA':
-        agent = impala.ImpalaTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'A3C' or algorithm == 'A2C':
-        agent = a3c.A3CTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'PG':
-        agent = pg.PGTrainer(
-            config=ray_config,
-            env=alg_env)
-    elif algorithm == 'DQN':
-        agent = dqn.DQNTrainer(
-            config=ray_config,
-            env=alg_env)
+    experiments_str.sort()
+    for experiment_str, env_config, learn_config in zip(
+        experiments_str, env_configs, learn_configs):
 
-    episodes = []
-    for i in range(0, num_episodes):
-        print(f"episode: {i}")
-        agent.restore(checkpoint_path=checkpoint_path)
-        episode_reward = 0
-        done = False
-        states = []
-        obs = env.reset()
-        while not done:
-            action = agent.compute_action(obs)
-            obs, reward, done, info = env.step(action)
-            state = flatten(env.raw_observation, action, reward, info)
-            states.append(state)
-            episode_reward += reward
-        states = pd.DataFrame(states)
-        print(f"episode reward: {episode_reward}")
-        episodes.append(states)
-    info = {
-        'series': train_series,
-        'dataset_id': dataset_id,
-        'workload_id': workload_id,
-        'network_id': network_id,
-        'trace_id': trace_id,
-        'checkpint': checkpoint,
-        'experiments': experiment_id,
-        'episode_length': episode_length,
-        'num_episodes': num_episodes,
-        'algorithm': algorithm
-    }
-    # make the new experiment folder
-    test_series_path = os.path.join(
-        TESTS_RESULTS_PATH,
-        'series', str(test_series),
-        'tests')
-    if not os.path.isdir(test_series_path):
-        os.makedirs(test_series_path)
-    content = os.listdir(test_series_path)
-    new_test = len(content)
-    this_test_folder = os.path.join(test_series_path,
-                                    str(new_test))
-    os.makedirs(this_test_folder)
+    # trained ray agent should always be simulation
+    # however the agent outside it can be kuber agent or
+    # other types of agent
+        if type_env not in ['CartPole-v0', 'Pendulum-v0']:
+            env = gym.make(ENVSMAP[type_env], config=env_config)
+            # reset the env at the beginning of each episode
+            ray_config = {"env": make_env_class('sim-edge'),
+                        "env_config": env_config}
+            ray_config.update(learn_config)
+        else:
+            ray_config = {"env": type_env}
+            ray_config.update(learn_config)
+                # break
 
-    # save the necesarry information
-    with open(os.path.join(this_test_folder, 'info.json'), 'x') as out_file:
-        json.dump(info, out_file, indent=4)
-    with open(os.path.join(
-        this_test_folder, 'episodes.pickle'), 'wb') as out_pickle:
-        pickle.dump(episodes, out_pickle)
+        # checkpoint_string = [
+        #     s for s in filter (
+        #         lambda x: 'checkpoint' in x, os.listdir(
+        #             os.path.join(
+        #                 experiments_folder, experiment_string)))][0]
+        # checkpoint = int(checkpoint_string.replace('checkpoint_',''))
+        # checkpoint_path = os.path.join(
+        #     experiments_folder,
+        #     experiment_string,
+        #     # os.listdir(experiments_folder)[0],
+        #     checkpoint_string,
+        #     f"checkpoint-{checkpoint}"
+        # )
+        if checkpoint_to_load=='last':
+            checkpoint_string = sorted([
+                s for s in filter (
+                    lambda x: 'checkpoint' in x, os.listdir(
+                        os.path.join(
+                            experiments_folder, experiment_str)))])[-1]
+            checkpoint = int(checkpoint_string.replace('checkpoint_',''))
+            checkpoint_path = os.path.join(
+                experiments_folder,
+                experiment_str,
+                # os.listdir(experiments_folder)[0],
+                checkpoint_string,
+                f"checkpoint-{checkpoint}"
+            )
+            checkpoint_to_load_info = checkpoint
+        else:
+            checkpoint_path = os.path.join(
+                experiments_folder,
+                experiment_str,
+                # os.listdir(experiments_folder)[0],
+                f"checkpoint_{checkpoint_to_load}",
+                f"checkpoint-{int(checkpoint_to_load)}"
+            )
+            checkpoint_to_load_info = int(checkpoint_to_load)
+
+        alg_env = make_env_class(type_env)
+        if algorithm == 'PPO':
+            agent = ppo.PPOTrainer(
+                config=ray_config,
+                env=alg_env)
+        if algorithm == 'IMPALA':
+            agent = impala.ImpalaTrainer(
+                config=ray_config,
+                env=alg_env)
+        elif algorithm == 'A3C' or algorithm == 'A2C':
+            agent = a3c.A3CTrainer(
+                config=ray_config,
+                env=alg_env)
+        elif algorithm == 'PG':
+            agent = pg.PGTrainer(
+                config=ray_config,
+                env=alg_env)
+        elif algorithm == 'DQN':
+            agent = dqn.DQNTrainer(
+                config=ray_config,
+                env=alg_env)
+        import time
+        episodes = []
+        for i in range(0, num_episodes):
+            print(f"---- \nepisode: {i} ----\n")
+            agent.restore(checkpoint_path=checkpoint_path)
+            episode_reward = 0
+            done = False
+            states = []
+            obs = env.reset()
+            # print(f"observation: {env.env.raw_observation}")
+            # start = time.time()
+            while not done:
+                # print(f"timestep: {env.env.timestep}")
+                action = agent.compute_action(obs)
+                # pp.pprint(f"action: {action}")
+                obs, reward, done, info = env.step(action)
+                # pp.pprint(f"observation: {env.env.raw_observation}")
+                # print('\n'+50*'-'+'\n')
+                state = flatten(env.raw_observation, action, reward, info)
+                states.append(state)
+                episode_reward += reward
+            # print("time elapsed: {}".format(time.time() - start))
+            states = pd.DataFrame(states)
+            print(f"episode reward: {episode_reward}")
+            episodes.append(states)
+        info = {
+            'series': train_series,
+            'dataset_id': dataset_id,
+            'workload_id': workload_id,
+            'network_id': network_id,
+            'trace_id': trace_id,
+            'trace_id_test': trace_id_test,
+            'checkpoint': checkpoint_to_load_info,
+            'experiment_str': experiment_str,
+            'experiments': experiment_id,
+            'episode_length': episode_length,
+            'num_episodes': num_episodes,
+            'algorithm': algorithm,
+            'penalty_latency': env_config['penalty_latency'],
+            'penalty_consolidated': env_config['penalty_consolidated'],
+            'num_workers': num_workers
+        }
+        # make the new experiment folder
+        test_series_path = os.path.join(
+            TESTS_RESULTS_PATH,
+            'series', str(test_series),
+            'tests')
+        if not os.path.isdir(test_series_path):
+            os.makedirs(test_series_path)
+        content = os.listdir(test_series_path)
+        new_test = len(content)
+        this_test_folder = os.path.join(test_series_path,
+                                        str(new_test))
+        os.makedirs(this_test_folder)
+
+        # save the necesarry information
+        with open(os.path.join(this_test_folder, 'info.json'), 'x') as out_file:
+            json.dump(info, out_file, indent=4)
+        with open(os.path.join(
+            this_test_folder, 'episodes.pickle'), 'wb') as out_pickle:
+            pickle.dump(episodes, out_pickle)
 
 def flatten(raw_obs, action, reward, info):
     return {
@@ -213,29 +276,103 @@ def flatten(raw_obs, action, reward, info):
         'reward': reward
     }
 
+def fix_grid_searches(
+    config, dataset_id, workload_id_test, network_id,
+    trace_id_test, episode_length):
+    """
+    This function is used to fix the grid searches.
+    """
+    num_workers = 4
+    pp = pprint.PrettyPrinter(indent=4)
+    print('start experiments with the following config:\n')
+    pp.pprint(config)
+    learn_configs = []
+    env_configs = []
+
+    # extract differnt parts of the input_config
+    learn_config = config['learn_config']
+    algorithm = config["run_or_experiment"]
+    env_config_base = config['env_config_base']
+
+    values = []
+    for k, v in env_config_base.items():
+        if type(v) == dict:
+            if 'grid_search' in v:
+                values = v['grid_search']
+                break
+
+    # for k, v in learn_config.items():
+    #     if v is dict:
+    #         values = v['grid_search']
+    values.sort()
+    if values != []:
+        for value in values:
+            # update the difffent part of the envs 
+            env_config_base_copy = copy.deepcopy(env_config_base)
+            env_config_base_copy.update({
+                'episode_length': episode_length,
+                'no_action_on_overloaded': True,
+                'timestep_reset': True,
+                'placement_reset': True,
+                k: value
+            })
+            learn_config.update({"num_workers": num_workers})
+            # add the additional nencessary arguments to the edge config
+            env_config = add_path_to_config_edge(
+                config=env_config_base_copy,
+                dataset_id=dataset_id,
+                workload_id=workload_id_test,
+                network_id=network_id,
+                trace_id=trace_id_test
+            )
+            learn_configs.append(learn_config)
+            env_configs.append(env_config)
+    else:
+        # update the difffent part of the envs
+        env_config_base.update({
+            'episode_length': episode_length,
+            'no_action_on_overloaded': True,
+            'timestep_reset': True,
+            'placement_reset': True,
+        })
+        learn_config.update({"num_workers": num_workers})
+        # add the additional nencessary arguments to the edge config
+        env_config = add_path_to_config_edge(
+            config=env_config_base,
+            dataset_id=dataset_id,
+            workload_id=workload_id_test,
+            network_id=network_id,
+            trace_id=trace_id_test
+        )
+        learn_configs.append(learn_config)
+        env_configs.append(env_config)
+    return algorithm, env_configs, learn_configs, num_workers
+    # fix the grid searches
+
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=2)
-@click.option('--train-series', required=True, type=int, default=44)
+@click.option('--test-series', required=True, type=int, default=661)
+@click.option('--train-series', required=True, type=int, default=66)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=5)
+@click.option('--network-id', required=False, type=int, default=1)
 @click.option('--trace-id', required=False, type=int, default=2)
-@click.option('--experiment-id', required=True, type=int, default=0)
-@click.option('--checkpoint', required=False, type=int, default=1667)
-@click.option('--episode-length', required=False, type=int, default=50)
-@click.option('--num-episodes', required=False, type=int, default=10)
+@click.option('--experiment-id', required=True, type=int, default=1)
+@click.option('--episode-length', required=False, type=int, default=3453)
+@click.option('--num-episodes', required=False, type=int, default=20)
 @click.option('--workload-id-test', required=False, type=int, default=0)
 @click.option('--trace-id-test', required=False, type=int, default=0)
-def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
-         dataset_id: int, workload_id: int, network_id: int,
-         trace_id: int, experiment_id: int, checkpoint: int,
+@click.option('--checkpoint-to-load', required=False, type=str, default='last')
+def main(local_mode: bool, test_series: int, train_series: int,
+         type_env: str, dataset_id: int, workload_id: int,
+         network_id: int, trace_id: int, experiment_id: int,
          num_episodes: int, episode_length: int,
-         workload_id_test: int, trace_id_test: int):
+         workload_id_test: int, trace_id_test: int,
+         checkpoint_to_load: str):
     """[summary]
 
     Args:
@@ -257,10 +394,10 @@ def main(local_mode: bool, test_series: int, train_series: int, type_env: str,
         train_series=train_series, type_env=type_env,
         dataset_id=dataset_id, workload_id=workload_id,
         network_id=network_id, trace_id=trace_id,
-        experiment_id=experiment_id, checkpoint=checkpoint,
+        experiment_id=experiment_id,
         num_episodes=num_episodes, episode_length=episode_length,
         local_mode=local_mode, workload_id_test=workload_id_test,
-        trace_id_test=trace_id_test)
+        trace_id_test=trace_id_test, checkpoint_to_load=checkpoint_to_load)
 
 
 if __name__ == "__main__":

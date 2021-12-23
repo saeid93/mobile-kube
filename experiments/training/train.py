@@ -144,8 +144,8 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 
 @click.command()
 @click.option('--local-mode', type=bool, default=False)
-@click.option('--config-file', type=str, default='PPO')
-@click.option('--series', required=True, type=int, default=36)
+@click.option('--config-file', type=str, default='final-DQN')
+@click.option('--series', required=True, type=int, default=70)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-edge-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
@@ -155,7 +155,7 @@ def learner(*, config_file_path: str, config: Dict[str, Any],
 @click.option('--network-id', required=False, type=int, default=0)
 @click.option('--trace-id', required=False, type=int, default=0)
 @click.option('--use-callback', required=True, type=bool, default=True)
-@click.option('--checkpoint-freq', required=False, type=int, default=2000)
+@click.option('--checkpoint-freq', required=False, type=int, default=1000)
 def main(local_mode: bool, config_file: str, series: int,
          type_env: str, dataset_id: int, workload_id: int, network_id: int,
          trace_id: int, use_callback: bool, checkpoint_freq: int):

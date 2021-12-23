@@ -7,6 +7,7 @@ import pickle
 import click
 from typing import Dict, Any
 import json
+from gym.core import Env
 from ray.rllib.utils.framework import try_import_torch
 import pprint
 import gym
@@ -33,8 +34,9 @@ torch, nn = try_import_torch()
 
 
 def run_experiments(
-    *, test_series: int, train_series: int, type_env: str, dataset_id: int,
-    workload_id: int, network_id: int, trace_id: int,
+    *, test_series: int, train_series: int, type_env: str,
+    dataset_id: int, workload_id: int, network_id: int,
+    trace_id: int, trace_id_test: int,
     comp_experiment_id: int, episode_length):
     """
     """
@@ -55,8 +57,8 @@ def run_experiments(
     pp = pprint.PrettyPrinter(indent=4)
     print('start experiments with the following config:\n')
     pp.pprint(config)
+
     # extract differnt parts of the input_config
-    learn_config = config['learn_config']
     algorithm = {
         'sim-binpacking': 'binpacking',
         'kube-binpacking': 'binpacking',
@@ -67,7 +69,9 @@ def run_experiments(
     # add evn_config_base updates
     env_config_base.update({
         'episode_length': episode_length,
-        'no_action_on_overloaded': True
+        'no_action_on_overloaded': True,
+        'timestep_reset': True,
+        'placement_reset': True
     })
 
     # add the additional nencessary arguments to the edge config
@@ -76,21 +80,17 @@ def run_experiments(
         dataset_id=dataset_id,
         workload_id=workload_id,
         network_id=network_id,
-        trace_id=trace_id
+        trace_id=trace_id_test
     )
+    fix_grid_searches(env_config)
 
     # trained ray agent should always be simulation
     # however the agent outside it can be kuber agent or
     # other types of agent
     if type_env not in ['CartPole-v0', 'Pendulum-v0']:
         env = gym.make(ENVSMAP[type_env], config=env_config)
-        # ray_config = {"env": make_env_class('sim-edge'),
-        #             "env_config": env_config}
-        # ray_config.update(learn_config)
     else:
         env = gym.make(type_env)
-        # ray_config = {"env": type_env}
-        # ray_config.update(learn_config)
 
     episode_reward = 0
     done = False
@@ -109,8 +109,12 @@ def run_experiments(
         'workload_id': workload_id,
         'network_id': network_id,
         'trace_id': trace_id,
+        'trace_id_test': trace_id_test,
+        'experiment_id': comp_experiment_id,
         'episode_length': episode_length,
-        'algorithm': algorithm
+        'algorithm': algorithm,
+        'penalty_latency': env_config['penalty_latency'],
+        'penalty_consolidated': env_config['penalty_consolidated']
     }
     # make the new experiment folder
     test_series_path = os.path.join(
@@ -148,9 +152,20 @@ def flatten(raw_obs, action, reward, info):
         'reward': reward
     }
 
+def fix_grid_searches(config):
+    values = []
+    for k, v in config.items():
+        if type(v) == dict:
+            values = v['grid_search']
+            config[k] = values[-1]
+            break
+    return config
+
+
+
 @click.command()
-@click.option('--test-series', required=True, type=int, default=1)
-@click.option('--comp-train-series', required=True, type=int, default=11)
+@click.option('--test-series', required=True, type=int, default=69)
+@click.option('--comp-train-series', required=True, type=int, default=69)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-binpacking', 'sim-greedy',
                                  'kube-binpacking', 'kube-greedy']),
@@ -158,12 +173,13 @@ def flatten(raw_obs, action, reward, info):
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=7)
-@click.option('--trace-id', required=False, type=int, default=0)
+@click.option('--trace-id', required=False, type=int, default=2)
+@click.option('--trace-id-test', required=False, type=int, default=0)
 @click.option('--comp-experiment-id', required=True, type=int, default=0)
-@click.option('--episode-length', required=False, type=int, default=50)
+@click.option('--episode-length', required=False, type=int, default=3453)
 def main(test_series: int, comp_train_series: int, type_env: str,
          dataset_id: int, workload_id: int, network_id: int,
-         trace_id: int, comp_experiment_id: int,
+         trace_id: int, trace_id_test: int, comp_experiment_id: int,
          episode_length: int):
     """[summary]
 
@@ -186,6 +202,7 @@ def main(test_series: int, comp_train_series: int, type_env: str,
         train_series=comp_train_series, type_env=type_env,
         dataset_id=dataset_id, workload_id=workload_id,
         network_id=network_id, trace_id=trace_id,
+        trace_id_test=trace_id_test,
         comp_experiment_id=comp_experiment_id,
         episode_length=episode_length)
 

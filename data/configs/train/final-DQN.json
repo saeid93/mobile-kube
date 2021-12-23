@@ -4,14 +4,15 @@
         "penalty_illegal": -1,
         "penalty_move": 0,
         "penalty_variance": 0,
-        "penalty_consolidated": 10,
-        "penalty_latency": 10,
+        "penalty_consolidated": 4,
+        "penalty_latency": 4,
         "episode_length": 10,
         "latency_lower": 0.75,
         "latency_upper": 2,
         "consolidation_lower": 0,
         "consolidation_upper": 0.6,
         "no_action_on_overloaded": false,
+        "discrete_actions": true,
         "seed": 1,
         "kube":{
             "admin_config": "~/.kube/config",
@@ -21,8 +22,9 @@
             "utilization_image": "sdghafouri/utilization-server"
         }
     },
-    "run_or_experiment": "ES",
+    "run_or_experiment": "DQN",
     "learn_config": {
+        "framework": "torch",
         "train_batch_size": 1000,
         "num_gpus": 0.5,
         "model": {
@@ -32,7 +34,8 @@
         },
         "gamma": 0.99,
         "lr": 0.0003,
-        "num_workers": 5,
+        "num_workers": 0,
+        "observation_filter": "MeanStdFilter",
         "seed": 203
     },
     "stop": {

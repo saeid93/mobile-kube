@@ -19,7 +19,8 @@ def check_config(config: Dict[str, Any]):
                      'dataset_path', 'workload_path', 'network_path', 'trace_path',
                      'no_action_on_overloaded', 'latency_reward_option',
                      'latency_lower', 'latency_upper', 'consolidation_lower',
-                     'consolidation_upper']
+                     'consolidation_upper', 'placement_reset',
+                     'timestep_reset', 'frame_skip', 'discrete_actions']
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"

@@ -114,7 +114,7 @@ def env_config_base_check(config: Dict[str, Any]):
                      'edge_simulator_config', 'action_method', 'step_method',
                      'kube', "no_action_on_overloaded", "latency_reward_option",
                      'latency_lower', 'latency_upper', 'consolidation_lower',
-                     'consolidation_upper']
+                     'consolidation_upper', 'discrete_actions']
 
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"
