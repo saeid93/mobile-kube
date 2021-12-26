@@ -61,17 +61,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     episode_total_consolidation_reward = 0
     while i < total_timesteps:
         action = env.action_space.sample()
-        # print("\n\n--------action--------")
-        # print(f'timestamp {i}')
-        # print(env.raw_observation)
-        # print(action)
-        # time.sleep(1)
         _, reward, done, info = env.step(action)
-        # env.render()
-        # env.edge_simulator.visualize_debug().savefig(
-        #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
-        # print(f"\niteration <{i}>:")
-        # print(f"reward:\n <{reward}>")
         latency_reward = info['rewards']['reward_latency']
         consolidation_reward = info['rewards']['reward_consolidation']
         latency_rewards.append(latency_reward)
@@ -82,11 +72,6 @@ def check_env(*, config: Dict[str, Any], type_env: str,
             episode_total_latency_reward += latency_reward
         else:
             latency_negative_rewards.append(0)
-        # users_distances.append(
-        #     info['users_distances'])
-        # print('info:')
-        # pp.pprint(info)
-        # print(f'done: {done}')
         i += 1
         episode_total_consolidation_reward += consolidation_reward
         episode_total_latency_reward += latency_reward

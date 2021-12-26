@@ -156,15 +156,15 @@ class SimEdgeEnv(SimBaseEnv):
         # take the action
         prev_services_nodes = deepcopy(self.services_nodes)
         assert self.action_space.contains(action)
+
         if self.discrete_actions:
             action = self.discrete_action_converter[action]
-        
+
         # TODO not possible to roll back in the real world
         # take the action in the real world only if possible
         # simulation therefore should co-exist
         self.services_nodes = deepcopy(action)
         if self.no_action_on_overloaded and self.num_overloaded > 0:
-            self.num_overloaded
             print("overloaded state, reverting back ...")
             self.services_nodes = deepcopy(prev_services_nodes)
 

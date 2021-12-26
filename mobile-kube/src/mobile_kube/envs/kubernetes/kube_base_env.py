@@ -122,8 +122,14 @@ class KubeBaseEnv(gym.Env):
         self.episode_length: int = config['episode_length']
 
         # whether to reset timestep and placement at every episode
-        self.timestep_reset: bool = False
-        self.placement_reset: bool = False
+        if 'timestep_reset' in config:
+            self.timestep_reset: bool = config['timestep_reset']
+        else:
+            self.timestep_reset: bool = False
+        if 'placement_reset' in config:
+            self.placement_reset: bool = config['placement_reset']
+        else:
+            self.placement_reset: bool = False
         self.global_timestep: int = 0
         self.timestep: int = 0
         self.services_nodes = deepcopy(self.initial_services_nodes)
@@ -141,6 +147,13 @@ class KubeBaseEnv(gym.Env):
         self.namespace: str = config['kube']['namespace']
         self.clean_after_exit: bool = config['kube']['clean_after_exit']
         self.using_auxiliary_server: bool = False
+
+        # value based methods needs to have a convertor of
+        # discrete state to multidiscrete
+        if 'discrete_actions' in config:
+            self.discrete_actions: bool = config['discrete_actions']
+        else:
+            self.discrete_actions: bool = False
 
         # construct the kubernetes cluster
         self._cluster = Cluster(
@@ -175,13 +188,16 @@ class KubeBaseEnv(gym.Env):
             self.nodes[id] for id in self.dataset['services_nodes']
         ])
 
-    # @property
-    # def services_nodes(self):
-    #     return np.array(list(map(lambda node: node.id, self.services_nodes_obj)))
+    @property
+    def services_nodes_in_cluster(self):
+        return np.array(list(map(lambda node: node.id, self.services_nodes_obj)))
 
     def seed(self, seed):
         np.random.seed(seed)
-        self.np_random = seeding.np_random(seed)
+        self.np_random, seed = seeding.np_random(seed)
+        self._env_seed = seed
+        self.base_env_seed = seed
+        return [seed]
 
     @override(gym.Env)
     def reset(self) -> np.ndarray:
