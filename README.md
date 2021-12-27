@@ -246,11 +246,11 @@ a sample of using the interface can be found [here](experiments/kube_operations.
 
 Log of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-[logs](docs/images/logs.png)
+![logs](docs/images/logs.png)
 
 Google cloud console of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-[images](docs/images/gcloud-console.png)
+![images](docs/images/gcloud-console.png)
 
 # 5. Other
 
