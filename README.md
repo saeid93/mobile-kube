@@ -207,20 +207,18 @@ python experiments/learning/learners.py --mode real --local-mode false --config-
 ```
 
 ### 4.4.2. [Analysis](experiments/analysis)
-TODO
 
-#### 4.4.2.1 [check environment](experiments/analysis)
+#### 4.4.2.1 [check_env](experiments/check_env.py)
 
-#### 4.4.3.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
+#### 4.4.2.2 [check_learned](experiments/check_learned.py)
 
-TODO
+#### 4.4.2.3 [test_baselines](experiments/test_baselines.py)
 
-#### 4.4.3.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
+#### 4.4.2.4 [check environment](experiments/test_rls.py)
 
-1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py).
-2. compile and upload the Dockerfile to your Docker registry TODO
-3. Use ansible playbooks in TODO to setup the cluster in gcloud 
-TODO
+#### 4.4.2.5 [check environment](experiments/analysis_test.ipynb)
+
+#### 4.4.2.6 [check environment](experiments/analysis_train.ipynb)
 
 
 ### 4.4.4. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
@@ -256,7 +254,7 @@ Google cloud console of a running emulation - moving service 0 from node 1 to no
 
 1. [Step by step guide to trainig the code on EECS](docs/step-by-step-guides/EECS.md)
 
-2. [Step by step guide to trainig the code on GKE](docs/step-by-step-guides/GKE.md) TODO
+2. [Step by step guide to trainig the code on GKE](docs/step-by-step-guides/GKE.md)
 
 3. [List of running ray problems](docs/problems/ray.md)
 
@@ -264,4 +262,4 @@ Google cloud console of a running emulation - moving service 0 from node 1 to no
 
 5. [Tensorboard Monitoring](docs/monitorings/tensorboard.md)
 
-6. [Cluster Monitoring](docs/monitorings/cluster.md) TODO
+6. [Cluster Monitoring](docs/monitorings/cluster.md)
