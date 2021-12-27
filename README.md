@@ -242,14 +242,17 @@ The main operations that are currently implemented are:
 
 a sample of using the interface can be found [here](experiments/kube_operations.py)
 
+# 4. Sample run on GKE cluster
 
-### 4.4.5. [Extra scripts](experiments/utils)
+Log of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-1. [experiments/utils/data_backup.py](experiments/utils/data_backup.py): Use this for backing up your data folder.
+(logs)[docs/images/logs.png]
 
-2. 
+Google cloud console of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-# 4. Other
+(images)[docs/images/gcloud-console.png]
+
+# 5. Other
 
 1. [Step by step guide to trainig the code on EECS](docs/step-by-step-guides/EECS.md)
 
