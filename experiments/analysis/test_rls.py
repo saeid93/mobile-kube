@@ -177,7 +177,7 @@ def run_experiments(
             )
             checkpoint_to_load_info = int(checkpoint_to_load)
 
-        alg_env = make_env_class(type_env)
+        alg_env = make_env_class('sim-edge')
         if algorithm == 'PPO':
             agent = ppo.PPOTrainer(
                 config=ray_config,
@@ -224,6 +224,7 @@ def run_experiments(
             print(f"episode reward: {episode_reward}")
             episodes.append(states)
         info = {
+            'type_env': type_env,
             'series': train_series,
             'dataset_id': dataset_id,
             'workload_id': workload_id,
