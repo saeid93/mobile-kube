@@ -2,16 +2,11 @@
 ## 1.1. Repo contetns
 This simulator contains many scenarios for both centralised and edge cloud
 
-TODO introduce paper(s), theory and background
+In recent years Kubernetes has become the de facto standard in the realm of service orchestration. Despite its great benefits, there is still a long way to make compatible with decentralised cloud computing platforms. There is an ongoing effort to make it available on distributed edge computing nodes/servers. One of the challenges of mobile edge computing is that the location of the users is changing over time. This mobility will constantly move users to a distant proximity of their connected services. One solution to this problem is to regularly move services to computing nodes closer to the most of the users. However, distributing the services in edge nodes only subject to user movements will result in fragmentation of active nodes. This leads to having a large number of active nodes without the use of their full capacity. In this research we have proposed a method to reduce the latency of Kubernetes applications on mobile edge computing devices while maintaining energy consumption at a reasonable level. Latecncy reduction is achieved by moving the services to Kubernetes nodes closer to the users. On the other hand, Energy consumption is reduced by trying to have the minimum number of active nodes in the Kubernetes cluster. A new state of the art reinforcement learning algorithm named IMPALA have been used in order to maintain a balance between theses two objectives. An experimental framework is designed on top of real-world Kubernetes clusters and real world traces of mobile users movements have been used to simulate the users' mobility. Experimental results have shown the feasibility of design and using reinforcement learning in container placement in Kubernetes driven MEC networks.
+
 1. Objectives
    1. latency reduction: having the services closer to the users
    2. energy comsomption: having the minimum number of active Kuberentes nodes
-## 1.2. RL Agent Characteristics
-**Observations** TODO a [sample observation](docs/learning/raw_observation.txt) with the [preprocessed observation](docs/learning/preprocessed_observation.txt)
-
-**Actions** TODO
-
-**Rewards** TODO
 
 ## Setup the environment in your machine
 1. Download source code from GitHub
@@ -134,7 +129,7 @@ follows:
 |1|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 |2|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 
-Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators. TODO
+Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators.
 
 ## 3.4. [experiments](experiments)
 
@@ -162,7 +157,7 @@ For a full list of `config.json` parameters options see [dataset-configs-options
 
 #### 4.4.1.2. [Generating the Workloads](experiments/dataset/generate_workload.py)
 
-Go to the your workload generation config [data/configs/generation-configs/workload-generation](data/configs/generation-configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-workload` in the sample [data](data) folder [data/configs/generation-configs/workload-generation/my-workload/config.json](data/configs/generation-configs/dataset-generation/my-workload/config.json). For a full list of `config.json` see TODO. Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
+Go to the your workload generation config [data/configs/generation-configs/workload-generation](data/configs/generation-configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-workload` in the sample [data](data) folder [data/configs/generation-configs/workload-generation/my-workload/config.json](data/configs/generation-configs/dataset-generation/my-workload/config.json). For a full list of `config.json` see. Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
 ```
 python generate_workload.py [OPTIONS]
 
