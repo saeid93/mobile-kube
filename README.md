@@ -44,7 +44,6 @@ You can find the toturial for creating the cluster on google cloud and locally i
 
 * [Google cloud installation](docs/kubernetes/installation-gcp.md)
 * [Local cluster setup installation](docs/kubernetes/installation-local.md)
-* [Installation using Ansible](docs/kubernetes/installation-ansible.md)
 
 # 3. Project Structure
 
