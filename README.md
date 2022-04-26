@@ -11,7 +11,7 @@ In recent years Kubernetes has become the de facto standard in the realm of serv
 ## Setup the environment in your machine
 1. Download source code from GitHub
    ```
-    git clone https://github.com/saeid93/CCGrid-paper
+    git clone https://github.com/saeid93/mobile-kube.git
    ```
 2. Download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html)
 3. Create [conda](https://docs.conda.io/en/latest/miniconda.html) virtual-environment
