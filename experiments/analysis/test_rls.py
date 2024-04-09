@@ -177,7 +177,7 @@ def run_experiments(
             )
             checkpoint_to_load_info = int(checkpoint_to_load)
 
-        alg_env = make_env_class(type_env)
+        alg_env = make_env_class('sim-edge')
         if algorithm == 'PPO':
             agent = ppo.PPOTrainer(
                 config=ray_config,
@@ -224,6 +224,7 @@ def run_experiments(
             print(f"episode reward: {episode_reward}")
             episodes.append(states)
         info = {
+            'type_env': type_env,
             'series': train_series,
             'dataset_id': dataset_id,
             'workload_id': workload_id,
@@ -352,18 +353,18 @@ def fix_grid_searches(
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=661)
-@click.option('--train-series', required=True, type=int, default=66)
+@click.option('--test-series', required=True, type=int, default=74)
+@click.option('--train-series', required=True, type=int, default=74)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
-              default='sim-edge')
+              default='kube-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=False, type=int, default=1)
 @click.option('--trace-id', required=False, type=int, default=2)
-@click.option('--experiment-id', required=True, type=int, default=1)
+@click.option('--experiment-id', required=True, type=int, default=0)
 @click.option('--episode-length', required=False, type=int, default=3453)
-@click.option('--num-episodes', required=False, type=int, default=20)
+@click.option('--num-episodes', required=False, type=int, default=1)
 @click.option('--workload-id-test', required=False, type=int, default=0)
 @click.option('--trace-id-test', required=False, type=int, default=0)
 @click.option('--checkpoint-to-load', required=False, type=str, default='last')

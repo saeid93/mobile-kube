@@ -8,8 +8,8 @@ from typing import Dict, Any
 import time
 import json
 from pprint import PrettyPrinter
-import matplotlib.pyplot as plt
-matplotlib.use("Agg")
+# import matplotlib.pyplot as plt
+# matplotlib.use("Agg")
 pp = PrettyPrinter(indent=4)
 
 # get an absolute path to the directory that contains parent files
@@ -61,17 +61,7 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     episode_total_consolidation_reward = 0
     while i < total_timesteps:
         action = env.action_space.sample()
-        # print("\n\n--------action--------")
-        # print(f'timestamp {i}')
-        # print(env.raw_observation)
-        # print(action)
-        # time.sleep(1)
         _, reward, done, info = env.step(action)
-        # env.render()
-        # env.edge_simulator.visualize_debug().savefig(
-        #     os.path.join(DATA_PATH, 'plots', '3-5-2',f'{i}.png'))
-        # print(f"\niteration <{i}>:")
-        # print(f"reward:\n <{reward}>")
         latency_reward = info['rewards']['reward_latency']
         consolidation_reward = info['rewards']['reward_consolidation']
         latency_rewards.append(latency_reward)
@@ -82,11 +72,6 @@ def check_env(*, config: Dict[str, Any], type_env: str,
             episode_total_latency_reward += latency_reward
         else:
             latency_negative_rewards.append(0)
-        # users_distances.append(
-        #     info['users_distances'])
-        # print('info:')
-        # pp.pprint(info)
-        # print(f'done: {done}')
         i += 1
         episode_total_consolidation_reward += consolidation_reward
         episode_total_latency_reward += latency_reward
@@ -94,26 +79,26 @@ def check_env(*, config: Dict[str, Any], type_env: str,
     print(f'episode_total_latency_negative_rewards: {episode_total_latency_negative_reward}')
     print(f'episode_total_consolidation_reward: {episode_total_consolidation_reward}')
     x = np.arange(total_timesteps-1)
-    plt.plot(x, np.array(latency_negative_rewards), label = "LN")
-    plt.plot(x, np.array(latency_rewards), label = "L")
+    # plt.plot(x, np.array(latency_negative_rewards), label = "LN")
+    # plt.plot(x, np.array(latency_rewards), label = "L")
     # plt.plot(x, users_distances, label = "users_distances")
     # plt.plot(x, 1/np.array(users_distances), label = "1/users_distances")
-    plt.plot(x, consolidation_rewards, label = "C")
-    plt.plot(x, reward_total, label = "reward")
-    plt.legend()
-    plt.grid()
-    plt.savefig(f'pic_network_2')
+    # plt.plot(x, consolidation_rewards, label = "C")
+    # plt.plot(x, reward_total, label = "reward")
+    # plt.legend()
+    # plt.grid()
+    # plt.savefig(f'pic_network_2')
 
 @click.command()
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'sim-binpacking', 'sim-greedy',
                                  'kube-edge', 'kube-binpacking', 'kube-greedy',
                                  'CartPole-v0', 'Pendulum-v0']),
-              default='sim-edge')
+              default='kube-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=5)
-@click.option('--trace-id', required=False, type=int, default=1)
+@click.option('--network-id', required=False, type=int, default=1)
+@click.option('--trace-id', required=False, type=int, default=0)
 def main(type_env: str, dataset_id: int,
          workload_id: int, network_id: int, trace_id: int):
     """[summary]

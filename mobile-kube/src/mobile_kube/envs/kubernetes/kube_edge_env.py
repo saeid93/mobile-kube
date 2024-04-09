@@ -10,7 +10,8 @@ from typing import (
 
 from gym.spaces import (
     Box,
-    MultiDiscrete
+    MultiDiscrete,
+    Discrete
 )
 
 
@@ -18,6 +19,7 @@ from mobile_kube.util import (
     Preprocessor,
     override,
     load_object,
+    Discrete2MultiDiscrete,
     logger
 )
 from mobile_kube.network import NetworkSimulator
@@ -34,12 +36,17 @@ class KubeEdgeEnv(KubeBaseEnv):
             trace=trace,
             **edge_simulator_config
             )
-
+        self.min_station_node, self.average_station_node, self.max_station_node =\
+            self.edge_simulator.paths_bounds()
         self.users_stations = self.edge_simulator.users_stations
         self.num_users = self.edge_simulator.num_users
         self.num_stations = self.edge_simulator.num_stations
-        self.normalise_latency = config['normalise_latency']
-        self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
+        self.latency_lower = config['latency_lower']
+        self.latency_upper = config['latency_upper']
+        self.consolidation_lower = config['consolidation_lower']
+        self.consolidation_upper = config['consolidation_upper']
+        # self.normalise_latency = config['normalise_latency']
+        # self.normalise_factor = self.edge_simulator.get_largest_station_node_path()
         super().__init__(config)
 
         self.observation_space, self.action_space =\
@@ -97,9 +104,18 @@ class KubeEdgeEnv(KubeBaseEnv):
 
         higher_bound = 10 # TODO TEMP just for test - find a cleaner way
         # generate observation and action spaces
-        observation_space = Box(low=0, high=higher_bound, shape=(obs_size, ))
-        action_space = MultiDiscrete(np.ones(self.num_services) *
-                                     self.num_nodes)
+        observation_space = Box(
+            low=0, high=higher_bound, shape=(obs_size, ),
+            dtype=np.float64, seed=self._env_seed)
+
+        if self.discrete_actions:
+            action_space = Discrete(
+                self.num_nodes**self.num_services, seed=self._env_seed)
+            self.discrete_action_converter = Discrete2MultiDiscrete(
+                self.num_nodes, self.num_services)
+        else:
+            action_space = MultiDiscrete(np.ones(self.num_services) *
+                                        self.num_nodes, seed=self._env_seed)
 
         return observation_space, action_space
 
@@ -136,6 +152,9 @@ class KubeEdgeEnv(KubeBaseEnv):
         prev_services_nodes = deepcopy(self.services_nodes)
         assert self.action_space.contains(action)
 
+        if self.discrete_actions:
+            action = self.discrete_action_converter[action]
+
         self.services_nodes = deepcopy(action)
         if self.no_action_on_overloaded and self.num_overloaded > 0:
             print("overloaded state, reverting back ...")
@@ -171,7 +190,9 @@ class KubeEdgeEnv(KubeBaseEnv):
                 'users_distances': np.sum(users_distances),
                 'total_reward': reward,
                 'timestep': self.timestep,
-                'rewards': rewards}
+                'global_timestep': self.global_timestep,
+                'rewards': rewards,
+                'seed': self.base_env_seed}
 
         assert self.observation_space.contains(self.observation),\
                 (f"observation:\n<{self.raw_observation}>\noutside of "

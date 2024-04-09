@@ -11,8 +11,9 @@ from mobile_kube.envs import (
 # DATA_PATH = "/home/jdoyledithencom/data-repos/myenv"
 # DATA_PATH = "/Users/saeid/Codes/mobile-kube/data"
 # DATA_PATH = "/data/home/acw498/mobile-kube/data"
-DATA_PATH = "/homes/sg324/mobile-kube/data"
+# DATA_PATH = "/homes/sg324/mobile-kube/data"
 # DATA_PATH = "/home/sdghafouri/mobile-kube/data"
+DATA_PATH = "/home/saeid/mobile-kube/data"
 
 # generated baesd on the users' path
 DATASETS_PATH = os.path.join(DATA_PATH, "datasets")

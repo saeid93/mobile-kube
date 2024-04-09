@@ -1,22 +1,17 @@
 # 1. Introduction
 ## 1.1. Repo contetns
-This simulator contains many scenarios for both centralised and edge cloud
+Source code of "Mobile-Kube: Mobility Aware and Energy Efficient Service Orchestration on Kubernetes Edge Servers"
 
-TODO introduce paper(s), theory and background
+In recent years Kubernetes has become the de facto standard in the realm of service orchestration. Despite its great benefits, there is still a long way to make compatible with decentralised cloud computing platforms. There is an ongoing effort to make it available on distributed edge computing nodes/servers. One of the challenges of mobile edge computing is that the location of the users is changing over time. This mobility will constantly move users to a distant proximity of their connected services. One solution to this problem is to regularly move services to computing nodes closer to the most of the users. However, distributing the services in edge nodes only subject to user movements will result in fragmentation of active nodes. This leads to having a large number of active nodes without the use of their full capacity. In this research we have proposed a method to reduce the latency of Kubernetes applications on mobile edge computing devices while maintaining energy consumption at a reasonable level. Latecncy reduction is achieved by moving the services to Kubernetes nodes closer to the users. On the other hand, Energy consumption is reduced by trying to have the minimum number of active nodes in the Kubernetes cluster. A new state of the art reinforcement learning algorithm named IMPALA have been used in order to maintain a balance between theses two objectives. An experimental framework is designed on top of real-world Kubernetes clusters and real world traces of mobile users movements have been used to simulate the users' mobility. Experimental results have shown the feasibility of design and using reinforcement learning in container placement in Kubernetes driven MEC networks.
+
 1. Objectives
    1. latency reduction: having the services closer to the users
    2. energy comsomption: having the minimum number of active Kuberentes nodes
-## 1.2. RL Agent Characteristics
-**Observations** TODO a [sample observation](docs/learning/raw_observation.txt) with the [preprocessed observation](docs/learning/preprocessed_observation.txt)
-
-**Actions** TODO
-
-**Rewards** TODO
 
 ## Setup the environment in your machine
 1. Download source code from GitHub
    ```
-    git clone https://github.com/saeid93/CCGrid-paper
+    git clone https://github.com/saeid93/mobile-kube.git
    ```
 2. Download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html)
 3. Create [conda](https://docs.conda.io/en/latest/miniconda.html) virtual-environment
@@ -49,7 +44,6 @@ You can find the toturial for creating the cluster on google cloud and locally i
 
 * [Google cloud installation](docs/kubernetes/installation-gcp.md)
 * [Local cluster setup installation](docs/kubernetes/installation-local.md)
-* [Installation using Ansible](docs/kubernetes/installation-ansible.md)
 
 # 3. Project Structure
 
@@ -134,7 +128,7 @@ follows:
 |1|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 |2|35.76727803828856|51.35991084161443|35.76031345070765|1.39458643788633|
 
-Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators. TODO
+Copy the results at the data/dataset_metadata in a numbered foldered to use it in experiments generators.
 
 ## 3.4. [experiments](experiments)
 
@@ -162,7 +156,7 @@ For a full list of `config.json` parameters options see [dataset-configs-options
 
 #### 4.4.1.2. [Generating the Workloads](experiments/dataset/generate_workload.py)
 
-Go to the your workload generation config [data/configs/generation-configs/workload-generation](data/configs/generation-configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-workload` in the sample [data](data) folder [data/configs/generation-configs/workload-generation/my-workload/config.json](data/configs/generation-configs/dataset-generation/my-workload/config.json). For a full list of `config.json` see TODO. Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
+Go to the your workload generation config [data/configs/generation-configs/workload-generation](data/configs/generation-configs/dataset-generation) make a folder named after your config and make the `config.json` in the folder e.g. see the `my-workload` in the sample [data](data) folder [data/configs/generation-configs/workload-generation/my-workload/config.json](data/configs/generation-configs/dataset-generation/my-workload/config.json). For a full list of `config.json` see. Then run the [experiments/dataset/generate_dataset.py](experiments/dataset/generate_dataset.py) with the following script:
 ```
 python generate_workload.py [OPTIONS]
 
@@ -207,20 +201,18 @@ python experiments/learning/learners.py --mode real --local-mode false --config-
 ```
 
 ### 4.4.2. [Analysis](experiments/analysis)
-TODO
 
-#### 4.4.2.1 [check environment](experiments/analysis)
+#### 4.4.2.1 [check_env](experiments/check_env.py)
 
-#### 4.4.3.2. [Evaluate the learned agent - simulation](experiments/check_scripts/check_learned.py)
+#### 4.4.2.2 [check_learned](experiments/check_learned.py)
 
-TODO
+#### 4.4.2.3 [test_baselines](experiments/test_baselines.py)
 
-#### 4.4.3.3. [Evaluate the learned agent - kubernetes](experiments/check_scripts/check_learned.py)
+#### 4.4.2.4 [check environment](experiments/test_rls.py)
 
-1. set the kubernetes INTERVAL variable in the [utilisation server](Dockerfile/Kubernetes-engine/utilization-server/app.py).
-2. compile and upload the Dockerfile to your Docker registry TODO
-3. Use ansible playbooks in TODO to setup the cluster in gcloud 
-TODO
+#### 4.4.2.5 [check environment](experiments/analysis_test.ipynb)
+
+#### 4.4.2.6 [check environment](experiments/analysis_train.ipynb)
 
 
 ### 4.4.4. [Kubernetes interface](mobile-kube/src/mobile_kube/util/kubernetes_utils)
@@ -242,18 +234,21 @@ The main operations that are currently implemented are:
 
 a sample of using the interface can be found [here](experiments/kube_operations.py)
 
+# 4. Sample run on GKE cluster
 
-### 4.4.5. [Extra scripts](experiments/utils)
+Log of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-1. [experiments/utils/data_backup.py](experiments/utils/data_backup.py): Use this for backing up your data folder.
+![logs](docs/images/logs.png)
 
-2. 
+Google cloud console of a running emulation - moving service 0 from node 1 to node 0 (s0n1 -> s0n1)
 
-# 4. Other
+![images](docs/images/gcloud-console.png)
+
+# 5. Other
 
 1. [Step by step guide to trainig the code on EECS](docs/step-by-step-guides/EECS.md)
 
-2. [Step by step guide to trainig the code on GKE](docs/step-by-step-guides/GKE.md) TODO
+2. [Step by step guide to trainig the code on GKE](docs/step-by-step-guides/GKE.md)
 
 3. [List of running ray problems](docs/problems/ray.md)
 
@@ -261,4 +256,4 @@ a sample of using the interface can be found [here](experiments/kube_operations.
 
 5. [Tensorboard Monitoring](docs/monitorings/tensorboard.md)
 
-6. [Cluster Monitoring](docs/monitorings/cluster.md) TODO
+6. [Cluster Monitoring](docs/monitorings/cluster.md)
