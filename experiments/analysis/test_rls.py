@@ -48,7 +48,8 @@ def run_experiments(
     dataset_id: int, workload_id: int, network_id: int,
     trace_id: int, experiment_id: int, local_mode: bool,
     episode_length, num_episodes: int, workload_id_test: int,
-    trace_id_test: int, checkpoint_to_load: str):
+    trace_id_test: int, checkpoint_to_load: str,
+    all_experiments: bool, penalty_latency: int):
     """
     """
     path_env = type_env if type_env != 'kube-edge' else 'sim-edge'    
@@ -124,6 +125,8 @@ def run_experiments(
     experiments_str.sort()
     for experiment_str, env_config, learn_config in zip(
         experiments_str, env_configs, learn_configs):
+        if (not all_experiments) and env_config['penalty_latency'] != penalty_latency:
+            continue
 
     # trained ray agent should always be simulation
     # however the agent outside it can be kuber agent or
@@ -198,7 +201,7 @@ def run_experiments(
             agent = dqn.DQNTrainer(
                 config=ray_config,
                 env=alg_env)
-        import time
+
         episodes = []
         for i in range(0, num_episodes):
             print(f"---- \nepisode: {i} ----\n")
@@ -353,27 +356,30 @@ def fix_grid_searches(
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=74)
-@click.option('--train-series', required=True, type=int, default=74)
+@click.option('--test-series', required=True, type=int, default=73)
+@click.option('--train-series', required=True, type=int, default=70)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
-              default='kube-edge')
+              default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=False, type=int, default=1)
-@click.option('--trace-id', required=False, type=int, default=2)
+@click.option('--network-id', required=True, type=int, default=1)
+@click.option('--trace-id', required=True, type=int, default=2)
 @click.option('--experiment-id', required=True, type=int, default=0)
-@click.option('--episode-length', required=False, type=int, default=3453)
-@click.option('--num-episodes', required=False, type=int, default=1)
-@click.option('--workload-id-test', required=False, type=int, default=0)
-@click.option('--trace-id-test', required=False, type=int, default=0)
-@click.option('--checkpoint-to-load', required=False, type=str, default='last')
+@click.option('--episode-length', required=True, type=int, default=3453)
+@click.option('--num-episodes', required=True, type=int, default=1)
+@click.option('--workload-id-test', required=True, type=int, default=0)
+@click.option('--trace-id-test', required=True, type=int, default=0)
+@click.option('--checkpoint-to-load', required=True, type=str, default='last')
+@click.option('--all-experiments', required=True, type=bool, default=False)
+@click.option('--penalty-latency', required=True, type=int, default=4)
 def main(local_mode: bool, test_series: int, train_series: int,
          type_env: str, dataset_id: int, workload_id: int,
          network_id: int, trace_id: int, experiment_id: int,
          num_episodes: int, episode_length: int,
          workload_id_test: int, trace_id_test: int,
-         checkpoint_to_load: str):
+         checkpoint_to_load: str, all_experiments: bool,
+         penalty_latency: int):
     """[summary]
 
     Args:
@@ -398,7 +404,8 @@ def main(local_mode: bool, test_series: int, train_series: int,
         experiment_id=experiment_id,
         num_episodes=num_episodes, episode_length=episode_length,
         local_mode=local_mode, workload_id_test=workload_id_test,
-        trace_id_test=trace_id_test, checkpoint_to_load=checkpoint_to_load)
+        trace_id_test=trace_id_test, checkpoint_to_load=checkpoint_to_load,
+        all_experiments=all_experiments, penalty_latency=penalty_latency)
 
 
 if __name__ == "__main__":

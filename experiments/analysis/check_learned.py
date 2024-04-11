@@ -178,7 +178,7 @@ def learner(*, series: int, type_env: str, dataset_id: int,
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--series', required=True, type=int, default=44)
+@click.option('--series', required=True, type=int, default=70)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge',
                                  'CartPole-v0', 'Pendulum-v0']),
