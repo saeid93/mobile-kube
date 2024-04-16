@@ -1,0 +1,1 @@
+1. In the paper we used the dataset 6, workloads 0 and network 1 (16 users), 5 (32 users), 6 (48 users) for training we used random movements using trace 0 and for testing we used trace 1
