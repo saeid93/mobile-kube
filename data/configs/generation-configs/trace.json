@@ -1,8 +1,9 @@
 {
+    "notes": "dataset timestep",
     "dataset_id": 6,
-    "network_id": 10,
+    "network_id": 11,
     "speed": 30,
-    "timesteps": 2000000,
-    "from_dataset": false,
+    "timesteps": 3453,
+    "from_dataset": true,
     "seed": 42
 }

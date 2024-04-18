@@ -26,7 +26,7 @@ from experiments.utils.constants import (
 
 from experiments.utils import config_trace_generation_check
 
-def generate_workload(dataset_id: int, network_id: int,
+def generate_workload(notes: str, dataset_id: int, network_id: int,
                       from_dataset: bool, seed: int,
                       speed: int, timesteps: int):
     """
@@ -69,6 +69,7 @@ def generate_workload(dataset_id: int, network_id: int,
 
     # information of the generated trace
     info = {
+        'notes': notes,
         'from_dataset': from_dataset,
         'seed': seed,
         'speed': speed,

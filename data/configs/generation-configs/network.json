@@ -1,7 +1,7 @@
 {
     "notes": "some network",
     "dataset_id": 6,
-    "num_users": 160,
+    "num_users": 16,
     "num_stations": 8,
     "width": 0.0001,
     "length": 0.0001,
@@ -10,8 +10,16 @@
     "users_services_distributions": "equal",
     "dataset_metadata": 2,
     "nodes_stations_con": 1,
-    "nodes_selection": "random",
-    "nodes_list": [1, 2],
+    "nodes_selection": "node_list",
+    "nodes_list": [
+        327,
+        358,
+        264,
+        6,
+        925,
+        73,
+        234,
+        851],
     "seed": 253411,
     "colocated": true
 }

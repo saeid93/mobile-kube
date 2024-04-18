@@ -84,7 +84,7 @@ def config_network_generation_check(config: Dict[str, Any]):
          f" <{config['nodes_selection']}>")
 
 def config_trace_generation_check(config: Dict[str, Any]):
-    allowed_items = ['dataset_id', 'network_id', 'speed', 'timesteps',
+    allowed_items = ['notes', 'dataset_id', 'network_id', 'speed', 'timesteps',
                      'from_dataset', 'seed']
     for key, _ in config.items():
         assert key in allowed_items, (f"<{key}> is not an allowed items for"

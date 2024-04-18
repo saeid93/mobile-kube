@@ -108,8 +108,8 @@ def generate_network(
     if from_dataset:
         info.update({
             'selected_nodes_indexes':\
-                edge_simulator.selected_nodes_indexes.tolist()})
-
+                # edge_simulator.selected_nodes_indexes.tolist()})
+                edge_simulator.selected_nodes_indexes})
     # save the info and network in the folder
     with open(os.path.join(dir2save, 'info.json'), 'x') as out_file:
         json.dump(info, out_file, indent=4)

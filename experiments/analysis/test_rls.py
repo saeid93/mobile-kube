@@ -365,7 +365,7 @@ def fix_grid_searches(
 @click.option('--workload-id', required=True, type=int, default=0)
 @click.option('--network-id', required=True, type=int, default=1)
 @click.option('--trace-id', required=True, type=int, default=2)
-@click.option('--experiment-id', required=True, type=int, default=0)
+@click.option('--experiment-id', required=True, type=int, default=4)
 @click.option('--episode-length', required=True, type=int, default=3453)
 @click.option('--num-episodes', required=True, type=int, default=1)
 @click.option('--workload-id-test', required=True, type=int, default=0)
