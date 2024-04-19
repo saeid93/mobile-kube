@@ -48,7 +48,7 @@ def run_experiments(
     dataset_id: int, workload_id: int, network_id: int,
     trace_id: int, experiment_id: int, local_mode: bool,
     episode_length, num_episodes: int, workload_id_test: int,
-    trace_id_test: int, checkpoint_to_load: str,
+    network_id_test: int, trace_id_test: int, checkpoint_to_load: str,
     all_experiments: bool, penalty_latency: int):
     """
     """
@@ -72,7 +72,8 @@ def run_experiments(
         config=config,
         dataset_id=dataset_id,
         workload_id_test=workload_id_test,
-        network_id=network_id,
+        network_id=network_id_test,
+        network_id_test=network_id_test,
         trace_id_test=trace_id_test,
         episode_length=episode_length
     )
@@ -234,6 +235,7 @@ def run_experiments(
             'network_id': network_id,
             'trace_id': trace_id,
             'trace_id_test': trace_id_test,
+            'network_id_test': network_id_test,
             'checkpoint': checkpoint_to_load_info,
             'experiment_str': experiment_str,
             'experiments': experiment_id,
@@ -282,7 +284,7 @@ def flatten(raw_obs, action, reward, info):
 
 def fix_grid_searches(
     config, dataset_id, workload_id_test, network_id,
-    trace_id_test, episode_length):
+    network_id_test, trace_id_test, episode_length):
     """
     This function is used to fix the grid searches.
     """
@@ -326,7 +328,7 @@ def fix_grid_searches(
                 config=env_config_base_copy,
                 dataset_id=dataset_id,
                 workload_id=workload_id_test,
-                network_id=network_id,
+                network_id=network_id_test,
                 trace_id=trace_id_test
             )
             learn_configs.append(learn_config)
@@ -345,7 +347,7 @@ def fix_grid_searches(
             config=env_config_base,
             dataset_id=dataset_id,
             workload_id=workload_id_test,
-            network_id=network_id,
+            network_id=network_id_test,
             trace_id=trace_id_test
         )
         learn_configs.append(learn_config)
@@ -356,7 +358,7 @@ def fix_grid_searches(
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=73)
+@click.option('--test-series', required=True, type=int, default=74)
 @click.option('--train-series', required=True, type=int, default=70)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
@@ -369,6 +371,7 @@ def fix_grid_searches(
 @click.option('--episode-length', required=True, type=int, default=3453)
 @click.option('--num-episodes', required=True, type=int, default=1)
 @click.option('--workload-id-test', required=True, type=int, default=0)
+@click.option('--network-id-test', required=True, type=int, default=0)
 @click.option('--trace-id-test', required=True, type=int, default=0)
 @click.option('--checkpoint-to-load', required=True, type=str, default='last')
 @click.option('--all-experiments', required=True, type=bool, default=False)
@@ -377,7 +380,7 @@ def main(local_mode: bool, test_series: int, train_series: int,
          type_env: str, dataset_id: int, workload_id: int,
          network_id: int, trace_id: int, experiment_id: int,
          num_episodes: int, episode_length: int,
-         workload_id_test: int, trace_id_test: int,
+         workload_id_test: int, network_id_test: int, trace_id_test: int,
          checkpoint_to_load: str, all_experiments: bool,
          penalty_latency: int):
     """[summary]
@@ -403,7 +406,7 @@ def main(local_mode: bool, test_series: int, train_series: int,
         network_id=network_id, trace_id=trace_id,
         experiment_id=experiment_id,
         num_episodes=num_episodes, episode_length=episode_length,
-        local_mode=local_mode, workload_id_test=workload_id_test,
+        local_mode=local_mode, workload_id_test=workload_id_test, network_id_test=network_id_test,
         trace_id_test=trace_id_test, checkpoint_to_load=checkpoint_to_load,
         all_experiments=all_experiments, penalty_latency=penalty_latency)
 
