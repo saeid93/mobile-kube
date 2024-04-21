@@ -358,7 +358,7 @@ def fix_grid_searches(
 
 @click.command()
 @click.option('--local-mode', type=bool, default=True)
-@click.option('--test-series', required=True, type=int, default=74)
+@click.option('--test-series', required=True, type=int, default=73)
 @click.option('--train-series', required=True, type=int, default=70)
 @click.option('--type-env', required=True,
               type=click.Choice(['sim-edge', 'kube-edge']),
