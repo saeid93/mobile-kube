@@ -1,7 +1,7 @@
 {
     "notes": "some network",
     "dataset_id": 6,
-    "num_users": 16,
+    "num_users": 48,
     "num_stations": 8,
     "width": 0.0001,
     "length": 0.0001,
@@ -15,7 +15,7 @@
         1,
         1000,
         1200,
-        1001,
+        1002,
         1002,
         75,
         240,

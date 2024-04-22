@@ -365,7 +365,7 @@ def fix_grid_searches(
               default='sim-edge')
 @click.option('--dataset-id', required=True, type=int, default=6)
 @click.option('--workload-id', required=True, type=int, default=0)
-@click.option('--network-id', required=True, type=int, default=1)
+@click.option('--network-id', required=True, type=int, default=6)
 @click.option('--trace-id', required=True, type=int, default=2)
 @click.option('--experiment-id', required=True, type=int, default=4)
 @click.option('--episode-length', required=True, type=int, default=3453)
